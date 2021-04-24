@@ -1,0 +1,8 @@
+{
+  "compilerOptions": {
+    "types": ["@graphprotocol/graph-ts", "node"],
+    "resolveJsonModule": true,
+    "moduleResolution": "node",
+    "target": "es5"
+  }
+}

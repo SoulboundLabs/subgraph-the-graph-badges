@@ -1,0 +1,36 @@
+{
+  "name": "the-graph-badge-starter",
+  "version": "0.0.1",
+  "description": "Starter repo for creating badges for The Graph",
+  "repository": "https://github.com/badgeth/the-graph-badge-starter",
+  "author": "Badgeth",
+  "license": "GPL-3.0-only",
+  "private": false,
+  "scripts": {
+    "build-contract": "solc contracts/Gravity.sol --abi -o abis --overwrite && solc contracts/Gravity.sol --bin -o bin --overwrite",
+    "create": "graph create badgeth-dao/the-graph-badges --node https://api.thegraph.com/deploy/",
+    "create-local": "graph create badgeth-dao/the-graph-badges --node http://127.0.0.1:8020",
+    "codegen": "graph codegen",
+    "build": "graph build",
+    "deploy": "graph deploy badgeth-dao/the-graph-badges --ipfs https://api.thegraph.com/ipfs/ --node https://api.thegraph.com/deploy/",
+    "deploy-local": "graph deploy badgeth-dao/the-graph-badges --ipfs http://localhost:5001 --node http://127.0.0.1:8020",
+    "prep:addresses:mainnet": "ts-node config/mainnetAddressScript.ts && mustache ./config/generatedAddresses.json ./config/addresses.template.ts > ./config/addresses.ts",
+    "prep:addresses:rinkeby": "ts-node config/rinkebyAddressScript.ts && mustache ./config/generatedAddresses.json ./config/addresses.template.ts > ./config/addresses.ts",
+    "prepare:rinkeby": "yarn prep:addresses:rinkeby && mustache ./config/generatedAddresses.json subgraph.template.yaml > subgraph.yaml && graph codegen --output-dir src/types/",
+    "prepare:mainnet": "yarn prep:addresses:mainnet && mustache ./config/generatedAddresses.json subgraph.template.yaml > subgraph.yaml && graph codegen --output-dir src/types/"
+  },
+  "devDependencies": {
+    "@graphprotocol/graph-cli": "graphprotocol/graph-cli",
+    "typescript": "^4.1.5"
+  },
+  "dependencies": {
+    "@graphprotocol/contracts": "^1.2.0",
+    "@graphprotocol/graph-ts": "^0.20.0",
+    "babel-polyfill": "^6.26.0",
+    "babel-register": "^6.26.0",
+    "mustache": "^4.2.0",
+    "truffle": "^5.0.4",
+    "truffle-contract": "^4.0.5",
+    "truffle-hdwallet-provider": "^1.0.4"
+  }
+}

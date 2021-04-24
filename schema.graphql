@@ -1,0 +1,16 @@
+# type StandardBadgeProps @entity {
+#   id: ID!
+#   awardedAtBlock: BigInt
+# }
+
+type FirstToCloseBadge @entity {
+  id: ID!   # SubgraphDeploymentId
+  # badge: StandardBadgeProps!
+  indexer: Bytes!
+  awardedAtBlock: BigInt!
+}
+
+# type SlashedBadge @entity {
+#   id: ID!   # <indexrAddress>-<SlashedBadgeNumber>
+
+# }

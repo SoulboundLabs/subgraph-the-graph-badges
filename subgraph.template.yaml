@@ -1,0 +1,54 @@
+specVersion: 0.0.2
+description: First badges for Badgeth
+repository: https://github.com/badgeth/the-graph-badge-starter
+schema:
+  file: ./schema.graphql
+dataSources:
+  - kind: ethereum/contract
+    name: BadgeRegistry
+    network: "{{network}}"
+    source:
+      address: "{{badgeRegistry}}"
+      abi: BadgeRegistry
+      startBlock: {{blockNumber}}
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.4
+      language: wasm/assemblyscript
+      file: ./src/mappings/badgeRegistry.ts
+      entities:
+        - BadgeRegistry
+      abis:
+        - name: BadgeRegistry
+          file: ./abis/BadgeRegistry.json
+      eventHandlers:
+        - event: BadgeAdded(string,int256)
+          handler: handleBadgeAdded
+        - event: BadgeRecipientAdded(address,string,int256)
+          handler: handleBadgeRecipientAdded
+        - event: BadgeMinted(string,int256)
+          handler: handleBadgeMinted
+        - event: BadgeRecipientDisputed(address,string,int256)
+          handler: handleBadgeRecipientDisputed
+  - kind: ethereum/contract
+    name: Staking
+    network: "{{network}}"
+    source:
+      address: "{{staking}}"
+      abi: Staking
+      startBlock: {{blockNumber}}
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.4
+      language: wasm/assemblyscript
+      file: ./src/mappings/staking.ts
+      entities:
+        - SubgraphDeployment
+      abis:
+        - name: Staking
+          file: ./node_modules/@graphprotocol/contracts/dist/abis/Staking.json
+        - name: GraphTokenLockWallet
+          file: ./node_modules/@graphprotocol/contracts/dist/abis/GraphToken.json
+      eventHandlers:
+        - event: AllocationClosed(indexed address,indexed bytes32,uint256,uint256,indexed address,uint256,address,bytes32,bool)
+          handler: handleAllocationClosed
