@@ -3,7 +3,11 @@
  * https://github.com/graphprotocol/contracts/blob/master/contracts/staking/Staking.sol
  */
 
-import { FirstToCloseBadge } from "../../generated/schema";
+import {
+  Allocation,
+  FirstToCloseBadge,
+  TwentyEightEpochsLaterBadge,
+} from "../../generated/schema";
 import {
   AllocationClosed,
   StakeSlashed,
@@ -85,6 +89,7 @@ export function handleAllocationClosed(event: AllocationClosed): void {
 
   if (epochsToClose < 28) {
   }
+
   let twentyEightEpochsLater = TwentyEightEpochsLaterBadge.load(indexerId);
 
   if (twentyEightEpochsLater == null) {

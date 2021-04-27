@@ -27,7 +27,7 @@ type Indexer @entity {
   "Epoch indexer created their last allocation"
   lastCreatedAllocationEpoch: BigInt!
   "Maximum epochs that indexer for allocation to close"
-  maxEpochsToCloseAllocation: BigInt!
+  maxEpochsToCloseAllocation: Int!
 }
 
 """
@@ -43,12 +43,13 @@ type FirstToCloseBadge @entity {
 """
 Awarded to indexers who close their allocations every 28 epochs or fewer
 """
-type TwentyEightDaysLaterBadge @entity {
+type TwentyEightEpochsLaterBadge @entity {
   id: ID! # SubgraphDeploymentId
   # badge: StandardBadgeProps!
   indexer: Bytes!
   awardedAtBlock: BigInt!
   longestEpochToClose: BigInt!
+  maxEpochsToCloseAllocation: Int!
 }
 
 # type SlashedBadge @entity {
