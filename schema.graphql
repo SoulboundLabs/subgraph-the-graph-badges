@@ -27,7 +27,10 @@ type Indexer @entity {
   "Epoch indexer created their last allocation"
   lastCreatedAllocationEpoch: BigInt!
   "Maximum epochs that indexer for allocation to close"
-  maxEpochsToCloseAllocation: Int!
+  maxEpochsToCloseAllocation: BigInt!
+
+  "Epoch which the last twentyEightEpochsLater badge starts"
+  twentyEightEpochsLaterStartStreak: BigInt!
 }
 
 """
@@ -45,11 +48,10 @@ Awarded to indexers who close their allocations every 28 epochs or fewer
 """
 type TwentyEightEpochsLaterBadge @entity {
   id: ID! # SubgraphDeploymentId
-  # badge: StandardBadgeProps!
-  indexer: Bytes!
-  awardedAtBlock: BigInt!
-  longestEpochToClose: BigInt!
-  maxEpochsToCloseAllocation: Int!
+  indexer: Indexer!
+  epochStartStreak: BigInt!
+  epochStreakLength: BigInt!
+  epochEndStreak: BigInt
 }
 
 # type SlashedBadge @entity {
@@ -64,9 +66,9 @@ type Allocation @entity {
   "Channel Address"
   id: ID!
   "Epoch this allocation was created"
-  createdAtEpoch: Int!
+  createdAtEpoch: BigInt!
   "Epoch this allocation was closed in"
-  closedAtEpoch: Int!
+  closedAtEpoch: BigInt!
 }
 
 enum AllocationStatus {

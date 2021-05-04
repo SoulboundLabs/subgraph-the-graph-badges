@@ -10,9 +10,11 @@ import {
 } from "../../generated/schema";
 import {
   AllocationClosed,
+  AllocationCreated,
   StakeSlashed,
 } from "../../generated/Staking/Staking";
 import { createOrLoadIndexer } from "../helpers/models";
+import { toBigInt } from "../helpers/typeConverter";
 
 export function handleStakeSlashed(event: StakeSlashed): void {}
 
@@ -33,7 +35,7 @@ export function handleAllocationCreated(event: AllocationCreated): void {
   let allocationID = event.params.allocationID.toHexString();
 
   let allocation = new Allocation(allocationID);
-  allocation.createdAtEpoch = event.params.epoch.toI32();
+  allocation.createdAtEpoch = event.params.epoch;
   allocation.save();
 }
 
@@ -71,34 +73,52 @@ export function handleAllocationClosed(event: AllocationClosed): void {
   }
 
   // TwentyEightEpochsLaterBadge - awarded to indexers who close their allocation every 28 epochs or fewer
-  let indexerId = event.params.indexer.toHexString();
+  let indexerID = event.params.indexer.toHexString();
   let allocationID = event.params.allocationID.toHexString();
-  let closedAtEpoch = event.params.epoch.toI32();
+  let currentEpoch = event.params.epoch;
 
+  let indexer = createOrLoadIndexer(indexerID);
   let allocation = Allocation.load(allocationID);
 
-  let epochsToClose = closedAtEpoch - allocation.createdAtEpoch;
+  let epochsToClose = currentEpoch.minus(allocation.createdAtEpoch);
+  let epochStartStreak =
+    indexer.twentyEightEpochsLaterStartStreak || currentEpoch;
+  let epochStreakLength = currentEpoch.minus(epochStartStreak);
 
-  let maxEpochsToCloseAllocation =
-    epochsToClose > twentyEightEpochsLater.maxEpochsToCloseAllocation
-      ? epochsToClose
-      : twentyEightEpochsLater.maxEpochsToCloseAllocation;
+  let badgeID = indexerID.concat("-").concat(epochStartStreak.toString());
+  let twentyEightEpochsLater = TwentyEightEpochsLaterBadge.load(badgeID);
 
-  let indexer = createOrLoadIndexer(indexerId);
-  indexer.maxEpochsToCloseAllocation = maxEpochsToCloseAllocation;
+  let badgeIsActive = epochsToClose.lt(toBigInt(28));
+  let noBadgeAwarded = twentyEightEpochsLater == null;
 
-  if (epochsToClose < 28) {
-  }
+  let startBadgeStreak = badgeIsActive && noBadgeAwarded;
+  let addBadgeStreak = badgeIsActive && !noBadgeAwarded;
+  let endBadgeStreak = !badgeIsActive && !noBadgeAwarded;
 
-  let twentyEightEpochsLater = TwentyEightEpochsLaterBadge.load(indexerId);
+  if (startBadgeStreak) {
+    indexer.twentyEightEpochsLaterStartStreak = epochStartStreak;
+    indexer.save();
 
-  if (twentyEightEpochsLater == null) {
-    // TwentyEightEpochsLater hasn't been awarded for this subgraphDeploymentId yet
-    // Conditionally award to this indexer
-    twentyEightEpochsLater = new TwentyEightEpochsLaterBadge(indexerId);
-    twentyEightEpochsLater.indexer = event.params.indexer;
-    twentyEightEpochsLater.awardedAtBlock = event.block.number;
-    twentyEightEpochsLater.maxEpochsToCloseAllocation = maxEpochsToCloseAllocation;
+    twentyEightEpochsLater = new TwentyEightEpochsLaterBadge(badgeID);
+    twentyEightEpochsLater.indexer = indexer.id;
+    twentyEightEpochsLater.epochStartStreak = epochStartStreak;
+    twentyEightEpochsLater.epochStreakLength = epochStreakLength;
+    twentyEightEpochsLater.save();
+  } else if (addBadgeStreak) {
+    twentyEightEpochsLater.epochStreakLength = epochStreakLength;
+    twentyEightEpochsLater.save();
+  } else if (endBadgeStreak) {
+    indexer.twentyEightEpochsLaterStartStreak = null;
+    indexer.save();
+
+    twentyEightEpochsLater.epochEndStreak = currentEpoch;
+    twentyEightEpochsLater.epochStreakLength = epochStreakLength;
     twentyEightEpochsLater.save();
   }
 }
+
+// let maxEpochsToCloseAllocation =
+//   epochsToClose > twentyEightEpochsLater.maxEpochsToCloseAllocation
+//     ? epochsToClose
+//     : twentyEightEpochsLater.maxEpochsToCloseAllocation;
+// indexer.maxEpochsToCloseAllocation = maxEpochsToCloseAllocation;

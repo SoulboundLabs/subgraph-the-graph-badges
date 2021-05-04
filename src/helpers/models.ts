@@ -1,6 +1,5 @@
-import { Address, ethereum } from "@graphprotocol/graph-ts";
-import { EntityStats, Indexer, TwentyEightEpochsLaterBadge } from "../../generated/schema";
-import { TwentyEightDaysLaterBadge } from "../types/schema";
+import { EntityStats, Indexer } from "../../generated/schema";
+import { zeroBI } from "./constants";
 
 export function createOrLoadEntityStats(): EntityStats {
   let entityStats = EntityStats.load("1");
@@ -21,32 +20,13 @@ export function createOrLoadIndexer(id: string): Indexer {
 
   if (indexer == null) {
     indexer = new Indexer(id);
-    indexer.maxEpochsToCloseAllocation = 0;
+    indexer.maxEpochsToCloseAllocation = zeroBI();
+    indexer.twentyEightEpochsLaterStartStreak = zeroBI();
     indexer.save();
 
     let entityStats = createOrLoadEntityStats();
     entityStats.indexerCount = entityStats.indexerCount + 1;
     entityStats.save();
-  }
-
-  return indexer as Indexer;
-}
-
-export function createOrLoadTwentyEightDaysLaterBadge(
-  indexer: Address
-  block: ethereum.Block
-): TwentyEightDaysLaterBadge {
-  let indexerID = indexer.toHexString();
-  let twentyEightEpochsLater = TwentyEightEpochsLaterBadge.load(indexerID);
-
-  if (twentyEightEpochsLater == null) {
-    // TwentyEightEpochsLater hasn't been awarded for this subgraphDeploymentId yet
-    // Conditionally award to this indexer
-    twentyEightEpochsLater = new TwentyEightEpochsLaterBadge(indexerID);
-    twentyEightEpochsLater.indexer = indexer;
-    twentyEightEpochsLater.awardedAtBlock = block.number;
-    twentyEightEpochsLater.maxEpochsToCloseAllocation = maxEpochsToCloseAllocation;
-    twentyEightEpochsLater.save();
   }
 
   return indexer as Indexer;
