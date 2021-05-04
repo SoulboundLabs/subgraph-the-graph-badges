@@ -22,13 +22,6 @@ Metadata for the Indexer along with parameters and staking data
 """
 type Indexer @entity {
   id: ID! # SubgraphDeploymentId
-  # badge: StandardBadgeProps!
-  indexer: Bytes!
-  "Epoch indexer created their last allocation"
-  lastCreatedAllocationEpoch: BigInt!
-  "Maximum epochs that indexer for allocation to close"
-  maxEpochsToCloseAllocation: BigInt!
-
   "Epoch which the last twentyEightEpochsLater badge starts"
   twentyEightEpochsLaterStartStreak: BigInt!
 }
@@ -68,7 +61,7 @@ type Allocation @entity {
   "Epoch this allocation was created"
   createdAtEpoch: BigInt!
   "Epoch this allocation was closed in"
-  closedAtEpoch: BigInt!
+  closedAtEpoch: BigInt
 }
 
 enum AllocationStatus {

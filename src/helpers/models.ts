@@ -20,7 +20,6 @@ export function createOrLoadIndexer(id: string): Indexer {
 
   if (indexer == null) {
     indexer = new Indexer(id);
-    indexer.maxEpochsToCloseAllocation = zeroBI();
     indexer.twentyEightEpochsLaterStartStreak = zeroBI();
     indexer.save();
 

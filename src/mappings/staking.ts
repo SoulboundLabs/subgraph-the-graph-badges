@@ -81,14 +81,22 @@ export function handleAllocationClosed(event: AllocationClosed): void {
   let allocation = Allocation.load(allocationID);
 
   let epochsToClose = currentEpoch.minus(allocation.createdAtEpoch);
-  let epochStartStreak =
-    indexer.twentyEightEpochsLaterStartStreak || currentEpoch;
-  let epochStreakLength = currentEpoch.minus(epochStartStreak);
+  let badgeIsActive = epochsToClose.lt(toBigInt(28));
 
-  let badgeID = indexerID.concat("-").concat(epochStartStreak.toString());
+  if (badgeIsActive && indexer.twentyEightEpochsLaterStartStreak == null) {
+    indexer.twentyEightEpochsLaterStartStreak = currentEpoch;
+    indexer.save();
+  }
+
+  let epochStreakLength = currentEpoch.minus(
+    indexer.twentyEightEpochsLaterStartStreak
+  );
+
+  let badgeID = indexerID
+    .concat("-")
+    .concat(indexer.twentyEightEpochsLaterStartStreak.toString());
   let twentyEightEpochsLater = TwentyEightEpochsLaterBadge.load(badgeID);
 
-  let badgeIsActive = epochsToClose.lt(toBigInt(28));
   let noBadgeAwarded = twentyEightEpochsLater == null;
 
   let startBadgeStreak = badgeIsActive && noBadgeAwarded;
@@ -96,12 +104,10 @@ export function handleAllocationClosed(event: AllocationClosed): void {
   let endBadgeStreak = !badgeIsActive && !noBadgeAwarded;
 
   if (startBadgeStreak) {
-    indexer.twentyEightEpochsLaterStartStreak = epochStartStreak;
-    indexer.save();
-
     twentyEightEpochsLater = new TwentyEightEpochsLaterBadge(badgeID);
     twentyEightEpochsLater.indexer = indexer.id;
-    twentyEightEpochsLater.epochStartStreak = epochStartStreak;
+    twentyEightEpochsLater.epochStartStreak =
+      indexer.twentyEightEpochsLaterStartStreak;
     twentyEightEpochsLater.epochStreakLength = epochStreakLength;
     twentyEightEpochsLater.save();
   } else if (addBadgeStreak) {
