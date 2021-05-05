@@ -12,6 +12,10 @@ export function zeroBD(): BigDecimal {
   return BigDecimal.fromString("0");
 }
 
+export function oneBD(): BigDecimal {
+  return BigDecimal.fromString("1");
+}
+
 export function sixteenBD(): BigDecimal {
   return BigDecimal.fromString("16");
 }

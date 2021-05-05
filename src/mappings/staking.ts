@@ -4,6 +4,7 @@
  */
 
 import { store } from "@graphprotocol/graph-ts";
+import { BigInt } from "@graphprotocol/graph-ts/index";
 import {
   Allocation,
   FirstToCloseBadge,
@@ -14,6 +15,7 @@ import {
   AllocationCreated,
   StakeSlashed,
 } from "../../generated/Staking/Staking";
+import { oneBD } from "../helpers/constants";
 import { epochToEra } from "../helpers/epoch";
 import { createOrLoadIndexer, createOrLoadIndexerEra } from "../helpers/models";
 import { toBigInt } from "../helpers/typeConverter";
@@ -87,9 +89,9 @@ export function handleAllocationClosed(event: AllocationClosed): void {
   let epochsToClose = currentEpoch.minus(allocation.createdAtEpoch);
   let isUnder28Epochs = epochsToClose.lt(toBigInt(28));
 
-  let epochStreakLength = currentEpoch.minus(
-    indexer.twentyEightEpochsLaterStartStreak
-  );
+  // let epochStreakLength = currentEpoch.minus(
+  //   indexer.twentyEightEpochsLaterStartStreak
+  // );
 
   let currentEra = epochToEra(currentEpoch);
 
@@ -119,6 +121,17 @@ export function handleAllocationClosed(event: AllocationClosed): void {
     // twentyEightEpochsLater.save();
   } else if (invalidateBadge) {
     store.remove("TwentyEightEpochsLaterBadge", badgeID);
+
+    let ineligibleTwentyEightEpochsLaterBadgeCount =
+      indexer.ineligibleTwentyEightEpochsLaterBadgeCount + 1;
+    indexer.twentyEightEpochsLaterBadgePercentage =
+      oneBD() -
+      BigInt.fromI32(
+        ineligibleTwentyEightEpochsLaterBadgeCount
+      ).toBigDecimal() /
+        currentEra.toBigDecimal();
+    indexer.ineligibleTwentyEightEpochsLaterBadgeCount = ineligibleTwentyEightEpochsLaterBadgeCount;
+    indexer.save();
 
     indexerEra.twentyEightEpochsLaterBadge = "Ineligible";
     indexerEra.save();

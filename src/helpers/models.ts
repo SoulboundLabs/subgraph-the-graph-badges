@@ -1,6 +1,6 @@
 import { BigInt } from "@graphprotocol/graph-ts/index";
 import { EntityStats, Indexer, IndexerEra } from "../../generated/schema";
-import { zeroBI } from "./constants";
+import { zeroBD } from "./constants";
 import { epochToEra } from "./epoch";
 
 export function createOrLoadEntityStats(): EntityStats {
@@ -22,7 +22,8 @@ export function createOrLoadIndexer(id: string): Indexer {
 
   if (indexer == null) {
     indexer = new Indexer(id);
-    indexer.twentyEightEpochsLaterStartStreak = zeroBI();
+    indexer.ineligibleTwentyEightEpochsLaterBadgeCount = 0;
+    indexer.twentyEightEpochsLaterBadgePercentage = zeroBD();
     indexer.save();
 
     let entityStats = createOrLoadEntityStats();

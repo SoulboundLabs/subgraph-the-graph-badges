@@ -22,8 +22,11 @@ Metadata for the Indexer along with parameters and staking data
 """
 type Indexer @entity {
   id: ID! # SubgraphDeploymentId
-  "Epoch which the last twentyEightEpochsLater badge starts"
-  twentyEightEpochsLaterStartStreak: BigInt!
+  "Percentage of time indexer has earned badge"
+  twentyEightEpochsLaterBadgePercentage: BigDecimal!
+
+  "Number of times indexer failed to earn badge"
+  ineligibleTwentyEightEpochsLaterBadgeCount: Int!
 }
 
 """
