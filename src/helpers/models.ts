@@ -1,5 +1,7 @@
-import { EntityStats, Indexer } from "../../generated/schema";
+import { BigInt } from "@graphprotocol/graph-ts/index";
+import { EntityStats, Indexer, IndexerEra } from "../../generated/schema";
 import { zeroBI } from "./constants";
+import { epochToEra } from "./epoch";
 
 export function createOrLoadEntityStats(): EntityStats {
   let entityStats = EntityStats.load("1");
@@ -29,4 +31,23 @@ export function createOrLoadIndexer(id: string): Indexer {
   }
 
   return indexer as Indexer;
+}
+
+export function createOrLoadIndexerEra(
+  indexerID: string,
+  epoch: BigInt
+): IndexerEra {
+  let era = epochToEra(epoch);
+  let id = indexerID.concat("-").concat(era.toString());
+  let indexerEra = IndexerEra.load(id);
+
+  if (indexerEra == null) {
+    indexerEra = new IndexerEra(id);
+    indexerEra.era = era;
+    indexerEra.indexer = indexerID;
+    indexerEra.twentyEightEpochsLaterBadge = "Unawarded";
+    indexerEra.save();
+  }
+
+  return indexerEra as IndexerEra;
 }

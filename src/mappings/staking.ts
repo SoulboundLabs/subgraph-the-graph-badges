@@ -3,6 +3,7 @@
  * https://github.com/graphprotocol/contracts/blob/master/contracts/staking/Staking.sol
  */
 
+import { store } from "@graphprotocol/graph-ts";
 import {
   Allocation,
   FirstToCloseBadge,
@@ -13,7 +14,8 @@ import {
   AllocationCreated,
   StakeSlashed,
 } from "../../generated/Staking/Staking";
-import { createOrLoadIndexer } from "../helpers/models";
+import { epochToEra } from "../helpers/epoch";
+import { createOrLoadIndexer, createOrLoadIndexerEra } from "../helpers/models";
 import { toBigInt } from "../helpers/typeConverter";
 
 export function handleStakeSlashed(event: StakeSlashed): void {}
@@ -78,48 +80,48 @@ export function handleAllocationClosed(event: AllocationClosed): void {
   let currentEpoch = event.params.epoch;
 
   let indexer = createOrLoadIndexer(indexerID);
+  let indexerEra = createOrLoadIndexerEra(indexerID, currentEpoch);
+
   let allocation = Allocation.load(allocationID);
 
   let epochsToClose = currentEpoch.minus(allocation.createdAtEpoch);
-  let badgeIsActive = epochsToClose.lt(toBigInt(28));
-
-  if (badgeIsActive && indexer.twentyEightEpochsLaterStartStreak == null) {
-    indexer.twentyEightEpochsLaterStartStreak = currentEpoch;
-    indexer.save();
-  }
+  let isUnder28Epochs = epochsToClose.lt(toBigInt(28));
 
   let epochStreakLength = currentEpoch.minus(
     indexer.twentyEightEpochsLaterStartStreak
   );
 
-  let badgeID = indexerID
-    .concat("-")
-    .concat(indexer.twentyEightEpochsLaterStartStreak.toString());
+  let currentEra = epochToEra(currentEpoch);
+
+  let badgeID = indexerID.concat("-").concat(currentEra.toString());
   let twentyEightEpochsLater = TwentyEightEpochsLaterBadge.load(badgeID);
 
   let noBadgeAwarded = twentyEightEpochsLater == null;
 
-  let startBadgeStreak = badgeIsActive && noBadgeAwarded;
-  let addBadgeStreak = badgeIsActive && !noBadgeAwarded;
-  let endBadgeStreak = !badgeIsActive && !noBadgeAwarded;
+  let isUnawarded = indexerEra.twentyEightEpochsLaterBadge == "Unawarded";
+  let isAwarded = indexerEra.twentyEightEpochsLaterBadge == "Awarded";
+  let isIneligible = indexerEra.twentyEightEpochsLaterBadge == "Ineligible";
 
-  if (startBadgeStreak) {
+  let awardBadge = isUnder28Epochs && noBadgeAwarded && isUnawarded;
+  let addBadgeStreak = isUnder28Epochs && !noBadgeAwarded && isAwarded;
+  let invalidateBadge = !isUnder28Epochs && !isIneligible;
+
+  if (awardBadge) {
     twentyEightEpochsLater = new TwentyEightEpochsLaterBadge(badgeID);
     twentyEightEpochsLater.indexer = indexer.id;
-    twentyEightEpochsLater.epochStartStreak =
-      indexer.twentyEightEpochsLaterStartStreak;
-    twentyEightEpochsLater.epochStreakLength = epochStreakLength;
+    twentyEightEpochsLater.eraAwarded = currentEra;
     twentyEightEpochsLater.save();
-  } else if (addBadgeStreak) {
-    twentyEightEpochsLater.epochStreakLength = epochStreakLength;
-    twentyEightEpochsLater.save();
-  } else if (endBadgeStreak) {
-    indexer.twentyEightEpochsLaterStartStreak = null;
-    indexer.save();
 
-    twentyEightEpochsLater.epochEndStreak = currentEpoch;
-    twentyEightEpochsLater.epochStreakLength = epochStreakLength;
-    twentyEightEpochsLater.save();
+    indexerEra.twentyEightEpochsLaterBadge = "Awarded";
+    indexerEra.save();
+  } else if (addBadgeStreak) {
+    // twentyEightEpochsLater.epochStreakLength = epochStreakLength;
+    // twentyEightEpochsLater.save();
+  } else if (invalidateBadge) {
+    store.remove("TwentyEightEpochsLaterBadge", badgeID);
+
+    indexerEra.twentyEightEpochsLaterBadge = "Ineligible";
+    indexerEra.save();
   }
 }
 

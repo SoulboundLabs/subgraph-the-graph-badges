@@ -27,6 +27,22 @@ type Indexer @entity {
 }
 
 """
+
+"""
+type IndexerEra @entity {
+  id: ID! # indexer id + era
+  indexer: Indexer!
+  era: BigInt!
+  twentyEightEpochsLaterBadge: BadgeStatus!
+}
+
+enum BadgeStatus {
+  Unawarded # Indexer has yet to be awarded badge for this era
+  Awarded # == Indexer has been awarded badge for this era
+  Ineligible # == Indexer has been determined to be ineligible for the badge
+}
+
+"""
 Awarded to indexers who are first to close an allocation for a subgraph
 """
 type FirstToCloseBadge @entity {
@@ -42,9 +58,7 @@ Awarded to indexers who close their allocations every 28 epochs or fewer
 type TwentyEightEpochsLaterBadge @entity {
   id: ID! # SubgraphDeploymentId
   indexer: Indexer!
-  epochStartStreak: BigInt!
-  epochStreakLength: BigInt!
-  epochEndStreak: BigInt
+  eraAwarded: BigInt!
 }
 
 # type SlashedBadge @entity {
