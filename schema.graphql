@@ -51,7 +51,7 @@ Awarded to indexers who are first to close an allocation for a subgraph
 type FirstToCloseBadge @entity {
   id: ID! # SubgraphDeploymentId
   # badge: StandardBadgeProps!
-  indexer: Bytes!
+  indexer: String!
   awardedAtBlock: BigInt!
 }
 
