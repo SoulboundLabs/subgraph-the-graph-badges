@@ -1,4 +1,5 @@
 import { BigInt } from "@graphprotocol/graph-ts/index";
+import { toBigInt } from "./typeConverter";
 import { EntityStats, Indexer, IndexerEra } from "../../generated/schema";
 import { zeroBD } from "./constants";
 import { epochToEra } from "./epoch";
@@ -11,6 +12,7 @@ export function createOrLoadEntityStats(): EntityStats {
     entityStats.indexerCount = 0;
     entityStats.firstToCloseBadgeCount = 0;
     entityStats.twentyEightDaysLaterBadgeCount = 0;
+    entityStats.lastEpochUpdate = toBigInt(0);
     entityStats.save();
   }
 
