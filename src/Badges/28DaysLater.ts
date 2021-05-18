@@ -5,6 +5,7 @@ import { epochToEra } from "../helpers/epoch";
 import { toBigInt } from "../helpers/typeConverter";
 import { store } from "@graphprotocol/graph-ts";
 import { oneBD } from "../helpers/constants";
+import { transitionToNewEpochIfNeeded } from "../helpers/epoch";
 import {
     Allocation,
     TwentyEightEpochsLaterBadge,
@@ -13,18 +14,24 @@ import {
 
 
 export function processAllocationCreatedFor28DaysLaterBadge(event: AllocationCreated): void {
-    _processAllocationCreated(
-        event.params.allocationID.toHexString(),
-        event.params.epoch
-    );
+  transitionToNewEpochIfNeeded(event.params.epoch);
+  _processAllocationCreated(
+      event.params.allocationID.toHexString(),
+      event.params.epoch
+  );
 }
 
 export function processAllocationClosedFor28DaysLaterBadge(event: AllocationClosed): void {
-    _processAllocationClosed(
-        event.params.indexer.toHexString(),
-        event.params.allocationID.toHexString(),
-        event.params.epoch
-    )
+  transitionToNewEpochIfNeeded(event.params.epoch);
+  _processAllocationClosed(
+      event.params.indexer.toHexString(),
+      event.params.allocationID.toHexString(),
+      event.params.epoch
+  );
+}
+
+export function process28DaysLaterBadgesForEpoch(epoch: BigInt): void {
+  // todo: finalize any "pending" badges from this epoch
 }
 
 function _processAllocationCreated(allocationID: string, currentEpoch: BigInt): void {
