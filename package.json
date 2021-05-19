@@ -21,7 +21,7 @@
     "prepare": "husky install"
   },
   "lint-staged": {
-    "**/*": "prettier --write --ignore-unknown"
+    "**/*.ts": "prettier --write --ignore-unknown"
   },
   "devDependencies": {
     "@graphprotocol/graph-cli": "graphprotocol/graph-cli",
