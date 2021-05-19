@@ -3,7 +3,7 @@ import {
   EntityStats,
   Indexer,
   IndexerCount,
-  IndexerEra,
+  IndexerEra
 } from "../../generated/schema";
 import { zeroBD } from "./constants";
 import { epochToEra } from "./epoch";
@@ -37,6 +37,8 @@ export function createOrLoadIndexer(id: string): Indexer {
     let indexerCount = entityStats.indexerCount + 1;
     entityStats.indexerCount = indexerCount;
     entityStats.save();
+
+    createOrLoadIndexerCount(indexerCount.toString(), indexer.id);
   }
 
   return indexer as Indexer;

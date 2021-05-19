@@ -6,10 +6,13 @@
 import {
   AllocationClosed,
   AllocationCreated,
-  StakeSlashed,
+  StakeSlashed
 } from "../../generated/Staking/Staking";
 import { processAllocationClosedForFirstToCloseBadge } from "../Badges/firstToClose";
-import { processAllocationClosedFor28DaysLaterBadge, processAllocationCreatedFor28DaysLaterBadge } from "../Badges/28DaysLater";
+import {
+  processAllocationClosedFor28DaysLaterBadge,
+  processAllocationCreatedFor28DaysLaterBadge
+} from "../Badges/28DaysLater";
 
 export function handleStakeSlashed(event: StakeSlashed): void {}
 

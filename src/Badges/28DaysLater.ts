@@ -2,18 +2,18 @@ import { store } from "@graphprotocol/graph-ts";
 import { BigInt } from "@graphprotocol/graph-ts/index";
 import {
   Allocation,
-  TwentyEightEpochsLaterBadge,
+  TwentyEightEpochsLaterBadge
 } from "../../generated/schema";
 import {
   AllocationClosed,
-  AllocationCreated,
+  AllocationCreated
 } from "../../generated/Staking/Staking";
 import { oneBD } from "../helpers/constants";
 import { epochToEra, transitionToNewEpochIfNeeded } from "../helpers/epoch";
 import {
   createOrLoadEntityStats,
   createOrLoadIndexer,
-  createOrLoadIndexerEra,
+  createOrLoadIndexerEra
 } from "../helpers/models";
 import { toBigInt } from "../helpers/typeConverter";
 
