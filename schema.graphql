@@ -20,17 +20,26 @@ type EntityStats @entity {
 }
 
 """
+Created when any indexer is instantiated to track order of indexers
+"""
+type IndexerCount @entity {
+  "Numeric count of Indexer used during for loops"
+  id: ID!
+  "Associated indexer"
+  indexer: Indexer!
+}
+
+"""
 Metadata for the Indexer along with parameters and staking data
 """
 type Indexer @entity {
-  id: ID! # SubgraphDeploymentId
+  "Address of Indexer"
+  id: ID!
   "Percentage of time indexer has earned badge"
   twentyEightEpochsLaterBadgePercentage: BigDecimal!
-
   "Number of times indexer failed to earn badge"
   ineligibleTwentyEightEpochsLaterBadgeCount: Int!
 }
-
 """
 
 """

@@ -1,8 +1,13 @@
 import { BigInt } from "@graphprotocol/graph-ts/index";
-import { toBigInt } from "./typeConverter";
-import { EntityStats, Indexer, IndexerEra } from "../../generated/schema";
+import {
+  EntityStats,
+  Indexer,
+  IndexerCount,
+  IndexerEra,
+} from "../../generated/schema";
 import { zeroBD } from "./constants";
 import { epochToEra } from "./epoch";
+import { toBigInt } from "./typeConverter";
 
 export function createOrLoadEntityStats(): EntityStats {
   let entityStats = EntityStats.load("1");
@@ -29,11 +34,27 @@ export function createOrLoadIndexer(id: string): Indexer {
     indexer.save();
 
     let entityStats = createOrLoadEntityStats();
-    entityStats.indexerCount = entityStats.indexerCount + 1;
+    let indexerCount = entityStats.indexerCount + 1;
+    entityStats.indexerCount = indexerCount;
     entityStats.save();
   }
 
   return indexer as Indexer;
+}
+
+export function createOrLoadIndexerCount(
+  id: string,
+  indexer: string
+): IndexerCount {
+  let indexerCount = IndexerCount.load(id);
+
+  if (indexerCount == null) {
+    indexerCount = new IndexerCount(id);
+    indexerCount.indexer = indexer;
+    indexerCount.save();
+  }
+
+  return indexerCount as IndexerCount;
 }
 
 export function createOrLoadIndexerEra(
