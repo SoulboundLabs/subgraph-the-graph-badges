@@ -65,6 +65,7 @@ export function createOrLoadIndexerEra(
   epoch: BigInt
 ): IndexerEra {
   let era = epochToEra(epoch);
+
   let id = indexerID.concat("-").concat(era.toString());
   let indexerEra = IndexerEra.load(id);
 

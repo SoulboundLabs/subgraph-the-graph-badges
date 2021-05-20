@@ -1,4 +1,4 @@
-import { BigInt } from "@graphprotocol/graph-ts/index";
+import { BigInt, log } from "@graphprotocol/graph-ts/index";
 import { Allocation, IndexerCount } from "../../generated/schema";
 import {
   AllocationClosed,
@@ -9,6 +9,7 @@ import { transitionToNewEpochIfNeeded } from "../helpers/epoch";
 import {
   create28EpochsLaterBadge,
   createOrLoadEntityStats,
+  createOrLoadIndexer,
   createOrLoadIndexerEra
 } from "../helpers/models";
 import { toBigInt } from "../helpers/typeConverter";
@@ -16,22 +17,22 @@ import { toBigInt } from "../helpers/typeConverter";
 export function processAllocationCreatedFor28DaysLaterBadge(
   event: AllocationCreated
 ): void {
-  transitionToNewEpochIfNeeded(event.params.epoch);
   _processAllocationCreated(
     event.params.allocationID.toHexString(),
     event.params.epoch
   );
+  transitionToNewEpochIfNeeded(event.params.epoch);
 }
 
 export function processAllocationClosedFor28DaysLaterBadge(
   event: AllocationClosed
 ): void {
-  transitionToNewEpochIfNeeded(event.params.epoch);
   _processAllocationClosed(
     event.params.indexer.toHexString(),
     event.params.allocationID.toHexString(),
     event.params.epoch
   );
+  transitionToNewEpochIfNeeded(event.params.epoch);
 }
 
 export function process28DaysLaterBadgesForEpoch(currentEpoch: BigInt): void {
@@ -39,7 +40,8 @@ export function process28DaysLaterBadgesForEpoch(currentEpoch: BigInt): void {
   let entityStats = createOrLoadEntityStats();
   let previousEpoch = currentEpoch.minus(oneBI());
 
-  for (let i = 0; i < entityStats.indexerCount; i++) {
+  for (let i = 1; i < entityStats.indexerCount; i++) {
+    log.info("FORLOOP", []);
     let indexerCount = IndexerCount.load(i.toString());
     let indexerEra = createOrLoadIndexerEra(
       indexerCount.indexer,
@@ -65,7 +67,8 @@ function _processAllocationClosed(
   allocationID: string,
   currentEpoch: BigInt
 ): void {
-  let indexerEra = createOrLoadIndexerEra(indexerID, currentEpoch);
+  let indexer = createOrLoadIndexer(indexerID);
+  let indexerEra = createOrLoadIndexerEra(indexer.id, currentEpoch);
 
   let allocation = Allocation.load(allocationID);
 
