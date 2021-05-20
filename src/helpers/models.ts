@@ -3,7 +3,8 @@ import {
   EntityStats,
   Indexer,
   IndexerCount,
-  IndexerEra
+  IndexerEra,
+  TwentyEightEpochsLaterBadge
 } from "../../generated/schema";
 import { zeroBD } from "./constants";
 import { epochToEra } from "./epoch";
@@ -71,9 +72,25 @@ export function createOrLoadIndexerEra(
     indexerEra = new IndexerEra(id);
     indexerEra.era = era;
     indexerEra.indexer = indexerID;
-    indexerEra.twentyEightEpochsLaterBadge = "Unawarded";
+    indexerEra.ineligibleTwentyEightEpochsLaterBadge = false;
     indexerEra.save();
   }
 
   return indexerEra as IndexerEra;
+}
+
+export function create28EpochsLaterBadge(
+  indexerID: string,
+  epoch: BigInt
+): TwentyEightEpochsLaterBadge {
+  let currentEra = epochToEra(epoch);
+
+  let badgeID = indexerID.concat("-").concat(currentEra.toString());
+
+  let twentyEightEpochsLater = new TwentyEightEpochsLaterBadge(badgeID);
+  twentyEightEpochsLater.indexer = indexerID;
+  twentyEightEpochsLater.eraAwarded = currentEra;
+  twentyEightEpochsLater.save();
+
+  return twentyEightEpochsLater as TwentyEightEpochsLaterBadge;
 }

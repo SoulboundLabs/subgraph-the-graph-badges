@@ -47,13 +47,7 @@ type IndexerEra @entity {
   id: ID! # indexer id + era
   indexer: Indexer!
   era: BigInt!
-  twentyEightEpochsLaterBadge: BadgeStatus!
-}
-
-enum BadgeStatus {
-  Unawarded # Indexer has yet to be awarded badge for this era
-  Awarded # == Indexer has been awarded badge for this era
-  Ineligible # == Indexer has been determined to be ineligible for the badge
+  ineligibleTwentyEightEpochsLaterBadge: Boolean!
 }
 
 """
