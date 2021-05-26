@@ -15,8 +15,8 @@ type EntityStats @entity {
   firstToCloseBadgeCount: Int!
   "Number of twentyEightDaysLaterBadge"
   twentyEightDaysLaterBadgeCount: Int!
-  "Most recent Epoch processed"
-  lastEpochUpdate: BigInt!
+  "Most recent Era processed"
+  lastEraProcessed: BigInt!
 }
 
 """
@@ -48,6 +48,7 @@ type IndexerEra @entity {
   indexer: Indexer!
   era: BigInt!
   ineligibleTwentyEightEpochsLaterBadge: Boolean!
+  ineligibleNeverSlashedBadge: Boolean!
 }
 
 """
@@ -84,6 +85,8 @@ type Allocation @entity {
   createdAtEpoch: BigInt!
   "Epoch this allocation was closed in"
   closedAtEpoch: BigInt
+  "Indexer that created this Allocation"
+  indexer: Indexer!
 }
 
 enum AllocationStatus {

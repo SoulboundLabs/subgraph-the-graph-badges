@@ -1,17 +1,24 @@
 import { BigInt } from "@graphprotocol/graph-ts/index";
 import { toBigInt } from "./typeConverter";
 import { createOrLoadEntityStats } from "./models";
-import { process28DaysLaterBadgesForEpoch } from "../Badges/28DaysLater";
+import { process28DaysLaterBadgesForEra } from "../Badges/28DaysLater";
+import { processNeverSlashedBadgesForEra } from "../Badges/neverSlashed";
 
 export function epochToEra(epoch: BigInt): BigInt {
   return epoch.div(toBigInt(28));
 }
 
-export function transitionToNewEpochIfNeeded(epoch: BigInt): void {
+export function transitionToNewEraIfNeeded(epoch: BigInt): void {
   let entityStats = createOrLoadEntityStats();
-  if (epoch.gt(entityStats.lastEpochUpdate)) {
-    process28DaysLaterBadgesForEpoch(entityStats.lastEpochUpdate);
-    entityStats.lastEpochUpdate = epoch;
+  let era = epochToEra(epoch);
+  if (era.gt(entityStats.lastEraProcessed)) {
+    _processBadgesForEra(entityStats.lastEraProcessed);
+    entityStats.lastEraProcessed = era;
     entityStats.save();
   }
+}
+
+function _processBadgesForEra(era: BigInt): void {
+  process28DaysLaterBadgesForEra(era);
+  processNeverSlashedBadgesForEra(era);
 }

@@ -15,7 +15,9 @@ import {
 } from "../helpers/models";
 import { toBigInt } from "../helpers/typeConverter";
 
-export function processAllocationCreatedFor28DaysLaterBadge(
+
+
+export function processAllocationCreatedForNeverSlashedBadge(
   event: AllocationCreated
 ): void {
   _processAllocationCreated(
@@ -26,51 +28,34 @@ export function processAllocationCreatedFor28DaysLaterBadge(
   transitionToNewEraIfNeeded(event.params.epoch);
 }
 
-export function processAllocationClosedFor28DaysLaterBadge(
+export function processAllocationClosedForNeverSlashedBadge(
   event: AllocationClosed
 ): void {
   _processAllocationClosed(
-    event.params.allocationID.toHexString(),
     event.params.indexer.toHexString(),
+    event.params.allocationID.toHexString(),
     event.params.epoch
   );
   transitionToNewEraIfNeeded(event.params.epoch);
 }
 
-export function process28DaysLaterBadgesForEra(era: BigInt): void {
-  // todo: finalize any "pending" badges from this epoch
-  let entityStats = createOrLoadEntityStats();
-
-  for (let i = 1; i < entityStats.indexerCount; i++) {
-    log.info("FORLOOP", []);
-    let indexerCount = IndexerCount.load(i.toString());
-    let indexerEra = createOrLoadIndexerEra(
-      indexerCount.indexer,
-      era
-    );
-    if (!indexerEra.ineligibleTwentyEightEpochsLaterBadge) {
-      create28EpochsLaterBadge(indexerCount.indexer, era);
-    }
-  }
-}
-
 function _processAllocationCreated(
-  allocationId: string,
-  indexerId: string,
+  allocationID: string,
+  indexerID: string,
   currentEpoch: BigInt
 ): void {
-  createAllocation(allocationId, indexerId, currentEpoch);
+  createAllocation(allocationID, indexerID, currentEpoch);
 }
 
 function _processAllocationClosed(
-  allocationId: string,
-  indexerId: string,
+  indexerID: string,
+  allocationID: string,
   currentEpoch: BigInt
 ): void {
-  let indexer = createOrLoadIndexer(indexerId);
+  let indexer = createOrLoadIndexer(indexerID);
   let indexerEra = createOrLoadIndexerEra(indexer.id, currentEpoch);
 
-  let allocation = Allocation.load(allocationId);
+  let allocation = Allocation.load(allocationID);
 
   let epochsToClose = currentEpoch.minus(allocation.createdAtEpoch);
   let isUnder28Epochs = epochsToClose.lt(toBigInt(28));
@@ -79,4 +64,22 @@ function _processAllocationClosed(
     indexerEra.ineligibleTwentyEightEpochsLaterBadge = true;
     indexerEra.save();
   }
+}
+
+export function processNeverSlashedBadgesForEra(era: BigInt): void {
+  // // todo: finalize any "pending" badges from this epoch
+  // let entityStats = createOrLoadEntityStats();
+  // let previousEpoch = currentEpoch.minus(oneBI());
+
+  // for (let i = 1; i < entityStats.indexerCount; i++) {
+  //   log.info("FORLOOP", []);
+  //   let indexerCount = IndexerCount.load(i.toString());
+  //   let indexerEra = createOrLoadIndexerEra(
+  //     indexerCount.indexer,
+  //     previousEpoch
+  //   );
+  //   if (!indexerEra.ineligibleTwentyEightEpochsLaterBadge) {
+  //     create28EpochsLaterBadge(indexerCount.indexer, previousEpoch);
+  //   }
+  // }
 }

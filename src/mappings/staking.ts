@@ -13,6 +13,10 @@ import {
   processAllocationClosedFor28DaysLaterBadge,
   processAllocationCreatedFor28DaysLaterBadge
 } from "../Badges/28DaysLater";
+import {
+  processAllocationCreatedForNeverSlashedBadge,
+  processAllocationClosedForNeverSlashedBadge
+} from "../Badges/neverSlashed";
 
 export function handleStakeSlashed(event: StakeSlashed): void {}
 
@@ -31,6 +35,7 @@ export function handleStakeSlashed(event: StakeSlashed): void {}
  */
 export function handleAllocationCreated(event: AllocationCreated): void {
   processAllocationCreatedFor28DaysLaterBadge(event);
+  processAllocationCreatedForNeverSlashedBadge(event);
 }
 
 /**
@@ -53,4 +58,5 @@ export function handleAllocationCreated(event: AllocationCreated): void {
 export function handleAllocationClosed(event: AllocationClosed): void {
   processAllocationClosedForFirstToCloseBadge(event);
   processAllocationClosedFor28DaysLaterBadge(event);
+  processAllocationClosedForNeverSlashedBadge(event);
 }
