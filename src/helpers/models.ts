@@ -1,5 +1,6 @@
 import { BigInt } from "@graphprotocol/graph-ts/index";
 import {
+  Allocation,
   Delegator,
   EntityStats,
   Indexer,
@@ -19,7 +20,7 @@ export function createOrLoadEntityStats(): EntityStats {
     entityStats.indexerCount = 0;
     entityStats.firstToCloseBadgeCount = 0;
     entityStats.twentyEightDaysLaterBadgeCount = 0;
-    entityStats.lastEpochUpdate = toBigInt(0);
+    entityStats.lastEraProcessed = toBigInt(0);
     entityStats.save();
   }
 
@@ -91,6 +92,19 @@ export function createOrLoadIndexerEra(
   }
 
   return indexerEra as IndexerEra;
+}
+
+export function createAllocation(
+  allocationID: string,
+  indexerID: string,
+  epochCreated: BigInt
+): void {
+  if (Allocation.load(allocationID) == null) {
+    let allocation = new Allocation(allocationID);
+    allocation.createdAtEpoch = epochCreated;
+
+    allocation.save();
+  }
 }
 
 export function create28EpochsLaterBadge(
