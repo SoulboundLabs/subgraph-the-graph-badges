@@ -4,15 +4,22 @@
  */
 
 import {
+  DelegatedStake,
+  DelegationNationBadge,
+  Delegator
+} from "../../generated/schema";
+import {
   AllocationClosed,
   AllocationCreated,
+  StakeDelegated,
   StakeSlashed
 } from "../../generated/Staking/Staking";
-import { processAllocationClosedForFirstToCloseBadge } from "../Badges/firstToClose";
 import {
   processAllocationClosedFor28DaysLaterBadge,
   processAllocationCreatedFor28DaysLaterBadge
 } from "../Badges/28DaysLater";
+import { processAllocationClosedForFirstToCloseBadge } from "../Badges/firstToClose";
+import { createOrLoadDelegator } from "../helpers/models";
 
 export function handleStakeSlashed(event: StakeSlashed): void {}
 
@@ -53,4 +60,49 @@ export function handleAllocationCreated(event: AllocationCreated): void {
 export function handleAllocationClosed(event: AllocationClosed): void {
   processAllocationClosedForFirstToCloseBadge(event);
   processAllocationClosedFor28DaysLaterBadge(event);
+}
+
+/**
+ * @dev Emitted when `delegator` delegated `tokens` to the `indexer`, the delegator
+ * gets `shares` for the delegation pool proportionally to the tokens staked.
+ * Parameters:
+ *   address indexer
+ *   address delegator
+ *   uint256 tokens,
+ *   uint256 shares
+ */
+export function handleStakeDelegated(event: StakeDelegated): void {
+  processStakeDelegatedForDelegationNationBadge(event);
+}
+
+export function processStakeDelegatedForDelegationNationBadge(
+  event: StakeDelegated
+): void {
+  let indexerID = event.params.indexer.toHexString();
+  let delegatorID = event.params.delegator.toHexString();
+  let id = delegatorID.concat("-").concat(indexerID);
+  let delegatedStake = DelegatedStake.load(id);
+
+  if (delegatedStake == null) {
+    delegatedStake = new DelegatedStake(id);
+    delegatedStake.save();
+
+    let delegator = createOrLoadDelegator(delegatorID);
+    let uniqueDelegationCount = delegator.uniqueDelegationCount + 1;
+
+    delegator.uniqueDelegationCount = uniqueDelegationCount;
+    delegator.save();
+
+    awardDelegationNationBadge(delegator);
+  }
+}
+
+export function awardDelegationNationBadge(delegator: Delegator) {
+  let minUniqueDelegations = delegator.uniqueDelegationCount >= 3;
+  let matchesBadgeLevel = delegator.uniqueDelegationCount % 3 == 0;
+  if (minUniqueDelegations && matchesBadgeLevel) {
+    let delegationNationBadge = new DelegationNationBadge(delegator.id);
+    delegationNationBadge.uniqueDelegationCount =
+      delegator.uniqueDelegationCount;
+  }
 }

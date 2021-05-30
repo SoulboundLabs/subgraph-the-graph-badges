@@ -40,10 +40,30 @@ type Indexer @entity {
   "Number of times indexer failed to earn badge"
   ineligibleTwentyEightEpochsLaterBadgeCount: Int!
 }
-"""
 
 """
+Metadata for the Delegator
+"""
+type Delegator @entity {
+  "Address of Delegator"
+  id: ID!
+  "Number of delegations with unique indexers"
+  uniqueDelegationCount: Int!
+}
+
+"""
+Metadata for the Delegator
+"""
+type DelegatedStake @entity {
+  "Delegator + Indexer"
+  id: ID!
+}
+
+"""
+Joins Indexer metrics over a particular era
+"""
 type IndexerEra @entity {
+  "Indexer Address + Era"
   id: ID! # indexer id + era
   indexer: Indexer!
   era: BigInt!
@@ -66,6 +86,15 @@ Awarded to indexers who close their allocations every 28 epochs or fewer
 type TwentyEightEpochsLaterBadge @entity {
   id: ID! # SubgraphDeploymentId
   indexer: Indexer!
+  eraAwarded: BigInt!
+}
+
+"""
+Awarded to delegators who delegate to 3 or more indexers during any epoch
+"""
+type DelegationNationBadge @entity {
+  id: ID! # SubgraphDeploymentId
+  delegator: Delegator!
   eraAwarded: BigInt!
 }
 

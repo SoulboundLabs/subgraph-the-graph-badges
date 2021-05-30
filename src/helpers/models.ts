@@ -1,5 +1,6 @@
 import { BigInt } from "@graphprotocol/graph-ts/index";
 import {
+  Delegator,
   EntityStats,
   Indexer,
   IndexerCount,
@@ -43,6 +44,18 @@ export function createOrLoadIndexer(id: string): Indexer {
   }
 
   return indexer as Indexer;
+}
+
+export function createOrLoadDelegator(id: string): Delegator {
+  let delegator = Delegator.load(id);
+
+  if (delegator == null) {
+    delegator = new Delegator(id);
+    delegator.uniqueDelegationCount = 0;
+    delegator.save();
+  }
+
+  return delegator as Delegator;
 }
 
 export function createOrLoadIndexerCount(
