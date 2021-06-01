@@ -1,17 +1,16 @@
-import { BigInt, log } from "@graphprotocol/graph-ts/index";
+import { BigInt } from "@graphprotocol/graph-ts/index";
 import { Allocation, IndexerCount } from "../../generated/schema";
 import {
   AllocationClosed,
   AllocationCreated
 } from "../../generated/Staking/Staking";
-import { oneBI } from "../helpers/constants";
-import { transitionToNewEraIfNeeded } from "../helpers/epoch";
+import { epochToEra, transitionToNewEraIfNeeded } from "../helpers/epoch";
 import {
   create28EpochsLaterBadge,
+  createAllocation,
   createOrLoadEntityStats,
   createOrLoadIndexer,
-  createOrLoadIndexerEra,
-  createAllocation
+  createOrLoadIndexerEra
 } from "../helpers/models";
 import { toBigInt } from "../helpers/typeConverter";
 
@@ -42,13 +41,9 @@ export function process28DaysLaterBadgesForEra(era: BigInt): void {
   let entityStats = createOrLoadEntityStats();
 
   for (let i = 1; i < entityStats.indexerCount; i++) {
-    log.info("FORLOOP", []);
     let indexerCount = IndexerCount.load(i.toString());
-    let indexerEra = createOrLoadIndexerEra(
-      indexerCount.indexer,
-      era
-    );
-    if (!indexerEra.ineligibleTwentyEightEpochsLaterBadge) {
+    let indexerEra = createOrLoadIndexerEra(indexerCount.indexer, era);
+    if (!indexerEra.isClosingAllocationLate) {
       create28EpochsLaterBadge(indexerCount.indexer, era);
     }
   }
@@ -68,7 +63,8 @@ function _processAllocationClosed(
   currentEpoch: BigInt
 ): void {
   let indexer = createOrLoadIndexer(indexerId);
-  let indexerEra = createOrLoadIndexerEra(indexer.id, currentEpoch);
+  let era = epochToEra(currentEpoch);
+  let indexerEra = createOrLoadIndexerEra(indexer.id, era);
 
   let allocation = Allocation.load(allocationId);
 
@@ -76,7 +72,7 @@ function _processAllocationClosed(
   let isUnder28Epochs = epochsToClose.lt(toBigInt(28));
 
   if (!isUnder28Epochs) {
-    indexerEra.ineligibleTwentyEightEpochsLaterBadge = true;
+    indexerEra.isClosingAllocationLate = true;
     indexerEra.save();
   }
 }

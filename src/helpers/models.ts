@@ -6,10 +6,10 @@ import {
   Indexer,
   IndexerCount,
   IndexerEra,
+  NeverSlashedBadge,
   TwentyEightEpochsLaterBadge
 } from "../../generated/schema";
 import { zeroBD } from "./constants";
-import { epochToEra } from "./epoch";
 import { toBigInt } from "./typeConverter";
 
 export function createOrLoadEntityStats(): EntityStats {
@@ -32,7 +32,7 @@ export function createOrLoadIndexer(id: string): Indexer {
 
   if (indexer == null) {
     indexer = new Indexer(id);
-    indexer.ineligibleTwentyEightEpochsLaterBadgeCount = 0;
+    indexer.isClosingAllocationLateCount = 0;
     indexer.twentyEightEpochsLaterBadgePercentage = zeroBD();
     indexer.save();
 
@@ -76,10 +76,8 @@ export function createOrLoadIndexerCount(
 
 export function createOrLoadIndexerEra(
   indexerID: string,
-  epoch: BigInt
+  era: BigInt
 ): IndexerEra {
-  let era = epochToEra(epoch);
-
   let id = indexerID.concat("-").concat(era.toString());
   let indexerEra = IndexerEra.load(id);
 
@@ -87,7 +85,8 @@ export function createOrLoadIndexerEra(
     indexerEra = new IndexerEra(id);
     indexerEra.era = era;
     indexerEra.indexer = indexerID;
-    indexerEra.ineligibleTwentyEightEpochsLaterBadge = false;
+    indexerEra.isClosingAllocationLate = false;
+    indexerEra.isSlashed = false;
     indexerEra.save();
   }
 
@@ -109,10 +108,8 @@ export function createAllocation(
 
 export function create28EpochsLaterBadge(
   indexerID: string,
-  epoch: BigInt
+  currentEra: BigInt
 ): TwentyEightEpochsLaterBadge {
-  let currentEra = epochToEra(epoch);
-
   let badgeID = indexerID.concat("-").concat(currentEra.toString());
 
   let twentyEightEpochsLater = new TwentyEightEpochsLaterBadge(badgeID);
@@ -121,4 +118,18 @@ export function create28EpochsLaterBadge(
   twentyEightEpochsLater.save();
 
   return twentyEightEpochsLater as TwentyEightEpochsLaterBadge;
+}
+
+export function createNeverSlashedBadge(
+  indexerID: string,
+  currentEra: BigInt
+): NeverSlashedBadge {
+  let badgeID = indexerID.concat("-").concat(currentEra.toString());
+
+  let neverSlashedBadge = new NeverSlashedBadge(badgeID);
+  neverSlashedBadge.indexer = indexerID;
+  neverSlashedBadge.eraAwarded = currentEra;
+  neverSlashedBadge.save();
+
+  return neverSlashedBadge as NeverSlashedBadge;
 }

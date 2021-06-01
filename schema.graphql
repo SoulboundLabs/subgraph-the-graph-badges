@@ -38,7 +38,7 @@ type Indexer @entity {
   "Percentage of time indexer has earned badge"
   twentyEightEpochsLaterBadgePercentage: BigDecimal!
   "Number of times indexer failed to earn badge"
-  ineligibleTwentyEightEpochsLaterBadgeCount: Int!
+  isClosingAllocationLateCount: Int!
 }
 
 """
@@ -67,8 +67,8 @@ type IndexerEra @entity {
   id: ID! # indexer id + era
   indexer: Indexer!
   era: BigInt!
-  ineligibleTwentyEightEpochsLaterBadge: Boolean!
-  ineligibleNeverSlashedBadge: Boolean!
+  isClosingAllocationLate: Boolean!
+  isSlashed: Boolean!
 }
 
 """
@@ -76,9 +76,17 @@ Awarded to indexers who are first to close an allocation for a subgraph
 """
 type FirstToCloseBadge @entity {
   id: ID! # SubgraphDeploymentId
-  # badge: StandardBadgeProps!
   indexer: String!
-  awardedAtBlock: BigInt!
+  eraAwarded: BigInt!
+}
+
+"""
+Awarded to indexers who are don't get slashed during a era
+"""
+type NeverSlashedBadge @entity {
+  id: ID! # SubgraphDeploymentId
+  indexer: String!
+  eraAwarded: BigInt!
 }
 
 """

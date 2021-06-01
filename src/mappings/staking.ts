@@ -4,11 +4,6 @@
  */
 
 import {
-  DelegatedStake,
-  DelegationNationBadge,
-  Delegator
-} from "../../generated/schema";
-import {
   AllocationClosed,
   AllocationCreated,
   StakeDelegated,
@@ -18,13 +13,9 @@ import {
   processAllocationClosedFor28DaysLaterBadge,
   processAllocationCreatedFor28DaysLaterBadge
 } from "../Badges/28DaysLater";
-import {
-  processAllocationClosedForNeverSlashedBadge,
-  processAllocationCreatedForNeverSlashedBadge
-} from "../Badges/neverSlashed";
-import { createOrLoadDelegator } from "../helpers/models";
-
-export function handleStakeSlashed(event: StakeSlashed): void {}
+import { processStakeDelegatedForDelegationNationBadge } from "../Badges/delegationNation";
+import { processAllocationClosedForFirstToCloseBadge } from "../Badges/firstToClose";
+import { processStakeSlashedForNeverSlashedBadge } from "../Badges/neverSlashed";
 
 /**
  * @dev Emitted when `indexer` allocated `tokens` amount to `subgraphDeploymentID`
@@ -41,7 +32,6 @@ export function handleStakeSlashed(event: StakeSlashed): void {}
  */
 export function handleAllocationCreated(event: AllocationCreated): void {
   processAllocationCreatedFor28DaysLaterBadge(event);
-  processAllocationCreatedForNeverSlashedBadge(event);
 }
 
 /**
@@ -64,7 +54,6 @@ export function handleAllocationCreated(event: AllocationCreated): void {
 export function handleAllocationClosed(event: AllocationClosed): void {
   processAllocationClosedForFirstToCloseBadge(event);
   processAllocationClosedFor28DaysLaterBadge(event);
-  processAllocationClosedForNeverSlashedBadge(event);
 }
 
 /**
@@ -80,34 +69,15 @@ export function handleStakeDelegated(event: StakeDelegated): void {
   processStakeDelegatedForDelegationNationBadge(event);
 }
 
-export function processStakeDelegatedForDelegationNationBadge(
-  event: StakeDelegated
-): void {
-  let indexerID = event.params.indexer.toHexString();
-  let delegatorID = event.params.delegator.toHexString();
-  let id = delegatorID.concat("-").concat(indexerID);
-  let delegatedStake = DelegatedStake.load(id);
-
-  if (delegatedStake == null) {
-    delegatedStake = new DelegatedStake(id);
-    delegatedStake.save();
-
-    let delegator = createOrLoadDelegator(delegatorID);
-    let uniqueDelegationCount = delegator.uniqueDelegationCount + 1;
-
-    delegator.uniqueDelegationCount = uniqueDelegationCount;
-    delegator.save();
-
-    awardDelegationNationBadge(delegator);
-  }
-}
-
-export function awardDelegationNationBadge(delegator: Delegator) {
-  let minUniqueDelegations = delegator.uniqueDelegationCount >= 3;
-  let matchesBadgeLevel = delegator.uniqueDelegationCount % 3 == 0;
-  if (minUniqueDelegations && matchesBadgeLevel) {
-    let delegationNationBadge = new DelegationNationBadge(delegator.id);
-    delegationNationBadge.uniqueDelegationCount =
-      delegator.uniqueDelegationCount;
-  }
+/**
+ * @dev Emitted when `indexer` was slashed for a total of `tokens` amount.
+ * Tracks `reward` amount of tokens given to `beneficiary`.
+ * Parameters:
+ *   address indexer
+ *   uint256 tokens
+ *   uint256 reward,
+ *   address beneficiary
+ */
+export function handleStakeSlashed(event: StakeSlashed): void {
+  processStakeSlashedForNeverSlashedBadge(event);
 }
