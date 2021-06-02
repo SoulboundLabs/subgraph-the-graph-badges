@@ -7,7 +7,7 @@ import {
   IndexerCount,
   IndexerEra,
   NeverSlashedBadge,
-  TwentyEightEpochsLaterBadge
+  TwentyEightEpochsLaterBadge,
 } from "../../generated/schema";
 import { zeroBD } from "./constants";
 import { toBigInt } from "./typeConverter";
@@ -101,6 +101,7 @@ export function createAllocation(
   if (Allocation.load(allocationID) == null) {
     let allocation = new Allocation(allocationID);
     allocation.createdAtEpoch = epochCreated;
+    allocation.indexer = indexerID;
 
     allocation.save();
   }
