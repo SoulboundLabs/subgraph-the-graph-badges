@@ -38,7 +38,7 @@ export function processAllocationClosedFor28DaysLaterBadge(
 }
 
 export function process28DaysLaterBadgesForEra(era: BigInt): void {
-  // todo: finalize any "pending" badges from this epoch
+  // finalize any "pending" badges from this epoch
   let entityStats = createOrLoadEntityStats();
 
   for (let i = 1; i < entityStats.indexerCount; i++) {

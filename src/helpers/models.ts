@@ -5,7 +5,8 @@ import {
   Indexer,
   IndexerCount,
   IndexerEra,
-  TwentyEightEpochsLaterBadge
+  TwentyEightEpochsLaterBadge,
+  NeverBeenSlashedBadge
 } from "../../generated/schema";
 import { zeroBD } from "./constants";
 import { epochToEra } from "./epoch";
@@ -96,16 +97,31 @@ export function createAllocation(
 
 export function create28EpochsLaterBadge(
   indexerID: string,
-  epoch: BigInt
+  era: BigInt
 ): TwentyEightEpochsLaterBadge {
-  let currentEra = epochToEra(epoch);
 
-  let badgeID = indexerID.concat("-").concat(currentEra.toString());
+  let badgeID = indexerID.concat("-").concat(era.toString());
 
   let twentyEightEpochsLater = new TwentyEightEpochsLaterBadge(badgeID);
   twentyEightEpochsLater.indexer = indexerID;
-  twentyEightEpochsLater.eraAwarded = currentEra;
+  twentyEightEpochsLater.eraAwarded = era;
   twentyEightEpochsLater.save();
 
   return twentyEightEpochsLater as TwentyEightEpochsLaterBadge;
 }
+
+export function createNeverSlashedBadge(
+  indexerID: string,
+  era: BigInt
+): NeverBeenSlashedBadge {
+
+  let badgeID = indexerID.concat("-").concat(era.toString());
+
+  let neverSlashedBadge = new NeverBeenSlashedBadge(badgeID);
+  neverSlashedBadge.indexer = indexerID;
+  neverSlashedBadge.eraAwarded = era;
+  neverSlashedBadge.save();
+
+  return neverSlashedBadge as NeverBeenSlashedBadge;
+}
+

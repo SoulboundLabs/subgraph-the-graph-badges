@@ -4,14 +4,13 @@ import {
   AllocationClosed,
   AllocationCreated
 } from "../../generated/Staking/Staking";
-import { oneBI } from "../helpers/constants";
 import { transitionToNewEraIfNeeded } from "../helpers/epoch";
 import {
-  create28EpochsLaterBadge,
   createOrLoadEntityStats,
   createOrLoadIndexer,
   createOrLoadIndexerEra,
-  createAllocation
+  createAllocation,
+  createNeverSlashedBadge
 } from "../helpers/models";
 import { toBigInt } from "../helpers/typeConverter";
 
@@ -67,19 +66,17 @@ function _processAllocationClosed(
 }
 
 export function processNeverSlashedBadgesForEra(era: BigInt): void {
-  // // todo: finalize any "pending" badges from this epoch
-  // let entityStats = createOrLoadEntityStats();
-  // let previousEpoch = currentEpoch.minus(oneBI());
+  let entityStats = createOrLoadEntityStats();
 
-  // for (let i = 1; i < entityStats.indexerCount; i++) {
-  //   log.info("FORLOOP", []);
-  //   let indexerCount = IndexerCount.load(i.toString());
-  //   let indexerEra = createOrLoadIndexerEra(
-  //     indexerCount.indexer,
-  //     previousEpoch
-  //   );
-  //   if (!indexerEra.ineligibleTwentyEightEpochsLaterBadge) {
-  //     create28EpochsLaterBadge(indexerCount.indexer, previousEpoch);
-  //   }
-  // }
+  for (let i = 1; i < entityStats.indexerCount; i++) {
+    log.info("FORLOOP", []);
+    let indexerCount = IndexerCount.load(i.toString());
+    let indexerEra = createOrLoadIndexerEra(
+      indexerCount.indexer,
+      era
+    );
+    if (!indexerEra.ineligibleNeverSlashedBadge) {
+      createNeverSlashedBadge(indexerCount.indexer, era);
+    }
+  }
 }

@@ -35,16 +35,16 @@ Metadata for the Indexer along with parameters and staking data
 type Indexer @entity {
   "Address of Indexer"
   id: ID!
-  "Percentage of time indexer has earned badge"
+  "Percentage of eras indexer has earned badge"
   twentyEightEpochsLaterBadgePercentage: BigDecimal!
-  "Number of times indexer failed to earn badge"
+  "Number of eras indexer failed to earn badge"
   ineligibleTwentyEightEpochsLaterBadgeCount: Int!
 }
 """
 
 """
 type IndexerEra @entity {
-  id: ID! # indexer id + era
+  id: ID!   # {indexer}-{era}
   indexer: Indexer!
   era: BigInt!
   ineligibleTwentyEightEpochsLaterBadge: Boolean!
@@ -65,9 +65,19 @@ type FirstToCloseBadge @entity {
 Awarded to indexers who close their allocations every 28 epochs or fewer
 """
 type TwentyEightEpochsLaterBadge @entity {
-  id: ID! # SubgraphDeploymentId
+  id: ID! # indexerID-era
   indexer: Indexer!
   eraAwarded: BigInt!
+}
+
+"""
+Awarded to indexers who weren't slashed for an entire era
+"""
+type NeverBeenSlashedBadge @entity {
+  id: ID!
+  indexer: Indexer!
+  eraAwarded: BigInt!
+  # todo: amount of stake that went unslashed?
 }
 
 # type SlashedBadge @entity {
