@@ -19,6 +19,18 @@ type EntityStats @entity {
   lastEraProcessed: BigInt!
 }
 
+"Additional details related to the badge"
+type BadgeDetail @entity {
+  "Name of the badge"
+  id: ID!
+  "Funny tagline for the badge"
+  tagline: ID!
+  "Description of the badge"
+  description: String!
+  "IFTP link to the printable badge"
+  image: String!
+}
+
 """
 Created when any indexer is instantiated to track order of indexers
 """
@@ -78,6 +90,7 @@ type FirstToCloseBadge @entity {
   id: ID! # SubgraphDeploymentId
   indexer: String!
   eraAwarded: BigInt!
+  badgeDetail: BadgeDetail!
 }
 
 """
@@ -87,6 +100,7 @@ type NeverSlashedBadge @entity {
   id: ID! # SubgraphDeploymentId
   indexer: String!
   eraAwarded: BigInt!
+  badgeDetail: BadgeDetail!
 }
 
 """
@@ -96,6 +110,7 @@ type TwentyEightEpochsLaterBadge @entity {
   id: ID! # SubgraphDeploymentId
   indexer: Indexer!
   eraAwarded: BigInt!
+  badgeDetail: BadgeDetail!
 }
 
 """
@@ -105,6 +120,7 @@ type DelegationNationBadge @entity {
   id: ID! # SubgraphDeploymentId
   delegator: Delegator!
   eraAwarded: BigInt!
+  badgeDetail: BadgeDetail!
 }
 
 # type SlashedBadge @entity {
