@@ -1,15 +1,15 @@
 import { BigInt } from "@graphprotocol/graph-ts/index";
 import {
   Allocation,
+  Delegator,
   EntityStats,
   Indexer,
   IndexerCount,
   IndexerEra,
-  TwentyEightEpochsLaterBadge,
-  NeverBeenSlashedBadge
+  NeverSlashedBadge,
+  TwentyEightEpochsLaterBadge
 } from "../../generated/schema";
 import { zeroBD } from "./constants";
-import { epochToEra } from "./epoch";
 import { toBigInt } from "./typeConverter";
 
 export function createOrLoadEntityStats(): EntityStats {
@@ -32,7 +32,7 @@ export function createOrLoadIndexer(id: string): Indexer {
 
   if (indexer == null) {
     indexer = new Indexer(id);
-    indexer.ineligibleTwentyEightEpochsLaterBadgeCount = 0;
+    indexer.isClosingAllocationLateCount = 0;
     indexer.twentyEightEpochsLaterBadgePercentage = zeroBD();
     indexer.save();
 
@@ -45,6 +45,18 @@ export function createOrLoadIndexer(id: string): Indexer {
   }
 
   return indexer as Indexer;
+}
+
+export function createOrLoadDelegator(id: string): Delegator {
+  let delegator = Delegator.load(id);
+
+  if (delegator == null) {
+    delegator = new Delegator(id);
+    delegator.uniqueDelegationCount = 0;
+    delegator.save();
+  }
+
+  return delegator as Delegator;
 }
 
 export function createOrLoadIndexerCount(
@@ -64,10 +76,8 @@ export function createOrLoadIndexerCount(
 
 export function createOrLoadIndexerEra(
   indexerID: string,
-  epoch: BigInt
+  era: BigInt
 ): IndexerEra {
-  let era = epochToEra(epoch);
-
   let id = indexerID.concat("-").concat(era.toString());
   let indexerEra = IndexerEra.load(id);
 
@@ -75,7 +85,8 @@ export function createOrLoadIndexerEra(
     indexerEra = new IndexerEra(id);
     indexerEra.era = era;
     indexerEra.indexer = indexerID;
-    indexerEra.ineligibleTwentyEightEpochsLaterBadge = false;
+    indexerEra.isClosingAllocationLate = false;
+    indexerEra.isSlashed = false;
     indexerEra.save();
   }
 
@@ -90,6 +101,7 @@ export function createAllocation(
   if (Allocation.load(allocationID) == null) {
     let allocation = new Allocation(allocationID);
     allocation.createdAtEpoch = epochCreated;
+    allocation.indexer = indexerID;
 
     allocation.save();
   }
@@ -112,16 +124,14 @@ export function create28EpochsLaterBadge(
 
 export function createNeverSlashedBadge(
   indexerID: string,
-  era: BigInt
-): NeverBeenSlashedBadge {
+  currentEra: BigInt
+): NeverSlashedBadge {
+  let badgeID = indexerID.concat("-").concat(currentEra.toString());
 
-  let badgeID = indexerID.concat("-").concat(era.toString());
-
-  let neverSlashedBadge = new NeverBeenSlashedBadge(badgeID);
+  let neverSlashedBadge = new NeverSlashedBadge(badgeID);
   neverSlashedBadge.indexer = indexerID;
-  neverSlashedBadge.eraAwarded = era;
+  neverSlashedBadge.eraAwarded = currentEra;
   neverSlashedBadge.save();
 
-  return neverSlashedBadge as NeverBeenSlashedBadge;
+  return neverSlashedBadge as NeverSlashedBadge;
 }
-

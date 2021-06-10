@@ -1,5 +1,6 @@
-import { BigInt, log } from "@graphprotocol/graph-ts/index";
-import { Allocation, IndexerCount } from "../../generated/schema";
+import { BigInt } from "@graphprotocol/graph-ts/index";
+import { IndexerCount } from "../../generated/schema";
+import { StakeSlashed } from "../../generated/Staking/Staking";
 import {
   AllocationClosed,
   AllocationCreated
@@ -12,70 +13,32 @@ import {
   createAllocation,
   createNeverSlashedBadge
 } from "../helpers/models";
-import { toBigInt } from "../helpers/typeConverter";
 
-
-
-export function processAllocationCreatedForNeverSlashedBadge(
-  event: AllocationCreated
+export function processStakeSlashedForNeverSlashedBadge(
+  event: StakeSlashed
 ): void {
-  _processAllocationCreated(
-    event.params.allocationID.toHexString(),
-    event.params.indexer.toHexString(),
-    event.params.epoch
-  );
-  transitionToNewEraIfNeeded(event.params.epoch);
+  _processStakeSlashed(event.params.indexer.toHexString());
 }
 
-export function processAllocationClosedForNeverSlashedBadge(
-  event: AllocationClosed
-): void {
-  _processAllocationClosed(
-    event.params.indexer.toHexString(),
-    event.params.allocationID.toHexString(),
-    event.params.epoch
-  );
-  transitionToNewEraIfNeeded(event.params.epoch);
-}
-
-function _processAllocationCreated(
-  allocationID: string,
-  indexerID: string,
-  currentEpoch: BigInt
-): void {
-  createAllocation(allocationID, indexerID, currentEpoch);
-}
-
-function _processAllocationClosed(
-  indexerID: string,
-  allocationID: string,
-  currentEpoch: BigInt
-): void {
+function _processStakeSlashed(indexerID: string): void {
+  let entityStats = createOrLoadEntityStats();
   let indexer = createOrLoadIndexer(indexerID);
-  let indexerEra = createOrLoadIndexerEra(indexer.id, currentEpoch);
+  let indexerEra = createOrLoadIndexerEra(
+    indexer.id,
+    entityStats.lastEraProcessed
+  );
 
-  let allocation = Allocation.load(allocationID);
-
-  let epochsToClose = currentEpoch.minus(allocation.createdAtEpoch);
-  let isUnder28Epochs = epochsToClose.lt(toBigInt(28));
-
-  if (!isUnder28Epochs) {
-    indexerEra.ineligibleTwentyEightEpochsLaterBadge = true;
-    indexerEra.save();
-  }
+  indexerEra.isSlashed = true;
+  indexerEra.save();
 }
 
 export function processNeverSlashedBadgesForEra(era: BigInt): void {
+  // todo: finalize any "pending" badges from this epoch
   let entityStats = createOrLoadEntityStats();
-
   for (let i = 1; i < entityStats.indexerCount; i++) {
-    log.info("FORLOOP", []);
     let indexerCount = IndexerCount.load(i.toString());
-    let indexerEra = createOrLoadIndexerEra(
-      indexerCount.indexer,
-      era
-    );
-    if (!indexerEra.ineligibleNeverSlashedBadge) {
+    let indexerEra = createOrLoadIndexerEra(indexerCount.indexer, era);
+    if (!indexerEra.isSlashed) {
       createNeverSlashedBadge(indexerCount.indexer, era);
     }
   }

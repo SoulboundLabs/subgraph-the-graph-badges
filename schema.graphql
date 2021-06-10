@@ -39,16 +39,37 @@ type Indexer @entity {
   twentyEightEpochsLaterBadgePercentage: BigDecimal!
   "Number of eras indexer failed to earn badge"
   ineligibleTwentyEightEpochsLaterBadgeCount: Int!
+  "Number of times indexer failed to earn badge"
+  isClosingAllocationLateCount: Int!
 }
-"""
 
+"""
+Metadata for the Delegator
+"""
+type Delegator @entity {
+  "Address of Delegator"
+  id: ID!
+  "Number of delegations with unique indexers"
+  uniqueDelegationCount: Int!
+}
+
+"""
+Metadata for the Delegator
+"""
+type DelegatedStake @entity {
+  "Delegator + Indexer"
+  id: ID!
+}
+
+"""
+Joins Indexer metrics over a particular era
 """
 type IndexerEra @entity {
   id: ID!   # {indexer}-{era}
   indexer: Indexer!
   era: BigInt!
-  ineligibleTwentyEightEpochsLaterBadge: Boolean!
-  ineligibleNeverSlashedBadge: Boolean!
+  isClosingAllocationLate: Boolean!
+  isSlashed: Boolean!
 }
 
 """
@@ -56,9 +77,17 @@ Awarded to indexers who are first to close an allocation for a subgraph
 """
 type FirstToCloseBadge @entity {
   id: ID! # SubgraphDeploymentId
-  # badge: StandardBadgeProps!
   indexer: String!
-  awardedAtBlock: BigInt!
+  eraAwarded: BigInt!
+}
+
+"""
+Awarded to indexers who are don't get slashed during a era
+"""
+type NeverSlashedBadge @entity {
+  id: ID! # SubgraphDeploymentId
+  indexer: String!
+  eraAwarded: BigInt!
 }
 
 """
@@ -78,6 +107,15 @@ type NeverBeenSlashedBadge @entity {
   indexer: Indexer!
   eraAwarded: BigInt!
   # todo: amount of stake that went unslashed?
+}
+
+"""
+Awarded to delegators who delegate to 3 or more indexers during any epoch
+"""
+type DelegationNationBadge @entity {
+  id: ID! # SubgraphDeploymentId
+  delegator: Delegator!
+  eraAwarded: BigInt!
 }
 
 # type SlashedBadge @entity {

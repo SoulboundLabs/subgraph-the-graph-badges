@@ -6,19 +6,16 @@
 import {
   AllocationClosed,
   AllocationCreated,
+  StakeDelegated,
   StakeSlashed
 } from "../../generated/Staking/Staking";
-import { processAllocationClosedForFirstToCloseBadge } from "../Badges/firstToClose";
 import {
   processAllocationClosedFor28DaysLaterBadge,
   processAllocationCreatedFor28DaysLaterBadge
 } from "../Badges/28DaysLater";
-import {
-  processAllocationCreatedForNeverSlashedBadge,
-  processAllocationClosedForNeverSlashedBadge
-} from "../Badges/neverSlashed";
-
-export function handleStakeSlashed(event: StakeSlashed): void {}
+import { processStakeDelegatedForDelegationNationBadge } from "../Badges/delegationNation";
+import { processAllocationClosedForFirstToCloseBadge } from "../Badges/firstToClose";
+import { processStakeSlashedForNeverSlashedBadge } from "../Badges/neverSlashed";
 
 /**
  * @dev Emitted when `indexer` allocated `tokens` amount to `subgraphDeploymentID`
@@ -35,7 +32,6 @@ export function handleStakeSlashed(event: StakeSlashed): void {}
  */
 export function handleAllocationCreated(event: AllocationCreated): void {
   processAllocationCreatedFor28DaysLaterBadge(event);
-  processAllocationCreatedForNeverSlashedBadge(event);
 }
 
 /**
@@ -58,5 +54,30 @@ export function handleAllocationCreated(event: AllocationCreated): void {
 export function handleAllocationClosed(event: AllocationClosed): void {
   processAllocationClosedForFirstToCloseBadge(event);
   processAllocationClosedFor28DaysLaterBadge(event);
-  processAllocationClosedForNeverSlashedBadge(event);
+}
+
+/**
+ * @dev Emitted when `delegator` delegated `tokens` to the `indexer`, the delegator
+ * gets `shares` for the delegation pool proportionally to the tokens staked.
+ * Parameters:
+ *   address indexer
+ *   address delegator
+ *   uint256 tokens,
+ *   uint256 shares
+ */
+export function handleStakeDelegated(event: StakeDelegated): void {
+  processStakeDelegatedForDelegationNationBadge(event);
+}
+
+/**
+ * @dev Emitted when `indexer` was slashed for a total of `tokens` amount.
+ * Tracks `reward` amount of tokens given to `beneficiary`.
+ * Parameters:
+ *   address indexer
+ *   uint256 tokens
+ *   uint256 reward,
+ *   address beneficiary
+ */
+export function handleStakeSlashed(event: StakeSlashed): void {
+  processStakeSlashedForNeverSlashedBadge(event);
 }
