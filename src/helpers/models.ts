@@ -1,8 +1,11 @@
 import { BigInt } from "@graphprotocol/graph-ts/index";
 import {
   Allocation,
+  BadgeDetail,
+  DelegationNationBadge,
   Delegator,
   EntityStats,
+  FirstToCloseBadge,
   Indexer,
   IndexerCount,
   IndexerEra,
@@ -111,12 +114,18 @@ export function create28EpochsLaterBadge(
   indexerID: string,
   era: BigInt
 ): TwentyEightEpochsLaterBadge {
-
   let badgeID = indexerID.concat("-").concat(era.toString());
+  let badgeDetail = createOrLoadBadgeDetail(
+    "28 Epochs Later",
+    "Awarded to indexers who close their allocations every 28 epochs or fewer",
+    "Kid, you're only as good as your last closed allocation",
+    "NFT_GOES_HERE"
+  );
 
   let twentyEightEpochsLater = new TwentyEightEpochsLaterBadge(badgeID);
   twentyEightEpochsLater.indexer = indexerID;
   twentyEightEpochsLater.eraAwarded = era;
+  twentyEightEpochsLater.badgeDetail = badgeDetail.id;
   twentyEightEpochsLater.save();
 
   return twentyEightEpochsLater as TwentyEightEpochsLaterBadge;
@@ -127,11 +136,76 @@ export function createNeverSlashedBadge(
   currentEra: BigInt
 ): NeverSlashedBadge {
   let badgeID = indexerID.concat("-").concat(currentEra.toString());
+  let badgeDetail = createOrLoadBadgeDetail(
+    "Never Slashed",
+    "Awarded to indexers who are don't get slashed during a era",
+    "Freddy Kreuger would be proud",
+    "NFT_GOES_HERE"
+  );
 
   let neverSlashedBadge = new NeverSlashedBadge(badgeID);
   neverSlashedBadge.indexer = indexerID;
   neverSlashedBadge.eraAwarded = currentEra;
+  neverSlashedBadge.badgeDetail = badgeDetail.id;
   neverSlashedBadge.save();
 
   return neverSlashedBadge as NeverSlashedBadge;
+}
+
+export function createDelegationNationBadge(delegator: Delegator): void {
+  let entityStats = createOrLoadEntityStats();
+  let badgeDetail = createOrLoadBadgeDetail(
+    "Delegation Nation",
+    "Awarded to delegators who delegate to 3 or more indexers during any epoch",
+    "A seven nation army couldn't hold me back",
+    "NFT_GOES_HERE"
+  );
+  let delegationNationBadge = new DelegationNationBadge(delegator.id);
+  delegationNationBadge.delegator = delegator.id;
+  delegationNationBadge.eraAwarded = entityStats.lastEraProcessed;
+  delegationNationBadge.id = badgeDetail.id;
+
+  delegationNationBadge.save();
+}
+
+export function createFirstToCloseBadge(
+  subgraphDeploymentID: string,
+  indexer: string
+): void {
+  let entityStats = createOrLoadEntityStats();
+  let firstToClose = FirstToCloseBadge.load(subgraphDeploymentID);
+  let badgeDetail = createOrLoadBadgeDetail(
+    "First To Close",
+    "Awarded to indexers who are first to close an allocation for a subgraph",
+    "The early indexer gets the worm",
+    "NFT_GOES_HERE"
+  );
+  if (firstToClose == null) {
+    // FirstToCloseBadge hasn't been awarded for this subgraphDeploymentId yet
+    // Award to this indexer
+    firstToClose = new FirstToCloseBadge(subgraphDeploymentID);
+    firstToClose.indexer = indexer;
+    firstToClose.eraAwarded = entityStats.lastEraProcessed;
+    firstToClose.badgeDetail = badgeDetail.id;
+    firstToClose.save();
+  }
+}
+
+export function createOrLoadBadgeDetail(
+  name: string,
+  description: string,
+  tagline: string,
+  image: string
+): BadgeDetail {
+  let badgeDetail = BadgeDetail.load(name);
+
+  if (badgeDetail == null) {
+    badgeDetail = new BadgeDetail(name);
+    badgeDetail.description = description;
+    badgeDetail.tagline = tagline;
+    badgeDetail.image = image;
+    badgeDetail.save();
+  }
+
+  return badgeDetail as BadgeDetail;
 }

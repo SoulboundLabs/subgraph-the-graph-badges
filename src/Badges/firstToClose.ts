@@ -1,33 +1,13 @@
 // FirstToCloseBadge - awarded to indexers who are first to close an allocation for a subgraph
 
-import { BigInt } from "@graphprotocol/graph-ts/index";
-import { FirstToCloseBadge } from "../../generated/schema";
 import { AllocationClosed } from "../../generated/Staking/Staking";
-import { createOrLoadEntityStats } from "../helpers/models";
+import { createFirstToCloseBadge } from "../helpers/models";
 
 export function processAllocationClosedForFirstToCloseBadge(
   event: AllocationClosed
 ): void {
-  _processAllocationClosed(
+  createFirstToCloseBadge(
     event.params.subgraphDeploymentID.toHexString(),
-    event.params.indexer.toHexString(),
-    event.block.number
+    event.params.indexer.toHexString()
   );
-}
-
-function _processAllocationClosed(
-  subgraphDeploymentID: string,
-  indexer: string,
-  blockNumber: BigInt
-): void {
-  let entityStats = createOrLoadEntityStats();
-  let firstToClose = FirstToCloseBadge.load(subgraphDeploymentID);
-  if (firstToClose == null) {
-    // FirstToCloseBadge hasn't been awarded for this subgraphDeploymentId yet
-    // Award to this indexer
-    firstToClose = new FirstToCloseBadge(subgraphDeploymentID);
-    firstToClose.indexer = indexer;
-    firstToClose.eraAwarded = entityStats.lastEraProcessed;
-    firstToClose.save();
-  }
 }
