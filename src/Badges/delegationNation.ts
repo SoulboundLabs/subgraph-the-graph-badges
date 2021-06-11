@@ -27,7 +27,7 @@ export function processStakeDelegatedForDelegationNationBadge(
   }
 }
 
-export function awardDelegationNationBadge(delegator: Delegator): void {
+function awardDelegationNationBadge(delegator: Delegator): void {
   let minUniqueDelegations = delegator.uniqueDelegationCount >= 3;
   let matchesBadgeLevel = delegator.uniqueDelegationCount % 3 == 0;
 
