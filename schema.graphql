@@ -1,8 +1,3 @@
-# type StandardBadgeProps @entity {
-#   id: ID!
-#   awardedAtBlock: BigInt
-# }
-
 """
 Singleton entity that tracks number of other entities/badges
 """
@@ -115,16 +110,6 @@ type TwentyEightEpochsLaterBadge @entity {
 }
 
 """
-Awarded to indexers who weren't slashed for an entire era
-"""
-type NeverBeenSlashedBadge @entity {
-  id: ID!
-  indexer: Indexer!
-  eraAwarded: BigInt!
-  badgeDetail: BadgeDetail!
-}
-
-"""
 Awarded to delegators who delegate to 3 or more indexers during any epoch
 """
 type DelegationNationBadge @entity {
@@ -133,11 +118,6 @@ type DelegationNationBadge @entity {
   eraAwarded: BigInt!
   badgeDetail: BadgeDetail!
 }
-
-# type SlashedBadge @entity {
-#   id: ID!   # <indexrAddress>-<SlashedBadgeNumber>
-
-# }
 
 """
 A state channel Allocation representing a single Indexer-SubgraphDeployment stake
