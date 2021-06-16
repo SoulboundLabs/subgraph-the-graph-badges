@@ -2,8 +2,11 @@ import { BigInt } from "@graphprotocol/graph-ts/index";
 import {
   Allocation,
   BadgeDetail,
+  DelegatedStake,
   DelegationNationBadge,
+  DelegationStreakBadge,
   Delegator,
+  DelegatorCount,
   EntityStats,
   FirstToCloseBadge,
   Indexer,
@@ -21,6 +24,7 @@ export function createOrLoadEntityStats(): EntityStats {
   if (entityStats == null) {
     entityStats = new EntityStats("1");
     entityStats.indexerCount = 0;
+    entityStats.delegatorCount = 0;
     entityStats.firstToCloseBadgeCount = 0;
     entityStats.twentyEightDaysLaterBadgeCount = 0;
     entityStats.lastEraProcessed = toBigInt(0);
@@ -56,7 +60,17 @@ export function createOrLoadDelegator(id: string): Delegator {
   if (delegator == null) {
     delegator = new Delegator(id);
     delegator.uniqueDelegationCount = 0;
+    delegator.uniqueActiveDelegationCount = 0;
+    delegator.streakStartBlockNumber = toBigInt(-1);
     delegator.save();
+
+    let entityStats = createOrLoadEntityStats();
+    let delegatorCount = entityStats.delegatorCount + 1;
+    entityStats.delegatorCount = delegatorCount;
+    entityStats.save();
+
+    createOrLoadDelegatorCount(delegatorCount.toString(), delegator.id);
+  
   }
 
   return delegator as Delegator;
@@ -77,6 +91,21 @@ export function createOrLoadIndexerCount(
   return indexerCount as IndexerCount;
 }
 
+function createOrLoadDelegatorCount(
+  id: string,
+  delegator: string
+): DelegatorCount {
+  let delegatorCount = DelegatorCount.load(id);
+
+  if (delegatorCount == null) {
+    delegatorCount = new DelegatorCount(id);
+    delegatorCount.delegator = delegator;
+    delegatorCount.save();
+  }
+
+  return delegatorCount as DelegatorCount;
+}
+
 export function createOrLoadIndexerEra(
   indexerID: string,
   era: BigInt
@@ -94,6 +123,33 @@ export function createOrLoadIndexerEra(
   }
 
   return indexerEra as IndexerEra;
+}
+
+export function createOrLoadDelegatedStake(
+  delegatorId: string,
+  indexerId: string
+): DelegatedStake {
+  let id = delegatorId.concat("-").concat(indexerId);
+  let delegatedStake = DelegatedStake.load(id);
+
+  if (delegatedStake == null) {
+    delegatedStake = new DelegatedStake(id);
+    delegatedStake.delegator = delegatorId;
+    delegatedStake.indexer = indexerId;
+    delegatedStake.shares = toBigInt(0);
+    delegatedStake.save();
+  }
+
+  return delegatedStake as DelegatedStake;
+}
+
+export function delegatedStakeExists(
+  delegatorId: string,
+  indexerId: string
+): boolean {
+  let id = delegatorId.concat("-").concat(indexerId);
+  let delegatedStake = DelegatedStake.load(id);
+  return delegatedStake != null;
 }
 
 export function createAllocation(
@@ -152,7 +208,7 @@ export function createNeverSlashedBadge(
   return neverSlashedBadge as NeverSlashedBadge;
 }
 
-export function createDelegationNationBadge(delegator: Delegator): void {
+export function createDelegationNationBadge(delegator: Delegator, blockNumber: BigInt): void {
   let entityStats = createOrLoadEntityStats();
   let badgeDetail = createOrLoadBadgeDetail(
     "Delegation Nation",
@@ -162,11 +218,25 @@ export function createDelegationNationBadge(delegator: Delegator): void {
   );
   let delegationNationBadge = new DelegationNationBadge(delegator.id);
   delegationNationBadge.delegator = delegator.id;
-  delegationNationBadge.eraAwarded = entityStats.lastEraProcessed;
-  delegationNationBadge.id = badgeDetail.id;
+  delegationNationBadge.blockAwarded = blockNumber;
+  delegationNationBadge.badgeDetail = badgeDetail.id;
 
   delegationNationBadge.save();
 }
+
+export function createOrLoadDelegationStreakBadge(delegator: Delegator, startBlockNumber: BigInt): DelegationStreakBadge {
+  let badgeId = delegator.id.concat(startBlockNumber.toString());
+  let badge = DelegationStreakBadge.load(badgeId);
+  if (badge == null) {
+    badge = new DelegationStreakBadge(badgeId);
+    badge.delegator = delegator.id;
+    badge.startBlockNumber = startBlockNumber;
+    badge.lastCheckpointBlockNumber = startBlockNumber;
+    badge.save();
+  }
+  return badge as DelegationStreakBadge;
+}
+
 
 export function createFirstToCloseBadge(
   subgraphDeploymentID: string,

@@ -7,6 +7,7 @@ import {
   AllocationClosed,
   AllocationCreated,
   StakeDelegated,
+  StakeDelegatedLocked,
   StakeSlashed
 } from "../../generated/Staking/Staking";
 import {
@@ -14,6 +15,10 @@ import {
   processAllocationCreatedFor28DaysLaterBadge
 } from "../Badges/28DaysLater";
 import { processStakeDelegatedForDelegationNationBadge } from "../Badges/delegationNation";
+import { 
+  processStakeDelegatedForDelegationStreakBadge,
+  processStakeDelegatedLockedForDelegationStreakBadge 
+} from "../Badges/delegationStreak";
 import { processAllocationClosedForFirstToCloseBadge } from "../Badges/firstToClose";
 import { processStakeSlashedForNeverSlashedBadge } from "../Badges/neverSlashed";
 
@@ -66,7 +71,23 @@ export function handleAllocationClosed(event: AllocationClosed): void {
  *   uint256 shares
  */
 export function handleStakeDelegated(event: StakeDelegated): void {
-  processStakeDelegatedForDelegationNationBadge(event);
+  // can skip notifying DelegationNation code if streak badge notifies nation badge when unique delegations are found
+  //processStakeDelegatedForDelegationNationBadge(event);
+  processStakeDelegatedForDelegationStreakBadge(event);
+}
+
+/**
+ * @dev Emitted when `delegator` undelegated `tokens` to the `indexer`, tokens get
+ * locked for withdrawal after a period of time.
+ * Parameters:
+ *   address indexer
+ *   address delegator
+ *   uint256 tokens,
+ *   uint256 shares,
+ *   uint256 until
+ */
+export function handleStakeDelegatedLocked(event: StakeDelegatedLocked): void {
+  processStakeDelegatedLockedForDelegationStreakBadge(event);
 }
 
 /**

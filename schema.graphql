@@ -6,11 +6,13 @@ type EntityStats @entity {
   id: ID!
   "Number of indexers"
   indexerCount: Int!
+  "Number of delegators"
+  delegatorCount: Int!
   "Number of FirstToCloseBadge"
   firstToCloseBadgeCount: Int!
   "Number of twentyEightDaysLaterBadge"
   twentyEightDaysLaterBadgeCount: Int!
-  "Most recent Era processed"
+  "Most recent Era processed for Indexer badges"
   lastEraProcessed: BigInt!
 }
 
@@ -37,6 +39,16 @@ type IndexerCount @entity {
 }
 
 """
+Created when any delegator is instantiated to track order of delegators
+"""
+type DelegatorCount @entity {
+  "Numeric count of Delegator used during for loops"
+  id: ID!
+  "Associated delegator"
+  delegator: Delegator!
+}
+
+"""
 Metadata for the Indexer along with parameters and staking data
 """
 type Indexer @entity {
@@ -58,6 +70,10 @@ type Delegator @entity {
   id: ID!
   "Number of delegations with unique indexers"
   uniqueDelegationCount: Int!
+  "Number of active delegations with unique indexers"
+  uniqueActiveDelegationCount: Int!
+  "Block number when most recent delegation streak was started"
+  streakStartBlockNumber: BigInt!
 }
 
 """
@@ -66,6 +82,9 @@ Metadata for the Delegator
 type DelegatedStake @entity {
   "Delegator + Indexer"
   id: ID!
+  delegator: Delegator!
+  indexer: Indexer!
+  shares: BigInt!
 }
 
 """
@@ -115,8 +134,21 @@ Awarded to delegators who delegate to 3 or more indexers during any epoch
 type DelegationNationBadge @entity {
   id: ID! # SubgraphDeploymentId
   delegator: Delegator!
-  eraAwarded: BigInt!
+  blockAwarded: BigInt!
   badgeDetail: BadgeDetail!
+}
+
+"""
+Awarded to delegators who keep delegating over the course of at least 3 consecutive eras
+"""
+type DelegationStreakBadge @entity {
+  id: ID!   # {delegator}-{startBlockNumber}
+  delegator: Delegator!
+  startBlockNumber: BigInt!
+  blockAwarded: BigInt!   # ongoing: -1
+
+  # last block number this streak was validated. For finished streaks, value is identical to blockAwarded
+  lastCheckpointBlockNumber: BigInt! 
 }
 
 """

@@ -56,3 +56,5 @@ dataSources:
           handler: handleAllocationCreated
         - event: StakeDelegated(indexed address,indexed address,uint256,uint256)
           handler: handleStakeDelegated
+        - event: StakeDelegatedLocked(indexed address,indexed address,uint256,uint256,uint256)
+          handler: handleStakeDelegatedLocked
