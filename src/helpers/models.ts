@@ -39,6 +39,7 @@ export function createOrLoadIndexer(id: string): Indexer {
 
   if (indexer == null) {
     indexer = new Indexer(id);
+    indexer.ineligibleTwentyEightEpochsLaterBadgeCount = 0;
     indexer.isClosingAllocationLateCount = 0;
     indexer.twentyEightEpochsLaterBadgePercentage = zeroBD();
     indexer.save();
@@ -70,7 +71,6 @@ export function createOrLoadDelegator(id: string): Delegator {
     entityStats.save();
 
     createOrLoadDelegatorCount(delegatorCount.toString(), delegator.id);
-  
   }
 
   return delegator as Delegator;
