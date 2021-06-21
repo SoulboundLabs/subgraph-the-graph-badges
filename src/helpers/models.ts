@@ -232,6 +232,7 @@ export function createOrLoadDelegationStreakBadge(delegator: Delegator, startBlo
     badge.delegator = delegator.id;
     badge.startBlockNumber = startBlockNumber;
     badge.lastCheckpointBlockNumber = startBlockNumber;
+    badge.blockAwarded = toBigInt(-1);
     badge.save();
   }
   return badge as DelegationStreakBadge;
