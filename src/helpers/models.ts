@@ -259,6 +259,9 @@ export function createFirstToCloseBadge(
     firstToClose.eraAwarded = entityStats.lastEraProcessed;
     firstToClose.badgeDetail = badgeDetail.id;
     firstToClose.save();
+
+    entityStats.firstToCloseBadgeCount = entityStats.firstToCloseBadgeCount.plus(1);
+    entityStats.save();
   }
 }
 
