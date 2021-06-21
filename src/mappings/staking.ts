@@ -21,6 +21,7 @@ import {
 } from "../Badges/delegationStreak";
 import { processAllocationClosedForFirstToCloseBadge } from "../Badges/firstToClose";
 import { processStakeSlashedForNeverSlashedBadge } from "../Badges/neverSlashed";
+import { log } from '@graphprotocol/graph-ts'
 
 /**
  * @dev Emitted when `indexer` allocated `tokens` amount to `subgraphDeploymentID`
@@ -36,6 +37,7 @@ import { processStakeSlashedForNeverSlashedBadge } from "../Badges/neverSlashed"
  *   bytes32 metadata
  */
 export function handleAllocationCreated(event: AllocationCreated): void {
+  log.debug("AllocationCreated event found", []);
   processAllocationCreatedFor28DaysLaterBadge(event);
 }
 
@@ -57,6 +59,7 @@ export function handleAllocationCreated(event: AllocationCreated): void {
  *   bool isDelegator
  */
 export function handleAllocationClosed(event: AllocationClosed): void {
+  log.debug("AllocationClosed event found", []);
   processAllocationClosedForFirstToCloseBadge(event);
   processAllocationClosedFor28DaysLaterBadge(event);
 }
@@ -71,6 +74,7 @@ export function handleAllocationClosed(event: AllocationClosed): void {
  *   uint256 shares
  */
 export function handleStakeDelegated(event: StakeDelegated): void {
+  log.debug("StakeDelegated event found", []);
   // can skip notifying DelegationNation code if streak badge notifies nation badge when unique delegations are found
   //processStakeDelegatedForDelegationNationBadge(event);
   processStakeDelegatedForDelegationStreakBadge(event);
@@ -87,6 +91,7 @@ export function handleStakeDelegated(event: StakeDelegated): void {
  *   uint256 until
  */
 export function handleStakeDelegatedLocked(event: StakeDelegatedLocked): void {
+  log.debug("StakeDelegatedLocked event found", []);
   processStakeDelegatedLockedForDelegationStreakBadge(event);
 }
 
@@ -100,5 +105,6 @@ export function handleStakeDelegatedLocked(event: StakeDelegatedLocked): void {
  *   address beneficiary
  */
 export function handleStakeSlashed(event: StakeSlashed): void {
+  log.debug("StakeSlashed event found", []);
   processStakeSlashedForNeverSlashedBadge(event);
 }
