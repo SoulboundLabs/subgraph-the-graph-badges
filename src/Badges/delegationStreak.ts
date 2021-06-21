@@ -8,7 +8,7 @@ import {
 } from "../helpers/models";
 import { toBigInt } from "../helpers/typeConverter";
 import { processUniqueDelegation } from "../Badges/delegationNation";
-import { BigInt } from "@graphprotocol/graph-ts/index";
+import { log, BigInt } from '@graphprotocol/graph-ts'
 
 
 
@@ -38,6 +38,8 @@ function _processStakeDelegated(
   shares: BigInt,
   blockNumber: BigInt
 ): void {
+  log.debug("_processStakeDelegated: delegatorId - {}", [delegatorId]);
+
   let delegator = createOrLoadDelegator(delegatorId);
   if (delegator.streakStartBlockNumber.equals(toBigInt(-1))) {
     // start new streak
@@ -69,6 +71,8 @@ function _processStakeDelegatedLocked(
   shares: BigInt,
   blockNumber: BigInt
 ): void {
+  log.debug("_processStakeDelegatedLocked: delegatorId - {}", [delegatorId]);
+
   let delegator = createOrLoadDelegator(delegatorId);
   let delegatedStake = createOrLoadDelegatedStake(delegatorId, indexerId);
   delegatedStake.shares = delegatedStake.shares.minus(shares);
@@ -83,6 +87,8 @@ function _processStakeDelegatedLocked(
 }
 
 function _finalizeDelegationStreak(delegator: Delegator, blockNumber: BigInt): void {
+  log.debug("_finalizeDelegationStreak: streak ended for delegatorId - {}", [delegator.id]);
+
   let badge = createOrLoadDelegationStreakBadge(delegator, delegator.streakStartBlockNumber);
   badge.blockAwarded = blockNumber;
   badge.lastCheckpointBlockNumber = blockNumber;
