@@ -1,5 +1,5 @@
 """
-Singleton entity that tracks number of other entities/badges
+Singleton entity that tracks numbers and stats
 """
 type EntityStats @entity {
   "ID is set to 1"
@@ -8,10 +8,6 @@ type EntityStats @entity {
   indexerCount: Int!
   "Number of delegators"
   delegatorCount: Int!
-  "Number of FirstToCloseBadge"
-  firstToCloseBadgeCount: Int!
-  "Number of twentyEightDaysLaterBadge"
-  twentyEightDaysLaterBadgeCount: Int!
   "Most recent Era processed for Indexer badges"
   lastEraProcessed: BigInt!
 }
@@ -20,14 +16,14 @@ type EntityStats @entity {
 type BadgeDetail @entity {
   "Name of the badge"
   id: ID!
-  "Funny tagline for the badge"
-  tagline: ID!
   "Description of the badge"
   description: String!
   "IFTP link to the printable badge"
   image: String!
   "Multiplier for governance voting"
   votingWeightMultiplier: BigDecimal!
+  "Total count of badges"
+  badgeCount: Int!
 }
 
 """
@@ -103,7 +99,7 @@ type DelegatedStake @entity {
 Joins Indexer metrics over a particular era
 """
 type IndexerEra @entity {
-  id: ID!   # {indexer}-{era}
+  id: ID! # {indexer}-{era}
   indexer: Indexer!
   era: BigInt!
   isClosingAllocationLate: Boolean!
@@ -118,6 +114,7 @@ type FirstToCloseBadge @entity {
   indexer: String!
   eraAwarded: BigInt!
   badgeDetail: BadgeDetail!
+  badgeNumber: Int!
 }
 
 """
@@ -128,6 +125,7 @@ type NeverSlashedBadge @entity {
   indexer: String!
   eraAwarded: BigInt!
   badgeDetail: BadgeDetail!
+  badgeNumber: Int!
 }
 
 """
@@ -138,6 +136,7 @@ type TwentyEightEpochsLaterBadge @entity {
   indexer: Indexer!
   eraAwarded: BigInt!
   badgeDetail: BadgeDetail!
+  badgeNumber: Int!
 }
 
 """
@@ -148,20 +147,22 @@ type DelegationNationBadge @entity {
   delegator: Delegator!
   blockAwarded: BigInt!
   badgeDetail: BadgeDetail!
+  badgeNumber: Int!
 }
 
 """
 Awarded to delegators who keep delegating over the course of at least 3 consecutive eras
 """
 type DelegationStreakBadge @entity {
-  id: ID!   # {delegator}-{startBlockNumber}
+  id: ID! # {delegator}-{startBlockNumber}
   delegator: Delegator!
   startBlockNumber: BigInt!
-  blockAwarded: BigInt!   # ongoing: -1
+  blockAwarded: BigInt! # ongoing: -1
   badgeDetail: BadgeDetail!
+  badgeNumber: Int!
 
   # last block number this streak was validated. For finished streaks, value is identical to blockAwarded
-  lastCheckpointBlockNumber: BigInt! 
+  lastCheckpointBlockNumber: BigInt!
 }
 
 """
