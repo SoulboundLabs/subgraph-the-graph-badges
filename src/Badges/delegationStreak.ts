@@ -4,11 +4,13 @@ import {
   createOrLoadDelegator,
   createOrLoadDelegatedStake,
   createOrLoadDelegationStreakBadge,
-  delegatedStakeExists
+  delegatedStakeExists,
+  addVotingPower
 } from "../helpers/models";
 import { toBigInt } from "../helpers/typeConverter";
 import { processUniqueDelegation } from "../Badges/delegationNation";
-import { log, BigInt } from '@graphprotocol/graph-ts'
+import { log, BigInt, BigDecimal } from '@graphprotocol/graph-ts'
+import { BADGE_VOTE_WEIGHT_DELEGATION_STREAK } from "../helpers/constants";
 
 
 
@@ -93,5 +95,8 @@ function _finalizeDelegationStreak(delegator: Delegator, blockNumber: BigInt): v
   badge.blockAwarded = blockNumber;
   badge.lastCheckpointBlockNumber = blockNumber;
   badge.save();
+
+  // todo: add more voting power for longer delegation streaks
+  addVotingPower(delegator.id, BigDecimal.fromString(BADGE_VOTE_WEIGHT_DELEGATION_STREAK));
 }
 

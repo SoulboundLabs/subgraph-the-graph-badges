@@ -79,6 +79,16 @@ type Delegator @entity {
 }
 
 """
+Addresses that have been awarded badges that come with voting power
+"""
+type Voter @entity {
+  "Address of protocol worker"
+  id: ID!
+  "Cumulative voting power across all badges"
+  votingPower: BigDecimal!
+}
+
+"""
 Metadata for the Delegator
 """
 type DelegatedStake @entity {

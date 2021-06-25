@@ -13,7 +13,8 @@ import {
   IndexerCount,
   IndexerEra,
   NeverSlashedBadge,
-  TwentyEightEpochsLaterBadge
+  TwentyEightEpochsLaterBadge,
+  Voter
 } from "../../generated/schema";
 import { 
   zeroBD,
@@ -31,7 +32,12 @@ import {
   BADGE_TAGLINE_28_EPOCHS_LATER,
   BADGE_NAME_FIRST_TO_CLOSE,
   BADGE_DESCRIPTION_FIRST_TO_CLOSE,
-  BADGE_TAGLINE_FIRST_TO_CLOSE
+  BADGE_TAGLINE_FIRST_TO_CLOSE, 
+  BADGE_VOTE_WEIGHT_FIRST_TO_CLOSE, 
+  BADGE_VOTE_WEIGHT_DELEGATION_STREAK, 
+  BADGE_VOTE_WEIGHT_DELEGATION_NATION, 
+  BADGE_VOTE_WEIGHT_NEVER_SLASHED, 
+  BADGE_VOTE_WEIGHT_28_EPOCHS_LATER
 } from "./constants";
 import { toBigInt } from "./typeConverter";
 
@@ -183,6 +189,24 @@ export function createAllocation(
   }
 }
 
+export function addVotingPower(
+  voterId: string,
+  votingPower: BigDecimal
+): void {
+  if (votingPower.equals(zeroBD())) {
+    return;
+  }
+
+  let voter = Voter.load(voterId);
+  if (voter == null) {
+    voter = new Voter(voterId);
+    voter.votingPower = votingPower;
+  }
+  else {
+    voter.votingPower = voter.votingPower.plus(votingPower);
+  }
+}
+
 export function create28EpochsLaterBadge(
   indexerID: string,
   era: BigInt
@@ -192,14 +216,17 @@ export function create28EpochsLaterBadge(
     BADGE_NAME_28_EPOCHS_LATER,
     BADGE_DESCRIPTION_28_EPOCHS_LATER,
     BADGE_TAGLINE_28_EPOCHS_LATER,
+    BigDecimal.fromString(BADGE_VOTE_WEIGHT_28_EPOCHS_LATER),
     "NFT_GOES_HERE"
   );
+
 
   let twentyEightEpochsLater = new TwentyEightEpochsLaterBadge(badgeID);
   twentyEightEpochsLater.indexer = indexerID;
   twentyEightEpochsLater.eraAwarded = era;
   twentyEightEpochsLater.badgeDetail = badgeDetail.id;
   twentyEightEpochsLater.save();
+  addVotingPower(indexerID, badgeDetail.votingWeightMultiplier);
 
   return twentyEightEpochsLater as TwentyEightEpochsLaterBadge;
 }
@@ -213,6 +240,7 @@ export function createNeverSlashedBadge(
     BADGE_NAME_NEVER_SLASHED,
     BADGE_DESCRIPTION_NEVER_SLASHED,
     BADGE_TAGLINE_NEVER_SLASHED,
+    BigDecimal.fromString(BADGE_VOTE_WEIGHT_NEVER_SLASHED),
     "NFT_GOES_HERE"
   );
 
@@ -221,6 +249,7 @@ export function createNeverSlashedBadge(
   neverSlashedBadge.eraAwarded = currentEra;
   neverSlashedBadge.badgeDetail = badgeDetail.id;
   neverSlashedBadge.save();
+  addVotingPower(indexerID, badgeDetail.votingWeightMultiplier);
 
   return neverSlashedBadge as NeverSlashedBadge;
 }
@@ -230,6 +259,7 @@ export function createDelegationNationBadge(delegator: Delegator, blockNumber: B
     BADGE_NAME_DELEGATION_NATION,
     BADGE_DESCRIPTION_DELEGATION_NATION,
     BADGE_TAGLINE_DELEGATION_NATION,
+    BigDecimal.fromString(BADGE_VOTE_WEIGHT_DELEGATION_NATION),
     "NFT_GOES_HERE"
   );
   let delegationNationBadge = new DelegationNationBadge(delegator.id);
@@ -238,6 +268,7 @@ export function createDelegationNationBadge(delegator: Delegator, blockNumber: B
   delegationNationBadge.badgeDetail = badgeDetail.id;
 
   delegationNationBadge.save();
+  addVotingPower(delegator.id, badgeDetail.votingWeightMultiplier);
 }
 
 export function createOrLoadDelegationStreakBadge(delegator: Delegator, startBlockNumber: BigInt): DelegationStreakBadge {
@@ -245,6 +276,7 @@ export function createOrLoadDelegationStreakBadge(delegator: Delegator, startBlo
     BADGE_NAME_DELEGATION_STREAK,
     BADGE_DESCRIPTION_DELEGATION_STREAK,
     BADGE_TAGLINE_DELEGATION_STREAK,
+    BigDecimal.fromString(BADGE_VOTE_WEIGHT_DELEGATION_STREAK),
     "NFT_GOES_HERE"
   );
   let badgeId = delegator.id.concat(startBlockNumber.toString());
@@ -272,6 +304,7 @@ export function createFirstToCloseBadge(
     BADGE_NAME_FIRST_TO_CLOSE,
     BADGE_DESCRIPTION_FIRST_TO_CLOSE,
     BADGE_TAGLINE_FIRST_TO_CLOSE,
+    BigDecimal.fromString(BADGE_VOTE_WEIGHT_FIRST_TO_CLOSE),
     "NFT_GOES_HERE"
   );
   if (firstToClose == null) {
@@ -285,6 +318,8 @@ export function createFirstToCloseBadge(
 
     entityStats.firstToCloseBadgeCount = entityStats.firstToCloseBadgeCount + 1;
     entityStats.save();
+
+    addVotingPower(indexer, badgeDetail.votingWeightMultiplier);
   }
 }
 
@@ -292,6 +327,7 @@ export function createOrLoadBadgeDetail(
   name: string,
   description: string,
   tagline: string,
+  voteWeight: BigDecimal,
   image: string
 ): BadgeDetail {
   let badgeDetail = BadgeDetail.load(name);
@@ -301,7 +337,7 @@ export function createOrLoadBadgeDetail(
     badgeDetail.description = description;
     badgeDetail.tagline = tagline;
     badgeDetail.image = image;
-    badgeDetail.votingWeightMultiplier = BigDecimal.fromString("0.0");
+    badgeDetail.votingWeightMultiplier = voteWeight;
     badgeDetail.save();
   }
 
