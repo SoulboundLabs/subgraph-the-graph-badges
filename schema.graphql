@@ -26,6 +26,8 @@ type BadgeDetail @entity {
   description: String!
   "IFTP link to the printable badge"
   image: String!
+  "Multiplier for governance voting"
+  votingWeightMultiplier: BigDecimal!
 }
 
 """

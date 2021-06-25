@@ -1,4 +1,4 @@
-import { BigInt } from "@graphprotocol/graph-ts/index";
+import { BigDecimal, BigInt } from "@graphprotocol/graph-ts/index";
 import {
   Allocation,
   BadgeDetail,
@@ -15,7 +15,24 @@ import {
   NeverSlashedBadge,
   TwentyEightEpochsLaterBadge
 } from "../../generated/schema";
-import { zeroBD } from "./constants";
+import { 
+  zeroBD,
+  BADGE_NAME_DELEGATION_STREAK, 
+  BADGE_TAGLINE_DELEGATION_STREAK, 
+  BADGE_DESCRIPTION_DELEGATION_STREAK, 
+  BADGE_NAME_DELEGATION_NATION, 
+  BADGE_DESCRIPTION_DELEGATION_NATION, 
+  BADGE_TAGLINE_DELEGATION_NATION,
+  BADGE_NAME_NEVER_SLASHED,
+  BADGE_DESCRIPTION_NEVER_SLASHED,
+  BADGE_TAGLINE_NEVER_SLASHED,
+  BADGE_NAME_28_EPOCHS_LATER,
+  BADGE_DESCRIPTION_28_EPOCHS_LATER,
+  BADGE_TAGLINE_28_EPOCHS_LATER,
+  BADGE_NAME_FIRST_TO_CLOSE,
+  BADGE_DESCRIPTION_FIRST_TO_CLOSE,
+  BADGE_TAGLINE_FIRST_TO_CLOSE
+} from "./constants";
 import { toBigInt } from "./typeConverter";
 
 export function createOrLoadEntityStats(): EntityStats {
@@ -172,9 +189,9 @@ export function create28EpochsLaterBadge(
 ): TwentyEightEpochsLaterBadge {
   let badgeID = indexerID.concat("-").concat(era.toString());
   let badgeDetail = createOrLoadBadgeDetail(
-    "28 Epochs Later",
-    "Awarded to indexers who close their allocations every 28 epochs or fewer",
-    "Kid, you're only as good as your last closed allocation",
+    BADGE_NAME_28_EPOCHS_LATER,
+    BADGE_DESCRIPTION_28_EPOCHS_LATER,
+    BADGE_TAGLINE_28_EPOCHS_LATER,
     "NFT_GOES_HERE"
   );
 
@@ -193,9 +210,9 @@ export function createNeverSlashedBadge(
 ): NeverSlashedBadge {
   let badgeID = indexerID.concat("-").concat(currentEra.toString());
   let badgeDetail = createOrLoadBadgeDetail(
-    "Never Slashed",
-    "Awarded to indexers who are don't get slashed during a era",
-    "Freddy Kreuger would be proud",
+    BADGE_NAME_NEVER_SLASHED,
+    BADGE_DESCRIPTION_NEVER_SLASHED,
+    BADGE_TAGLINE_NEVER_SLASHED,
     "NFT_GOES_HERE"
   );
 
@@ -210,9 +227,9 @@ export function createNeverSlashedBadge(
 
 export function createDelegationNationBadge(delegator: Delegator, blockNumber: BigInt): void {
   let badgeDetail = createOrLoadBadgeDetail(
-    "Delegation Nation",
-    "Awarded to delegators who delegate to 3 or more indexers during any epoch",
-    "A seven nation army couldn't hold me back",
+    BADGE_NAME_DELEGATION_NATION,
+    BADGE_DESCRIPTION_DELEGATION_NATION,
+    BADGE_TAGLINE_DELEGATION_NATION,
     "NFT_GOES_HERE"
   );
   let delegationNationBadge = new DelegationNationBadge(delegator.id);
@@ -225,9 +242,9 @@ export function createDelegationNationBadge(delegator: Delegator, blockNumber: B
 
 export function createOrLoadDelegationStreakBadge(delegator: Delegator, startBlockNumber: BigInt): DelegationStreakBadge {
   let badgeDetail = createOrLoadBadgeDetail(
-    "Delegation Streak",
-    "Awarded to delegators who delegate > 0 for > 0 consecutive blocks",
-    "Eyes on the prize",
+    BADGE_NAME_DELEGATION_STREAK,
+    BADGE_DESCRIPTION_DELEGATION_STREAK,
+    BADGE_TAGLINE_DELEGATION_STREAK,
     "NFT_GOES_HERE"
   );
   let badgeId = delegator.id.concat(startBlockNumber.toString());
@@ -252,9 +269,9 @@ export function createFirstToCloseBadge(
   let entityStats = createOrLoadEntityStats();
   let firstToClose = FirstToCloseBadge.load(subgraphDeploymentID);
   let badgeDetail = createOrLoadBadgeDetail(
-    "First To Close",
-    "Awarded to indexers who are first to close an allocation for a subgraph",
-    "The early indexer gets the worm",
+    BADGE_NAME_FIRST_TO_CLOSE,
+    BADGE_DESCRIPTION_FIRST_TO_CLOSE,
+    BADGE_TAGLINE_FIRST_TO_CLOSE,
     "NFT_GOES_HERE"
   );
   if (firstToClose == null) {
@@ -284,6 +301,7 @@ export function createOrLoadBadgeDetail(
     badgeDetail.description = description;
     badgeDetail.tagline = tagline;
     badgeDetail.image = image;
+    badgeDetail.votingWeightMultiplier = BigDecimal.fromString("0.0");
     badgeDetail.save();
   }
 
