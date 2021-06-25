@@ -209,7 +209,6 @@ export function createNeverSlashedBadge(
 }
 
 export function createDelegationNationBadge(delegator: Delegator, blockNumber: BigInt): void {
-  let entityStats = createOrLoadEntityStats();
   let badgeDetail = createOrLoadBadgeDetail(
     "Delegation Nation",
     "Awarded to delegators who delegate to 3 or more indexers during any epoch",
@@ -225,6 +224,12 @@ export function createDelegationNationBadge(delegator: Delegator, blockNumber: B
 }
 
 export function createOrLoadDelegationStreakBadge(delegator: Delegator, startBlockNumber: BigInt): DelegationStreakBadge {
+  let badgeDetail = createOrLoadBadgeDetail(
+    "Delegation Streak",
+    "Awarded to delegators who delegate > 0 for > 0 consecutive blocks",
+    "Eyes on the prize",
+    "NFT_GOES_HERE"
+  );
   let badgeId = delegator.id.concat(startBlockNumber.toString());
   let badge = DelegationStreakBadge.load(badgeId);
   if (badge == null) {
@@ -233,6 +238,7 @@ export function createOrLoadDelegationStreakBadge(delegator: Delegator, startBlo
     badge.startBlockNumber = startBlockNumber;
     badge.lastCheckpointBlockNumber = startBlockNumber;
     badge.blockAwarded = toBigInt(-1);
+    badge.badgeDetail = badgeDetail.id;
     badge.save();
   }
   return badge as DelegationStreakBadge;
@@ -260,7 +266,7 @@ export function createFirstToCloseBadge(
     firstToClose.badgeDetail = badgeDetail.id;
     firstToClose.save();
 
-    entityStats.firstToCloseBadgeCount = entityStats.firstToCloseBadgeCount.plus(1);
+    entityStats.firstToCloseBadgeCount = entityStats.firstToCloseBadgeCount + 1;
     entityStats.save();
   }
 }
