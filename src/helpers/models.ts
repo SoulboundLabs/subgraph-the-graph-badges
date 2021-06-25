@@ -13,25 +13,20 @@ import {
   IndexerCount,
   IndexerEra,
   NeverSlashedBadge,
-  TwentyEightEpochsLaterBadge
+  TwentyEightEpochsLaterBadge,
 } from "../../generated/schema";
-import { 
-  zeroBD,
-  BADGE_NAME_DELEGATION_STREAK, 
-  BADGE_TAGLINE_DELEGATION_STREAK, 
-  BADGE_DESCRIPTION_DELEGATION_STREAK, 
-  BADGE_NAME_DELEGATION_NATION, 
-  BADGE_DESCRIPTION_DELEGATION_NATION, 
-  BADGE_TAGLINE_DELEGATION_NATION,
-  BADGE_NAME_NEVER_SLASHED,
-  BADGE_DESCRIPTION_NEVER_SLASHED,
-  BADGE_TAGLINE_NEVER_SLASHED,
-  BADGE_NAME_28_EPOCHS_LATER,
+import {
   BADGE_DESCRIPTION_28_EPOCHS_LATER,
-  BADGE_TAGLINE_28_EPOCHS_LATER,
-  BADGE_NAME_FIRST_TO_CLOSE,
+  BADGE_DESCRIPTION_DELEGATION_NATION,
+  BADGE_DESCRIPTION_DELEGATION_STREAK,
   BADGE_DESCRIPTION_FIRST_TO_CLOSE,
-  BADGE_TAGLINE_FIRST_TO_CLOSE
+  BADGE_DESCRIPTION_NEVER_SLASHED,
+  BADGE_NAME_28_EPOCHS_LATER,
+  BADGE_NAME_DELEGATION_NATION,
+  BADGE_NAME_DELEGATION_STREAK,
+  BADGE_NAME_FIRST_TO_CLOSE,
+  BADGE_NAME_NEVER_SLASHED,
+  zeroBD,
 } from "./constants";
 import { toBigInt } from "./typeConverter";
 
@@ -42,8 +37,6 @@ export function createOrLoadEntityStats(): EntityStats {
     entityStats = new EntityStats("1");
     entityStats.indexerCount = 0;
     entityStats.delegatorCount = 0;
-    entityStats.firstToCloseBadgeCount = 0;
-    entityStats.twentyEightDaysLaterBadgeCount = 0;
     entityStats.lastEraProcessed = toBigInt(0);
     entityStats.save();
   }
@@ -191,14 +184,15 @@ export function create28EpochsLaterBadge(
   let badgeDetail = createOrLoadBadgeDetail(
     BADGE_NAME_28_EPOCHS_LATER,
     BADGE_DESCRIPTION_28_EPOCHS_LATER,
-    BADGE_TAGLINE_28_EPOCHS_LATER,
     "NFT_GOES_HERE"
   );
+  incrementBadgeCount(badgeDetail.id);
 
   let twentyEightEpochsLater = new TwentyEightEpochsLaterBadge(badgeID);
   twentyEightEpochsLater.indexer = indexerID;
   twentyEightEpochsLater.eraAwarded = era;
   twentyEightEpochsLater.badgeDetail = badgeDetail.id;
+  twentyEightEpochsLater.badgeNumber = badgeDetail.badgeCount;
   twentyEightEpochsLater.save();
 
   return twentyEightEpochsLater as TwentyEightEpochsLaterBadge;
@@ -212,55 +206,65 @@ export function createNeverSlashedBadge(
   let badgeDetail = createOrLoadBadgeDetail(
     BADGE_NAME_NEVER_SLASHED,
     BADGE_DESCRIPTION_NEVER_SLASHED,
-    BADGE_TAGLINE_NEVER_SLASHED,
     "NFT_GOES_HERE"
   );
+  incrementBadgeCount(badgeDetail.id);
 
   let neverSlashedBadge = new NeverSlashedBadge(badgeID);
   neverSlashedBadge.indexer = indexerID;
   neverSlashedBadge.eraAwarded = currentEra;
   neverSlashedBadge.badgeDetail = badgeDetail.id;
+  neverSlashedBadge.badgeNumber = badgeDetail.badgeCount;
   neverSlashedBadge.save();
 
   return neverSlashedBadge as NeverSlashedBadge;
 }
 
-export function createDelegationNationBadge(delegator: Delegator, blockNumber: BigInt): void {
+export function createDelegationNationBadge(
+  delegator: Delegator,
+  blockNumber: BigInt
+): void {
   let badgeDetail = createOrLoadBadgeDetail(
     BADGE_NAME_DELEGATION_NATION,
     BADGE_DESCRIPTION_DELEGATION_NATION,
-    BADGE_TAGLINE_DELEGATION_NATION,
     "NFT_GOES_HERE"
   );
+  incrementBadgeCount(badgeDetail.id);
+
   let delegationNationBadge = new DelegationNationBadge(delegator.id);
   delegationNationBadge.delegator = delegator.id;
   delegationNationBadge.blockAwarded = blockNumber;
   delegationNationBadge.badgeDetail = badgeDetail.id;
-
+  delegationNationBadge.badgeNumber = badgeDetail.badgeCount;
   delegationNationBadge.save();
 }
 
-export function createOrLoadDelegationStreakBadge(delegator: Delegator, startBlockNumber: BigInt): DelegationStreakBadge {
+export function createOrLoadDelegationStreakBadge(
+  delegator: Delegator,
+  startBlockNumber: BigInt
+): DelegationStreakBadge {
   let badgeDetail = createOrLoadBadgeDetail(
     BADGE_NAME_DELEGATION_STREAK,
     BADGE_DESCRIPTION_DELEGATION_STREAK,
-    BADGE_TAGLINE_DELEGATION_STREAK,
     "NFT_GOES_HERE"
   );
   let badgeId = delegator.id.concat(startBlockNumber.toString());
   let badge = DelegationStreakBadge.load(badgeId);
   if (badge == null) {
+    incrementBadgeCount(badgeDetail.id);
+
     badge = new DelegationStreakBadge(badgeId);
     badge.delegator = delegator.id;
     badge.startBlockNumber = startBlockNumber;
     badge.lastCheckpointBlockNumber = startBlockNumber;
     badge.blockAwarded = toBigInt(-1);
     badge.badgeDetail = badgeDetail.id;
+    badge.badgeNumber = badgeDetail.badgeCount;
+
     badge.save();
   }
   return badge as DelegationStreakBadge;
 }
-
 
 export function createFirstToCloseBadge(
   subgraphDeploymentID: string,
@@ -271,27 +275,25 @@ export function createFirstToCloseBadge(
   let badgeDetail = createOrLoadBadgeDetail(
     BADGE_NAME_FIRST_TO_CLOSE,
     BADGE_DESCRIPTION_FIRST_TO_CLOSE,
-    BADGE_TAGLINE_FIRST_TO_CLOSE,
     "NFT_GOES_HERE"
   );
   if (firstToClose == null) {
+    incrementBadgeCount(badgeDetail.id);
+
     // FirstToCloseBadge hasn't been awarded for this subgraphDeploymentId yet
     // Award to this indexer
     firstToClose = new FirstToCloseBadge(subgraphDeploymentID);
     firstToClose.indexer = indexer;
     firstToClose.eraAwarded = entityStats.lastEraProcessed;
     firstToClose.badgeDetail = badgeDetail.id;
+    firstToClose.badgeNumber = badgeDetail.badgeCount;
     firstToClose.save();
-
-    entityStats.firstToCloseBadgeCount = entityStats.firstToCloseBadgeCount + 1;
-    entityStats.save();
   }
 }
 
 export function createOrLoadBadgeDetail(
   name: string,
   description: string,
-  tagline: string,
   image: string
 ): BadgeDetail {
   let badgeDetail = BadgeDetail.load(name);
@@ -299,11 +301,19 @@ export function createOrLoadBadgeDetail(
   if (badgeDetail == null) {
     badgeDetail = new BadgeDetail(name);
     badgeDetail.description = description;
-    badgeDetail.tagline = tagline;
     badgeDetail.image = image;
     badgeDetail.votingWeightMultiplier = BigDecimal.fromString("0.0");
+    badgeDetail.badgeCount = 0;
     badgeDetail.save();
   }
+
+  return badgeDetail as BadgeDetail;
+}
+
+export function incrementBadgeCount(badgeName: string): BadgeDetail {
+  let badgeDetail = BadgeDetail.load(badgeName);
+  badgeDetail.badgeCount = badgeDetail.badgeCount + 1;
+  badgeDetail.save();
 
   return badgeDetail as BadgeDetail;
 }
