@@ -353,6 +353,7 @@ export function createOrLoadBadgeDetail(
     badgeDetail.description = description;
     badgeDetail.image = image;
     badgeDetail.votingWeightMultiplier = voteWeight;
+    badgeDetail.badgeCount = 0;
     badgeDetail.save();
   }
 
