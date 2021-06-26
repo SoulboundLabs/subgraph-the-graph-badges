@@ -36,7 +36,8 @@ import {
   BADGE_VOTE_WEIGHT_DELEGATION_STREAK, 
   BADGE_VOTE_WEIGHT_DELEGATION_NATION, 
   BADGE_VOTE_WEIGHT_NEVER_SLASHED, 
-  BADGE_VOTE_WEIGHT_28_EPOCHS_LATER
+  BADGE_VOTE_WEIGHT_28_EPOCHS_LATER,
+  zeroBD
 } from "./constants";
 import { toBigInt } from "./typeConverter";
 
@@ -332,7 +333,6 @@ export function createFirstToCloseBadge(
     firstToClose.badgeNumber = badgeDetail.badgeCount;
     firstToClose.save();
 
-    entityStats.firstToCloseBadgeCount = entityStats.firstToCloseBadgeCount + 1;
     entityStats.save();
 
     addVotingPower(indexer, badgeDetail.votingWeightMultiplier);
