@@ -202,6 +202,7 @@ export function addVotingPower(
   else {
     voter.votingPower = voter.votingPower.plus(votingPower);
   }
+  voter.save();
 }
 
 export function create28EpochsLaterBadge(
