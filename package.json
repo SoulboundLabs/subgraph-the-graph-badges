@@ -13,14 +13,22 @@
     "codegen": "graph codegen",
     "build": "graph build",
     "deploy": "graph deploy badgeth-dao/the-graph-badges --ipfs https://api.thegraph.com/ipfs/ --node https://api.thegraph.com/deploy/",
+    "deploy-dev": "graph deploy hardforksoverknives/badgeth-dev --ipfs https://api.thegraph.com/ipfs/ --node https://api.thegraph.com/deploy/",
     "deploy-local": "graph deploy badgeth-dao/the-graph-badges --ipfs http://localhost:5001 --node http://127.0.0.1:8020",
     "prep:addresses:mainnet": "ts-node config/mainnetAddressScript.ts && mustache ./config/generatedAddresses.json ./config/addresses.template.ts > ./config/addresses.ts",
     "prep:addresses:rinkeby": "ts-node config/rinkebyAddressScript.ts && mustache ./config/generatedAddresses.json ./config/addresses.template.ts > ./config/addresses.ts",
     "prepare:rinkeby": "yarn prep:addresses:rinkeby && mustache ./config/generatedAddresses.json subgraph.template.yaml > subgraph.yaml && graph codegen --output-dir src/types/",
-    "prepare:mainnet": "yarn prep:addresses:mainnet && mustache ./config/generatedAddresses.json subgraph.template.yaml > subgraph.yaml && graph codegen --output-dir src/types/"
+    "prepare:mainnet": "yarn prep:addresses:mainnet && mustache ./config/generatedAddresses.json subgraph.template.yaml > subgraph.yaml && graph codegen --output-dir src/types/",
+    "prepare": "husky install"
+  },
+  "lint-staged": {
+    "**/*.ts": "prettier --write --ignore-unknown"
   },
   "devDependencies": {
     "@graphprotocol/graph-cli": "graphprotocol/graph-cli",
+    "husky": "^6.0.0",
+    "lint-staged": "^11.0.0",
+    "prettier": "^2.3.0",
     "typescript": "^4.1.5"
   },
   "dependencies": {

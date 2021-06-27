@@ -1,16 +1,188 @@
-# type StandardBadgeProps @entity {
-#   id: ID!
-#   awardedAtBlock: BigInt
-# }
-
-type FirstToCloseBadge @entity {
-  id: ID!   # SubgraphDeploymentId
-  # badge: StandardBadgeProps!
-  indexer: Bytes!
-  awardedAtBlock: BigInt!
+"""
+Singleton entity that tracks numbers and stats
+"""
+type EntityStats @entity {
+  "ID is set to 1"
+  id: ID!
+  "Number of indexers"
+  indexerCount: Int!
+  "Number of delegators"
+  delegatorCount: Int!
+  "Most recent Era processed for Indexer badges"
+  lastEraProcessed: BigInt!
 }
 
-# type SlashedBadge @entity {
-#   id: ID!   # <indexrAddress>-<SlashedBadgeNumber>
+"Additional details related to the badge"
+type BadgeDetail @entity {
+  "Name of the badge"
+  id: ID!
+  "Description of the badge"
+  description: String!
+  "IFTP link to the printable badge"
+  image: String!
+  "Multiplier for governance voting"
+  votingWeightMultiplier: BigDecimal!
+  "Total count of badges"
+  badgeCount: Int!
+}
 
-# }
+"""
+Created when any indexer is instantiated to track order of indexers
+"""
+type IndexerCount @entity {
+  "Numeric count of Indexer used during for loops"
+  id: ID!
+  "Associated indexer"
+  indexer: Indexer!
+}
+
+"""
+Created when any delegator is instantiated to track order of delegators
+"""
+type DelegatorCount @entity {
+  "Numeric count of Delegator used during for loops"
+  id: ID!
+  "Associated delegator"
+  delegator: Delegator!
+}
+
+"""
+Metadata for the Indexer along with parameters and staking data
+"""
+type Indexer @entity {
+  "Address of Indexer"
+  id: ID!
+  "Percentage of eras indexer has earned badge"
+  twentyEightEpochsLaterBadgePercentage: BigDecimal!
+  "Number of eras indexer failed to earn badge"
+  ineligibleTwentyEightEpochsLaterBadgeCount: Int!
+  "Number of times indexer failed to earn badge"
+  isClosingAllocationLateCount: Int!
+}
+
+"""
+Metadata for the Delegator
+"""
+type Delegator @entity {
+  "Address of Delegator"
+  id: ID!
+  "Number of delegations with unique indexers"
+  uniqueDelegationCount: Int!
+  "Number of active delegations with unique indexers"
+  uniqueActiveDelegationCount: Int!
+  "Block number when most recent delegation streak was started"
+  streakStartBlockNumber: BigInt!
+}
+
+"""
+Addresses that have been awarded badges that come with voting power
+"""
+type Voter @entity {
+  "Address of protocol worker"
+  id: ID!
+  "Cumulative voting power across all badges"
+  votingPower: BigDecimal!
+}
+
+"""
+Metadata for the Delegator
+"""
+type DelegatedStake @entity {
+  "Delegator + Indexer"
+  id: ID!
+  delegator: Delegator!
+  indexer: Indexer!
+  shares: BigInt!
+}
+
+"""
+Joins Indexer metrics over a particular era
+"""
+type IndexerEra @entity {
+  id: ID! # {indexer}-{era}
+  indexer: Indexer!
+  era: BigInt!
+  isClosingAllocationLate: Boolean!
+  isSlashed: Boolean!
+}
+
+"""
+Awarded to indexers who are first to close an allocation for a subgraph
+"""
+type FirstToCloseBadge @entity {
+  id: ID! # SubgraphDeploymentId
+  indexer: String!
+  eraAwarded: BigInt!
+  badgeDetail: BadgeDetail!
+  badgeNumber: Int!
+}
+
+"""
+Awarded to indexers who are don't get slashed during a era
+"""
+type NeverSlashedBadge @entity {
+  id: ID! # SubgraphDeploymentId
+  indexer: String!
+  eraAwarded: BigInt!
+  badgeDetail: BadgeDetail!
+  badgeNumber: Int!
+}
+
+"""
+Awarded to indexers who close their allocations every 28 epochs or fewer
+"""
+type TwentyEightEpochsLaterBadge @entity {
+  id: ID! # indexerID-era
+  indexer: Indexer!
+  eraAwarded: BigInt!
+  badgeDetail: BadgeDetail!
+  badgeNumber: Int!
+}
+
+"""
+Awarded to delegators who delegate to 3 or more indexers during any epoch
+"""
+type DelegationNationBadge @entity {
+  id: ID! # SubgraphDeploymentId
+  delegator: Delegator!
+  blockAwarded: BigInt!
+  badgeDetail: BadgeDetail!
+  badgeNumber: Int!
+}
+
+"""
+Awarded to delegators who keep delegating over the course of at least 3 consecutive eras
+"""
+type DelegationStreakBadge @entity {
+  id: ID! # {delegator}-{startBlockNumber}
+  delegator: Delegator!
+  startBlockNumber: BigInt!
+  blockAwarded: BigInt! # ongoing: -1
+  badgeDetail: BadgeDetail!
+  badgeNumber: Int!
+
+  # last block number this streak was validated. For finished streaks, value is identical to blockAwarded
+  lastCheckpointBlockNumber: BigInt!
+}
+
+"""
+A state channel Allocation representing a single Indexer-SubgraphDeployment stake
+"""
+type Allocation @entity {
+  "Channel Address"
+  id: ID!
+  "Epoch this allocation was created"
+  createdAtEpoch: BigInt!
+  "Epoch this allocation was closed in"
+  closedAtEpoch: BigInt
+  "Indexer that created this Allocation"
+  indexer: Indexer!
+}
+
+enum AllocationStatus {
+  Null # == indexer == address(0)
+  Active # == not Null && tokens > 0 #
+  Closed # == Active && closedAtEpoch != 0. Still can collect, while you are waiting to be finalized. a.k.a settling
+  Finalized # == Closing && closedAtEpoch + channelDisputeEpochs > now(). Note, the subgraph has no way to return this value. it is implied
+  Claimed # == not Null && tokens == 0 - i.e. finalized, and all tokens withdrawn
+}

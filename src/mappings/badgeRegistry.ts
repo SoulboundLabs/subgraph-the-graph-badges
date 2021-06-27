@@ -2,7 +2,7 @@ import {
   BadgeAdded,
   BadgeMinted,
   BadgeRecipientAdded,
-  BadgeRecipientDisputed,
+  BadgeRecipientDisputed
 } from "../types/BadgeRegistry/BadgeRegistry";
 
 /**
