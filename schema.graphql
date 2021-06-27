@@ -12,7 +12,26 @@ type EntityStats @entity {
   lastEraProcessed: BigInt!
 }
 
-"Additional details related to the badge"
+"""
+The badge that is awarded to winner
+"""
+type BadgeAward @entity {
+  id: ID!
+  "Address of the winner"
+  winner: String!
+  "Era in which the badge was awarded"
+  eraAwarded: BigInt
+  "If era not available, award block number"
+  blockAwarded: BigInt
+  "Additional details about the badge"
+  badgeDetail: BadgeDetail!
+  "Number in which the badge was awarded"
+  badgeNumber: Int!
+}
+
+"""
+Additional details related to the badge
+"""
 type BadgeDetail @entity {
   "Name of the badge"
   id: ID!
@@ -104,50 +123,6 @@ type IndexerEra @entity {
   era: BigInt!
   isClosingAllocationLate: Boolean!
   isSlashed: Boolean!
-}
-
-"""
-Awarded to indexers who are first to close an allocation for a subgraph
-"""
-type FirstToCloseBadge @entity {
-  id: ID! # SubgraphDeploymentId
-  indexer: String!
-  eraAwarded: BigInt!
-  badgeDetail: BadgeDetail!
-  badgeNumber: Int!
-}
-
-"""
-Awarded to indexers who are don't get slashed during a era
-"""
-type NeverSlashedBadge @entity {
-  id: ID! # SubgraphDeploymentId
-  indexer: String!
-  eraAwarded: BigInt!
-  badgeDetail: BadgeDetail!
-  badgeNumber: Int!
-}
-
-"""
-Awarded to indexers who close their allocations every 28 epochs or fewer
-"""
-type TwentyEightEpochsLaterBadge @entity {
-  id: ID! # indexerID-era
-  indexer: Indexer!
-  eraAwarded: BigInt!
-  badgeDetail: BadgeDetail!
-  badgeNumber: Int!
-}
-
-"""
-Awarded to delegators who delegate to 3 or more indexers during any epoch
-"""
-type DelegationNationBadge @entity {
-  id: ID! # SubgraphDeploymentId
-  delegator: Delegator!
-  blockAwarded: BigInt!
-  badgeDetail: BadgeDetail!
-  badgeNumber: Int!
 }
 
 """

@@ -1,20 +1,17 @@
 import { BigDecimal, BigInt } from "@graphprotocol/graph-ts/index";
 import {
   Allocation,
+  BadgeAward,
   BadgeDetail,
   DelegatedStake,
-  DelegationNationBadge,
   DelegationStreakBadge,
   Delegator,
   DelegatorCount,
   EntityStats,
-  FirstToCloseBadge,
   Indexer,
   IndexerCount,
   IndexerEra,
-  NeverSlashedBadge,
-  TwentyEightEpochsLaterBadge,
-  Voter
+  Voter,
 } from "../../generated/schema";
 import {
   BADGE_DESCRIPTION_28_EPOCHS_LATER,
@@ -27,17 +24,17 @@ import {
   BADGE_NAME_DELEGATION_STREAK,
   BADGE_NAME_FIRST_TO_CLOSE,
   BADGE_NAME_NEVER_SLASHED,
-  BADGE_TAGLINE_FIRST_TO_CLOSE, 
   BADGE_TAGLINE_28_EPOCHS_LATER,
-  BADGE_TAGLINE_NEVER_SLASHED,
   BADGE_TAGLINE_DELEGATION_NATION,
   BADGE_TAGLINE_DELEGATION_STREAK,
-  BADGE_VOTE_WEIGHT_FIRST_TO_CLOSE, 
-  BADGE_VOTE_WEIGHT_DELEGATION_STREAK, 
-  BADGE_VOTE_WEIGHT_DELEGATION_NATION, 
-  BADGE_VOTE_WEIGHT_NEVER_SLASHED, 
+  BADGE_TAGLINE_FIRST_TO_CLOSE,
+  BADGE_TAGLINE_NEVER_SLASHED,
   BADGE_VOTE_WEIGHT_28_EPOCHS_LATER,
-  zeroBD
+  BADGE_VOTE_WEIGHT_DELEGATION_NATION,
+  BADGE_VOTE_WEIGHT_DELEGATION_STREAK,
+  BADGE_VOTE_WEIGHT_FIRST_TO_CLOSE,
+  BADGE_VOTE_WEIGHT_NEVER_SLASHED,
+  zeroBD,
 } from "./constants";
 import { toBigInt } from "./typeConverter";
 
@@ -187,10 +184,7 @@ export function createAllocation(
   }
 }
 
-export function addVotingPower(
-  voterId: string,
-  votingPower: BigDecimal
-): void {
+export function addVotingPower(voterId: string, votingPower: BigDecimal): void {
   if (votingPower.equals(zeroBD())) {
     return;
   }
@@ -199,8 +193,7 @@ export function addVotingPower(
   if (voter == null) {
     voter = new Voter(voterId);
     voter.votingPower = votingPower;
-  }
-  else {
+  } else {
     voter.votingPower = voter.votingPower.plus(votingPower);
   }
   voter.save();
@@ -209,8 +202,11 @@ export function addVotingPower(
 export function create28EpochsLaterBadge(
   indexerID: string,
   era: BigInt
-): TwentyEightEpochsLaterBadge {
-  let badgeID = indexerID.concat("-").concat(era.toString());
+): BadgeAward {
+  let badgeID = BADGE_NAME_28_EPOCHS_LATER.concat("-")
+    .concat(indexerID)
+    .concat("-")
+    .concat(era.toString());
   let badgeDetail = createOrLoadBadgeDetail(
     BADGE_NAME_28_EPOCHS_LATER,
     BADGE_DESCRIPTION_28_EPOCHS_LATER,
@@ -220,23 +216,25 @@ export function create28EpochsLaterBadge(
   );
   incrementBadgeCount(badgeDetail.id);
 
-
-  let twentyEightEpochsLater = new TwentyEightEpochsLaterBadge(badgeID);
-  twentyEightEpochsLater.indexer = indexerID;
+  let twentyEightEpochsLater = new BadgeAward(badgeID);
+  twentyEightEpochsLater.winner = indexerID;
   twentyEightEpochsLater.eraAwarded = era;
   twentyEightEpochsLater.badgeDetail = badgeDetail.id;
   twentyEightEpochsLater.badgeNumber = badgeDetail.badgeCount;
   twentyEightEpochsLater.save();
   addVotingPower(indexerID, badgeDetail.votingWeightMultiplier);
 
-  return twentyEightEpochsLater as TwentyEightEpochsLaterBadge;
+  return twentyEightEpochsLater as BadgeAward;
 }
 
 export function createNeverSlashedBadge(
   indexerID: string,
   currentEra: BigInt
-): NeverSlashedBadge {
-  let badgeID = indexerID.concat("-").concat(currentEra.toString());
+): BadgeAward {
+  let badgeID = BADGE_NAME_NEVER_SLASHED.concat("-")
+    .concat(indexerID)
+    .concat("-")
+    .concat(currentEra.toString());
   let badgeDetail = createOrLoadBadgeDetail(
     BADGE_NAME_NEVER_SLASHED,
     BADGE_DESCRIPTION_NEVER_SLASHED,
@@ -246,15 +244,15 @@ export function createNeverSlashedBadge(
   );
   incrementBadgeCount(badgeDetail.id);
 
-  let neverSlashedBadge = new NeverSlashedBadge(badgeID);
-  neverSlashedBadge.indexer = indexerID;
+  let neverSlashedBadge = new BadgeAward(badgeID);
+  neverSlashedBadge.winner = indexerID;
   neverSlashedBadge.eraAwarded = currentEra;
   neverSlashedBadge.badgeDetail = badgeDetail.id;
   neverSlashedBadge.badgeNumber = badgeDetail.badgeCount;
   neverSlashedBadge.save();
   addVotingPower(indexerID, badgeDetail.votingWeightMultiplier);
 
-  return neverSlashedBadge as NeverSlashedBadge;
+  return neverSlashedBadge as BadgeAward;
 }
 
 export function createDelegationNationBadge(
@@ -270,8 +268,8 @@ export function createDelegationNationBadge(
   );
   incrementBadgeCount(badgeDetail.id);
 
-  let delegationNationBadge = new DelegationNationBadge(delegator.id);
-  delegationNationBadge.delegator = delegator.id;
+  let delegationNationBadge = new BadgeAward(delegator.id);
+  delegationNationBadge.winner = delegator.id;
   delegationNationBadge.blockAwarded = blockNumber;
   delegationNationBadge.badgeDetail = badgeDetail.id;
   delegationNationBadge.badgeNumber = badgeDetail.badgeCount;
@@ -313,7 +311,7 @@ export function createFirstToCloseBadge(
   indexer: string
 ): void {
   let entityStats = createOrLoadEntityStats();
-  let firstToClose = FirstToCloseBadge.load(subgraphDeploymentID);
+  let firstToClose = BadgeAward.load(subgraphDeploymentID);
   let badgeDetail = createOrLoadBadgeDetail(
     BADGE_NAME_FIRST_TO_CLOSE,
     BADGE_DESCRIPTION_FIRST_TO_CLOSE,
@@ -326,8 +324,8 @@ export function createFirstToCloseBadge(
 
     // FirstToCloseBadge hasn't been awarded for this subgraphDeploymentId yet
     // Award to this indexer
-    firstToClose = new FirstToCloseBadge(subgraphDeploymentID);
-    firstToClose.indexer = indexer;
+    firstToClose = new BadgeAward(subgraphDeploymentID);
+    firstToClose.winner = indexer;
     firstToClose.eraAwarded = entityStats.lastEraProcessed;
     firstToClose.badgeDetail = badgeDetail.id;
     firstToClose.badgeNumber = badgeDetail.badgeCount;
