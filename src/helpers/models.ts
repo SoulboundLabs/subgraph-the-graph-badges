@@ -1,20 +1,17 @@
-import { BigDecimal, BigInt } from "@graphprotocol/graph-ts/index";
+import { BigDecimal, BigInt, ethereum } from "@graphprotocol/graph-ts/index";
 import {
   Allocation,
+  BadgeAward,
   BadgeDetail,
   DelegatedStake,
-  DelegationNationBadge,
   DelegationStreakBadge,
   Delegator,
   DelegatorCount,
   EntityStats,
-  FirstToCloseBadge,
   Indexer,
   IndexerCount,
   IndexerEra,
-  NeverSlashedBadge,
-  TwentyEightEpochsLaterBadge,
-  Voter
+  Voter,
 } from "../../generated/schema";
 import {
   BADGE_DESCRIPTION_28_EPOCHS_LATER,
@@ -27,17 +24,12 @@ import {
   BADGE_NAME_DELEGATION_STREAK,
   BADGE_NAME_FIRST_TO_CLOSE,
   BADGE_NAME_NEVER_SLASHED,
-  BADGE_TAGLINE_FIRST_TO_CLOSE, 
-  BADGE_TAGLINE_28_EPOCHS_LATER,
-  BADGE_TAGLINE_NEVER_SLASHED,
-  BADGE_TAGLINE_DELEGATION_NATION,
-  BADGE_TAGLINE_DELEGATION_STREAK,
-  BADGE_VOTE_WEIGHT_FIRST_TO_CLOSE, 
-  BADGE_VOTE_WEIGHT_DELEGATION_STREAK, 
-  BADGE_VOTE_WEIGHT_DELEGATION_NATION, 
-  BADGE_VOTE_WEIGHT_NEVER_SLASHED, 
   BADGE_VOTE_WEIGHT_28_EPOCHS_LATER,
-  zeroBD
+  BADGE_VOTE_WEIGHT_DELEGATION_NATION,
+  BADGE_VOTE_WEIGHT_DELEGATION_STREAK,
+  BADGE_VOTE_WEIGHT_FIRST_TO_CLOSE,
+  BADGE_VOTE_WEIGHT_NEVER_SLASHED,
+  zeroBD,
 } from "./constants";
 import { toBigInt } from "./typeConverter";
 
@@ -187,10 +179,7 @@ export function createAllocation(
   }
 }
 
-export function addVotingPower(
-  voterId: string,
-  votingPower: BigDecimal
-): void {
+export function addVotingPower(voterId: string, votingPower: BigDecimal): void {
   if (votingPower.equals(zeroBD())) {
     return;
   }
@@ -199,8 +188,7 @@ export function addVotingPower(
   if (voter == null) {
     voter = new Voter(voterId);
     voter.votingPower = votingPower;
-  }
-  else {
+  } else {
     voter.votingPower = voter.votingPower.plus(votingPower);
   }
   voter.save();
@@ -208,53 +196,52 @@ export function addVotingPower(
 
 export function create28EpochsLaterBadge(
   indexerID: string,
-  era: BigInt
-): TwentyEightEpochsLaterBadge {
+  era: BigInt,
+  block: ethereum.Block
+): BadgeAward {
   let badgeID = indexerID.concat("-").concat(era.toString());
   let badgeDetail = createOrLoadBadgeDetail(
     BADGE_NAME_28_EPOCHS_LATER,
     BADGE_DESCRIPTION_28_EPOCHS_LATER,
-    BADGE_TAGLINE_28_EPOCHS_LATER,
     BigDecimal.fromString(BADGE_VOTE_WEIGHT_28_EPOCHS_LATER),
     "NFT_GOES_HERE"
   );
   incrementBadgeCount(badgeDetail.id);
 
-
-  let twentyEightEpochsLater = new TwentyEightEpochsLaterBadge(badgeID);
-  twentyEightEpochsLater.indexer = indexerID;
-  twentyEightEpochsLater.eraAwarded = era;
+  let twentyEightEpochsLater = new BadgeAward(badgeID);
+  twentyEightEpochsLater.winner = indexerID;
+  twentyEightEpochsLater.blockAwarded = block.number;
   twentyEightEpochsLater.badgeDetail = badgeDetail.id;
   twentyEightEpochsLater.badgeNumber = badgeDetail.badgeCount;
   twentyEightEpochsLater.save();
   addVotingPower(indexerID, badgeDetail.votingWeightMultiplier);
 
-  return twentyEightEpochsLater as TwentyEightEpochsLaterBadge;
+  return twentyEightEpochsLater as BadgeAward;
 }
 
 export function createNeverSlashedBadge(
   indexerID: string,
-  currentEra: BigInt
-): NeverSlashedBadge {
+  currentEra: BigInt,
+  block: ethereum.Block
+): BadgeAward {
   let badgeID = indexerID.concat("-").concat(currentEra.toString());
   let badgeDetail = createOrLoadBadgeDetail(
     BADGE_NAME_NEVER_SLASHED,
     BADGE_DESCRIPTION_NEVER_SLASHED,
-    BADGE_TAGLINE_NEVER_SLASHED,
     BigDecimal.fromString(BADGE_VOTE_WEIGHT_NEVER_SLASHED),
     "NFT_GOES_HERE"
   );
   incrementBadgeCount(badgeDetail.id);
 
-  let neverSlashedBadge = new NeverSlashedBadge(badgeID);
-  neverSlashedBadge.indexer = indexerID;
-  neverSlashedBadge.eraAwarded = currentEra;
+  let neverSlashedBadge = new BadgeAward(badgeID);
+  neverSlashedBadge.winner = indexerID;
+  neverSlashedBadge.blockAwarded = block.number;
   neverSlashedBadge.badgeDetail = badgeDetail.id;
   neverSlashedBadge.badgeNumber = badgeDetail.badgeCount;
   neverSlashedBadge.save();
   addVotingPower(indexerID, badgeDetail.votingWeightMultiplier);
 
-  return neverSlashedBadge as NeverSlashedBadge;
+  return neverSlashedBadge as BadgeAward;
 }
 
 export function createDelegationNationBadge(
@@ -264,14 +251,13 @@ export function createDelegationNationBadge(
   let badgeDetail = createOrLoadBadgeDetail(
     BADGE_NAME_DELEGATION_NATION,
     BADGE_DESCRIPTION_DELEGATION_NATION,
-    BADGE_TAGLINE_DELEGATION_NATION,
     BigDecimal.fromString(BADGE_VOTE_WEIGHT_DELEGATION_NATION),
     "NFT_GOES_HERE"
   );
   incrementBadgeCount(badgeDetail.id);
 
-  let delegationNationBadge = new DelegationNationBadge(delegator.id);
-  delegationNationBadge.delegator = delegator.id;
+  let delegationNationBadge = new BadgeAward(delegator.id);
+  delegationNationBadge.winner = delegator.id;
   delegationNationBadge.blockAwarded = blockNumber;
   delegationNationBadge.badgeDetail = badgeDetail.id;
   delegationNationBadge.badgeNumber = badgeDetail.badgeCount;
@@ -286,7 +272,6 @@ export function createOrLoadDelegationStreakBadge(
   let badgeDetail = createOrLoadBadgeDetail(
     BADGE_NAME_DELEGATION_STREAK,
     BADGE_DESCRIPTION_DELEGATION_STREAK,
-    BADGE_TAGLINE_DELEGATION_STREAK,
     BigDecimal.fromString(BADGE_VOTE_WEIGHT_DELEGATION_STREAK),
     "NFT_GOES_HERE"
   );
@@ -310,14 +295,14 @@ export function createOrLoadDelegationStreakBadge(
 
 export function createFirstToCloseBadge(
   subgraphDeploymentID: string,
-  indexer: string
+  indexer: string,
+  block: ethereum.Block
 ): void {
   let entityStats = createOrLoadEntityStats();
-  let firstToClose = FirstToCloseBadge.load(subgraphDeploymentID);
+  let firstToClose = BadgeAward.load(subgraphDeploymentID);
   let badgeDetail = createOrLoadBadgeDetail(
     BADGE_NAME_FIRST_TO_CLOSE,
     BADGE_DESCRIPTION_FIRST_TO_CLOSE,
-    BADGE_TAGLINE_FIRST_TO_CLOSE,
     BigDecimal.fromString(BADGE_VOTE_WEIGHT_FIRST_TO_CLOSE),
     "NFT_GOES_HERE"
   );
@@ -326,9 +311,9 @@ export function createFirstToCloseBadge(
 
     // FirstToCloseBadge hasn't been awarded for this subgraphDeploymentId yet
     // Award to this indexer
-    firstToClose = new FirstToCloseBadge(subgraphDeploymentID);
-    firstToClose.indexer = indexer;
-    firstToClose.eraAwarded = entityStats.lastEraProcessed;
+    firstToClose = new BadgeAward(subgraphDeploymentID);
+    firstToClose.winner = indexer;
+    firstToClose.blockAwarded = block.number;
     firstToClose.badgeDetail = badgeDetail.id;
     firstToClose.badgeNumber = badgeDetail.badgeCount;
     firstToClose.save();
@@ -342,7 +327,6 @@ export function createFirstToCloseBadge(
 export function createOrLoadBadgeDetail(
   name: string,
   description: string,
-  tagline: string,
   voteWeight: BigDecimal,
   image: string
 ): BadgeDetail {
