@@ -50,10 +50,10 @@ dataSources:
         - name: GraphTokenLockWallet
           file: ./node_modules/@graphprotocol/contracts/dist/abis/GraphToken.json
       eventHandlers:
-        - event: AllocationClosed(indexed address,indexed bytes32,uint256,uint256,indexed address,uint256,address,bytes32,bool)
-          handler: handleAllocationClosed
         - event: AllocationCreated(indexed address,indexed bytes32,uint256,uint256,indexed address,bytes32)
           handler: handleAllocationCreated
+        - event: AllocationClosed(indexed address,indexed bytes32,uint256,uint256,indexed address,uint256,address,bytes32,bool)
+          handler: handleAllocationClosed
         - event: StakeDelegated(indexed address,indexed address,uint256,uint256)
           handler: handleStakeDelegated
         - event: StakeDelegatedLocked(indexed address,indexed address,uint256,uint256,uint256)

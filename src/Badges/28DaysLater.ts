@@ -17,7 +17,7 @@ import { toBigInt } from "../helpers/typeConverter";
 export function processAllocationCreatedFor28DaysLaterBadge(
   event: AllocationCreated
 ): void {
-  _processAllocationCreated(
+  createAllocation(
     event.params.allocationID.toHexString(),
     event.params.indexer.toHexString(),
     event.params.epoch
@@ -28,7 +28,7 @@ export function processAllocationCreatedFor28DaysLaterBadge(
 export function processAllocationClosedFor28DaysLaterBadge(
   event: AllocationClosed
 ): void {
-  _processAllocationClosed(
+  checkClosingAllocationLate(
     event.params.allocationID.toHexString(),
     event.params.indexer.toHexString(),
     event.params.epoch
@@ -52,15 +52,7 @@ export function process28DaysLaterBadgesForEra(
   }
 }
 
-function _processAllocationCreated(
-  allocationId: string,
-  indexerId: string,
-  currentEpoch: BigInt
-): void {
-  createAllocation(allocationId, indexerId, currentEpoch);
-}
-
-function _processAllocationClosed(
+function checkClosingAllocationLate(
   allocationId: string,
   indexerId: string,
   currentEpoch: BigInt

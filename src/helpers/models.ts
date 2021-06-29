@@ -199,7 +199,10 @@ export function create28EpochsLaterBadge(
   era: BigInt,
   block: ethereum.Block
 ): BadgeAward {
-  let badgeID = indexerID.concat("-").concat(era.toString());
+  let badgeID = BADGE_NAME_28_EPOCHS_LATER.concat("-")
+    .concat(indexerID)
+    .concat("-")
+    .concat(era.toString());
   let badgeDetail = createOrLoadBadgeDetail(
     BADGE_NAME_28_EPOCHS_LATER,
     BADGE_DESCRIPTION_28_EPOCHS_LATER,
@@ -224,7 +227,10 @@ export function createNeverSlashedBadge(
   currentEra: BigInt,
   block: ethereum.Block
 ): BadgeAward {
-  let badgeID = indexerID.concat("-").concat(currentEra.toString());
+  let badgeID = BADGE_NAME_NEVER_SLASHED.concat("-")
+    .concat(indexerID)
+    .concat("-")
+    .concat(currentEra.toString());
   let badgeDetail = createOrLoadBadgeDetail(
     BADGE_NAME_NEVER_SLASHED,
     BADGE_DESCRIPTION_NEVER_SLASHED,
@@ -248,6 +254,10 @@ export function createDelegationNationBadge(
   delegator: Delegator,
   blockNumber: BigInt
 ): void {
+  let badgeID = BADGE_NAME_DELEGATION_NATION.concat("-")
+    .concat(delegator.id)
+    .concat("-")
+    .concat(blockNumber.toString());
   let badgeDetail = createOrLoadBadgeDetail(
     BADGE_NAME_DELEGATION_NATION,
     BADGE_DESCRIPTION_DELEGATION_NATION,
@@ -256,7 +266,7 @@ export function createDelegationNationBadge(
   );
   incrementBadgeCount(badgeDetail.id);
 
-  let delegationNationBadge = new BadgeAward(delegator.id);
+  let delegationNationBadge = new BadgeAward(badgeID);
   delegationNationBadge.winner = delegator.id;
   delegationNationBadge.blockAwarded = blockNumber;
   delegationNationBadge.badgeDetail = badgeDetail.id;
@@ -275,7 +285,10 @@ export function createOrLoadDelegationStreakBadge(
     BigDecimal.fromString(BADGE_VOTE_WEIGHT_DELEGATION_STREAK),
     "NFT_GOES_HERE"
   );
-  let badgeId = delegator.id.concat(startBlockNumber.toString());
+  let badgeId = BADGE_NAME_DELEGATION_STREAK.concat("-")
+    .concat(delegator.id)
+    .concat("-")
+    .concat(startBlockNumber.toString());
   let badge = DelegationStreakBadge.load(badgeId);
   if (badge == null) {
     incrementBadgeCount(badgeDetail.id);
@@ -298,6 +311,8 @@ export function createFirstToCloseBadge(
   indexer: string,
   block: ethereum.Block
 ): void {
+  let badgeID =
+    BADGE_NAME_FIRST_TO_CLOSE.concat("-").concat(subgraphDeploymentID);
   let entityStats = createOrLoadEntityStats();
   let firstToClose = BadgeAward.load(subgraphDeploymentID);
   let badgeDetail = createOrLoadBadgeDetail(
@@ -311,7 +326,7 @@ export function createFirstToCloseBadge(
 
     // FirstToCloseBadge hasn't been awarded for this subgraphDeploymentId yet
     // Award to this indexer
-    firstToClose = new BadgeAward(subgraphDeploymentID);
+    firstToClose = new BadgeAward(badgeID);
     firstToClose.winner = indexer;
     firstToClose.blockAwarded = block.number;
     firstToClose.badgeDetail = badgeDetail.id;
