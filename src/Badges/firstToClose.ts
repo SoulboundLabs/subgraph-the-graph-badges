@@ -8,6 +8,7 @@ export function processAllocationClosedForFirstToCloseBadge(
 ): void {
   createFirstToCloseBadge(
     event.params.subgraphDeploymentID.toHexString(),
-    event.params.indexer.toHexString()
+    event.params.indexer.toHexString(),
+    event.block
   );
 }

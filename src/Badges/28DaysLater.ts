@@ -1,8 +1,8 @@
-import { BigInt } from "@graphprotocol/graph-ts/index";
+import { BigInt, ethereum } from "@graphprotocol/graph-ts/index";
 import { Allocation, IndexerCount } from "../../generated/schema";
 import {
   AllocationClosed,
-  AllocationCreated
+  AllocationCreated,
 } from "../../generated/Staking/Staking";
 import { epochToEra, transitionToNewEraIfNeeded } from "../helpers/epoch";
 import {
@@ -10,7 +10,7 @@ import {
   createAllocation,
   createOrLoadEntityStats,
   createOrLoadIndexer,
-  createOrLoadIndexerEra
+  createOrLoadIndexerEra,
 } from "../helpers/models";
 import { toBigInt } from "../helpers/typeConverter";
 
@@ -22,7 +22,7 @@ export function processAllocationCreatedFor28DaysLaterBadge(
     event.params.indexer.toHexString(),
     event.params.epoch
   );
-  transitionToNewEraIfNeeded(event.params.epoch);
+  transitionToNewEraIfNeeded(event.params.epoch, event.block);
 }
 
 export function processAllocationClosedFor28DaysLaterBadge(
@@ -33,10 +33,13 @@ export function processAllocationClosedFor28DaysLaterBadge(
     event.params.indexer.toHexString(),
     event.params.epoch
   );
-  transitionToNewEraIfNeeded(event.params.epoch);
+  transitionToNewEraIfNeeded(event.params.epoch, event.block);
 }
 
-export function process28DaysLaterBadgesForEra(era: BigInt): void {
+export function process28DaysLaterBadgesForEra(
+  era: BigInt,
+  block: ethereum.Block
+): void {
   // finalize any "pending" badges from this epoch
   let entityStats = createOrLoadEntityStats();
 
@@ -44,7 +47,7 @@ export function process28DaysLaterBadgesForEra(era: BigInt): void {
     let indexerCount = IndexerCount.load(i.toString());
     let indexerEra = createOrLoadIndexerEra(indexerCount.indexer, era);
     if (!indexerEra.isClosingAllocationLate) {
-      create28EpochsLaterBadge(indexerCount.indexer, era);
+      create28EpochsLaterBadge(indexerCount.indexer, era, block);
     }
   }
 }
