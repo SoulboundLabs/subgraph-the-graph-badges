@@ -8,3 +8,4 @@ src/types/
 yarn-error.log
 config/addresses.ts
 config/generatedAddresses.json
+subgraph.yaml
