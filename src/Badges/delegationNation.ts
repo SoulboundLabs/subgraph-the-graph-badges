@@ -29,7 +29,7 @@ export function processStakeDelegatedForDelegationNationBadge(
 }
 
 // DelegationNation shares Delegator entities with DelegationStreak. createOrLoadDelegatedStake
-// can call this function to piggy-back on listeners from .
+// can call this function to piggy-back on listeners
 export function processUniqueDelegation(delegator: Delegator, blockNumber: BigInt): void {
   delegator.uniqueDelegationCount = delegator.uniqueDelegationCount + 1;
   delegator.save();
