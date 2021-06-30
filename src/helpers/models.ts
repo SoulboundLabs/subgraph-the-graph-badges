@@ -279,18 +279,18 @@ export function createOrLoadDelegationStreakBadge(
   delegator: Delegator,
   startBlockNumber: BigInt
 ): DelegationStreakBadge {
-  let badgeDetail = createOrLoadBadgeDetail(
-    BADGE_NAME_DELEGATION_STREAK,
-    BADGE_DESCRIPTION_DELEGATION_STREAK,
-    BigDecimal.fromString(BADGE_VOTE_WEIGHT_DELEGATION_STREAK),
-    "NFT_GOES_HERE"
-  );
   let badgeId = BADGE_NAME_DELEGATION_STREAK.concat("-")
     .concat(delegator.id)
     .concat("-")
     .concat(startBlockNumber.toString());
   let badge = DelegationStreakBadge.load(badgeId);
   if (badge == null) {
+    let badgeDetail = createOrLoadBadgeDetail(
+      BADGE_NAME_DELEGATION_STREAK,
+      BADGE_DESCRIPTION_DELEGATION_STREAK,
+      BigDecimal.fromString(BADGE_VOTE_WEIGHT_DELEGATION_STREAK),
+      "NFT_GOES_HERE"
+    );
     incrementBadgeCount(badgeDetail.id);
 
     badge = new DelegationStreakBadge(badgeId);
@@ -311,17 +311,17 @@ export function createFirstToCloseBadge(
   indexer: string,
   block: ethereum.Block
 ): void {
-  let badgeID =
-    BADGE_NAME_FIRST_TO_CLOSE.concat("-").concat(subgraphDeploymentID);
-  let entityStats = createOrLoadEntityStats();
   let firstToClose = BadgeAward.load(subgraphDeploymentID);
-  let badgeDetail = createOrLoadBadgeDetail(
-    BADGE_NAME_FIRST_TO_CLOSE,
-    BADGE_DESCRIPTION_FIRST_TO_CLOSE,
-    BigDecimal.fromString(BADGE_VOTE_WEIGHT_FIRST_TO_CLOSE),
-    "NFT_GOES_HERE"
-  );
   if (firstToClose == null) {
+    let badgeID =
+      BADGE_NAME_FIRST_TO_CLOSE.concat("-").concat(subgraphDeploymentID);
+    let entityStats = createOrLoadEntityStats();
+    let badgeDetail = createOrLoadBadgeDetail(
+      BADGE_NAME_FIRST_TO_CLOSE,
+      BADGE_DESCRIPTION_FIRST_TO_CLOSE,
+      BigDecimal.fromString(BADGE_VOTE_WEIGHT_FIRST_TO_CLOSE),
+      "NFT_GOES_HERE"
+    );
     incrementBadgeCount(badgeDetail.id);
 
     // FirstToCloseBadge hasn't been awarded for this subgraphDeploymentId yet
