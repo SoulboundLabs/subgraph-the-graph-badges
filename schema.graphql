@@ -122,50 +122,6 @@ type IndexerEra @entity {
 }
 
 """
-Awarded to indexers who are first to close an allocation for a subgraph
-"""
-type FirstToCloseBadge @entity {
-  id: ID! # SubgraphDeploymentId
-  indexer: String!
-  eraAwarded: BigInt!
-  badgeDetail: BadgeDetail!
-  badgeNumber: Int!
-}
-
-"""
-Awarded to indexers who are don't get slashed during a era
-"""
-type NeverSlashedBadge @entity {
-  id: ID! # SubgraphDeploymentId
-  indexer: String!
-  eraAwarded: BigInt!
-  badgeDetail: BadgeDetail!
-  badgeNumber: Int!
-}
-
-"""
-Awarded to indexers who close their allocations every 28 epochs or fewer
-"""
-type TwentyEightEpochsLaterBadge @entity {
-  id: ID! # indexerID-era
-  indexer: Indexer!
-  eraAwarded: BigInt!
-  badgeDetail: BadgeDetail!
-  badgeNumber: Int!
-}
-
-"""
-Awarded to delegators who delegate to 3 or more indexers during any epoch
-"""
-type DelegationNationBadge @entity {
-  id: ID! # SubgraphDeploymentId
-  delegator: Delegator!
-  blockAwarded: BigInt!
-  badgeDetail: BadgeDetail!
-  badgeNumber: Int!
-}
-
-"""
 Awarded to delegators who keep delegating over the course of at least 3 consecutive eras
 """
 type DelegationStreakBadge @entity {
