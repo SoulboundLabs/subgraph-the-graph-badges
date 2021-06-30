@@ -30,7 +30,6 @@ export function processNeverSlashedBadgesForEra(
   era: BigInt,
   block: ethereum.Block
 ): void {
-  // todo: finalize any "pending" badges from this epoch
   let entityStats = createOrLoadEntityStats();
   for (let i = 1; i < entityStats.indexerCount; i++) {
     let indexerCount = IndexerCount.load(i.toString());
