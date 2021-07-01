@@ -39,6 +39,17 @@ type BadgeDetail @entity {
   votingWeightMultiplier: BigDecimal!
   "Total count of badges"
   badgeCount: Int!
+  "URL slug for the frontend"
+  urlHandle: String!
+  "Associated protocol for the badge"
+  protocol: Protocol!
+}
+
+type Protocol @entity {
+  "Name of the protocol"
+  id: ID!
+  "URL slug for the frontend"
+  urlHandle: String!
 }
 
 """

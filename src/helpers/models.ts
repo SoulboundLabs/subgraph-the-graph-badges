@@ -11,6 +11,7 @@ import {
   Indexer,
   IndexerCount,
   IndexerEra,
+  Protocol,
   Voter,
 } from "../../generated/schema";
 import {
@@ -24,11 +25,18 @@ import {
   BADGE_NAME_DELEGATION_STREAK,
   BADGE_NAME_FIRST_TO_CLOSE,
   BADGE_NAME_NEVER_SLASHED,
+  BADGE_URL_HANDLE_28_EPOCHS_LATER,
+  BADGE_URL_HANDLE_DELEGATION_NATION,
+  BADGE_URL_HANDLE_DELEGATION_STREAK,
+  BADGE_URL_HANDLE_FIRST_TO_CLOSE,
+  BADGE_URL_HANDLE_NEVER_SLASHED,
   BADGE_VOTE_WEIGHT_28_EPOCHS_LATER,
   BADGE_VOTE_WEIGHT_DELEGATION_NATION,
   BADGE_VOTE_WEIGHT_DELEGATION_STREAK,
   BADGE_VOTE_WEIGHT_FIRST_TO_CLOSE,
   BADGE_VOTE_WEIGHT_NEVER_SLASHED,
+  PROTOCOL_NAME_THE_GRAPH,
+  PROTOCOL_URL_HANDLE_THE_GRAPH,
   zeroBD,
 } from "./constants";
 import { toBigInt } from "./typeConverter";
@@ -205,6 +213,7 @@ export function create28EpochsLaterBadge(
     .concat(era.toString());
   let badgeDetail = createOrLoadBadgeDetail(
     BADGE_NAME_28_EPOCHS_LATER,
+    BADGE_URL_HANDLE_28_EPOCHS_LATER,
     BADGE_DESCRIPTION_28_EPOCHS_LATER,
     BigDecimal.fromString(BADGE_VOTE_WEIGHT_28_EPOCHS_LATER),
     "NFT_GOES_HERE"
@@ -233,6 +242,7 @@ export function createNeverSlashedBadge(
     .concat(currentEra.toString());
   let badgeDetail = createOrLoadBadgeDetail(
     BADGE_NAME_NEVER_SLASHED,
+    BADGE_URL_HANDLE_NEVER_SLASHED,
     BADGE_DESCRIPTION_NEVER_SLASHED,
     BigDecimal.fromString(BADGE_VOTE_WEIGHT_NEVER_SLASHED),
     "NFT_GOES_HERE"
@@ -260,6 +270,7 @@ export function createDelegationNationBadge(
     .concat(blockNumber.toString());
   let badgeDetail = createOrLoadBadgeDetail(
     BADGE_NAME_DELEGATION_NATION,
+    BADGE_URL_HANDLE_DELEGATION_NATION,
     BADGE_DESCRIPTION_DELEGATION_NATION,
     BigDecimal.fromString(BADGE_VOTE_WEIGHT_DELEGATION_NATION),
     "NFT_GOES_HERE"
@@ -287,6 +298,7 @@ export function createOrLoadDelegationStreakBadge(
   if (badge == null) {
     let badgeDetail = createOrLoadBadgeDetail(
       BADGE_NAME_DELEGATION_STREAK,
+      BADGE_URL_HANDLE_DELEGATION_STREAK,
       BADGE_DESCRIPTION_DELEGATION_STREAK,
       BigDecimal.fromString(BADGE_VOTE_WEIGHT_DELEGATION_STREAK),
       "NFT_GOES_HERE"
@@ -318,6 +330,7 @@ export function createFirstToCloseBadge(
     let entityStats = createOrLoadEntityStats();
     let badgeDetail = createOrLoadBadgeDetail(
       BADGE_NAME_FIRST_TO_CLOSE,
+      BADGE_URL_HANDLE_FIRST_TO_CLOSE,
       BADGE_DESCRIPTION_FIRST_TO_CLOSE,
       BigDecimal.fromString(BADGE_VOTE_WEIGHT_FIRST_TO_CLOSE),
       "NFT_GOES_HERE"
@@ -342,17 +355,23 @@ export function createFirstToCloseBadge(
 export function createOrLoadBadgeDetail(
   name: string,
   description: string,
+  urlHandle: string,
   voteWeight: BigDecimal,
   image: string
 ): BadgeDetail {
   let badgeDetail = BadgeDetail.load(name);
 
   if (badgeDetail == null) {
+    let protocol = createOrLoadTheGraphProtocol();
+
     badgeDetail = new BadgeDetail(name);
+    badgeDetail.protocol = protocol.id;
     badgeDetail.description = description;
     badgeDetail.image = image;
+    badgeDetail.urlHandle = urlHandle;
     badgeDetail.votingWeightMultiplier = voteWeight;
     badgeDetail.badgeCount = 0;
+
     badgeDetail.save();
   }
 
@@ -365,4 +384,16 @@ export function incrementBadgeCount(badgeName: string): BadgeDetail {
   badgeDetail.save();
 
   return badgeDetail as BadgeDetail;
+}
+
+export function createOrLoadTheGraphProtocol(): Protocol {
+  let badgeDetail = Protocol.load(PROTOCOL_NAME_THE_GRAPH);
+
+  if (badgeDetail == null) {
+    badgeDetail = new Protocol(PROTOCOL_NAME_THE_GRAPH);
+    badgeDetail.urlHandle = PROTOCOL_URL_HANDLE_THE_GRAPH;
+    badgeDetail.save();
+  }
+
+  return badgeDetail as Protocol;
 }
