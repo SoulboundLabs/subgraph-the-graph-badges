@@ -22,13 +22,13 @@ type BadgeAward @entity {
   "Block number in which badge was awarded"
   blockAwarded: BigInt!
   "Additional details about the badge"
-  badgeDetail: BadgeDetail!
+  definition: BadgeDefinition!
   "Number in which the badge was awarded"
   badgeNumber: Int!
 }
 
 "Additional details related to the badge"
-type BadgeDetail @entity {
+type BadgeDefinition @entity {
   "Name of the badge"
   id: ID!
   "Description of the badge"
@@ -140,7 +140,7 @@ type DelegationStreakBadge @entity {
   delegator: Delegator!
   startBlockNumber: BigInt!
   blockAwarded: BigInt! # ongoing: -1
-  badgeDetail: BadgeDetail!
+  definition: BadgeDefinition!
   badgeNumber: Int!
 
   # last block number this streak was validated. For finished streaks, value is identical to blockAwarded

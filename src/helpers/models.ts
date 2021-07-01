@@ -2,7 +2,7 @@ import { BigDecimal, BigInt, ethereum } from "@graphprotocol/graph-ts/index";
 import {
   Allocation,
   BadgeAward,
-  BadgeDetail,
+  BadgeDefinition,
   DelegatedStake,
   DelegationStreakBadge,
   Delegator,
@@ -211,22 +211,22 @@ export function create28EpochsLaterBadge(
     .concat(indexerID)
     .concat("-")
     .concat(era.toString());
-  let badgeDetail = createOrLoadBadgeDetail(
+  let badgeDefinition = createOrLoadBadgeDefinition(
     BADGE_NAME_28_EPOCHS_LATER,
     BADGE_URL_HANDLE_28_EPOCHS_LATER,
     BADGE_DESCRIPTION_28_EPOCHS_LATER,
     BigDecimal.fromString(BADGE_VOTE_WEIGHT_28_EPOCHS_LATER),
     "NFT_GOES_HERE"
   );
-  incrementBadgeCount(badgeDetail.id);
+  incrementBadgeCount(badgeDefinition.id);
 
   let twentyEightEpochsLater = new BadgeAward(badgeID);
   twentyEightEpochsLater.winner = indexerID;
   twentyEightEpochsLater.blockAwarded = block.number;
-  twentyEightEpochsLater.badgeDetail = badgeDetail.id;
-  twentyEightEpochsLater.badgeNumber = badgeDetail.badgeCount;
+  twentyEightEpochsLater.definition = badgeDefinition.id;
+  twentyEightEpochsLater.badgeNumber = badgeDefinition.badgeCount;
   twentyEightEpochsLater.save();
-  addVotingPower(indexerID, badgeDetail.votingWeightMultiplier);
+  addVotingPower(indexerID, badgeDefinition.votingWeightMultiplier);
 
   return twentyEightEpochsLater as BadgeAward;
 }
@@ -240,22 +240,22 @@ export function createNeverSlashedBadge(
     .concat(indexerID)
     .concat("-")
     .concat(currentEra.toString());
-  let badgeDetail = createOrLoadBadgeDetail(
+  let badgeDefinition = createOrLoadBadgeDefinition(
     BADGE_NAME_NEVER_SLASHED,
     BADGE_URL_HANDLE_NEVER_SLASHED,
     BADGE_DESCRIPTION_NEVER_SLASHED,
     BigDecimal.fromString(BADGE_VOTE_WEIGHT_NEVER_SLASHED),
     "NFT_GOES_HERE"
   );
-  incrementBadgeCount(badgeDetail.id);
+  incrementBadgeCount(badgeDefinition.id);
 
   let neverSlashedBadge = new BadgeAward(badgeID);
   neverSlashedBadge.winner = indexerID;
   neverSlashedBadge.blockAwarded = block.number;
-  neverSlashedBadge.badgeDetail = badgeDetail.id;
-  neverSlashedBadge.badgeNumber = badgeDetail.badgeCount;
+  neverSlashedBadge.definition = badgeDefinition.id;
+  neverSlashedBadge.badgeNumber = badgeDefinition.badgeCount;
   neverSlashedBadge.save();
-  addVotingPower(indexerID, badgeDetail.votingWeightMultiplier);
+  addVotingPower(indexerID, badgeDefinition.votingWeightMultiplier);
 
   return neverSlashedBadge as BadgeAward;
 }
@@ -268,22 +268,22 @@ export function createDelegationNationBadge(
     .concat(delegator.id)
     .concat("-")
     .concat(blockNumber.toString());
-  let badgeDetail = createOrLoadBadgeDetail(
+  let badgeDefinition = createOrLoadBadgeDefinition(
     BADGE_NAME_DELEGATION_NATION,
     BADGE_URL_HANDLE_DELEGATION_NATION,
     BADGE_DESCRIPTION_DELEGATION_NATION,
     BigDecimal.fromString(BADGE_VOTE_WEIGHT_DELEGATION_NATION),
     "NFT_GOES_HERE"
   );
-  incrementBadgeCount(badgeDetail.id);
+  incrementBadgeCount(badgeDefinition.id);
 
   let delegationNationBadge = new BadgeAward(badgeID);
   delegationNationBadge.winner = delegator.id;
   delegationNationBadge.blockAwarded = blockNumber;
-  delegationNationBadge.badgeDetail = badgeDetail.id;
-  delegationNationBadge.badgeNumber = badgeDetail.badgeCount;
+  delegationNationBadge.definition = badgeDefinition.id;
+  delegationNationBadge.badgeNumber = badgeDefinition.badgeCount;
   delegationNationBadge.save();
-  addVotingPower(delegator.id, badgeDetail.votingWeightMultiplier);
+  addVotingPower(delegator.id, badgeDefinition.votingWeightMultiplier);
 }
 
 export function createOrLoadDelegationStreakBadge(
@@ -296,22 +296,22 @@ export function createOrLoadDelegationStreakBadge(
     .concat(startBlockNumber.toString());
   let badge = DelegationStreakBadge.load(badgeId);
   if (badge == null) {
-    let badgeDetail = createOrLoadBadgeDetail(
+    let badgeDefinition = createOrLoadBadgeDefinition(
       BADGE_NAME_DELEGATION_STREAK,
       BADGE_URL_HANDLE_DELEGATION_STREAK,
       BADGE_DESCRIPTION_DELEGATION_STREAK,
       BigDecimal.fromString(BADGE_VOTE_WEIGHT_DELEGATION_STREAK),
       "NFT_GOES_HERE"
     );
-    incrementBadgeCount(badgeDetail.id);
+    incrementBadgeCount(badgeDefinition.id);
 
     badge = new DelegationStreakBadge(badgeId);
     badge.delegator = delegator.id;
     badge.startBlockNumber = startBlockNumber;
     badge.lastCheckpointBlockNumber = startBlockNumber;
     badge.blockAwarded = toBigInt(-1);
-    badge.badgeDetail = badgeDetail.id;
-    badge.badgeNumber = badgeDetail.badgeCount;
+    badge.definition = badgeDefinition.id;
+    badge.badgeNumber = badgeDefinition.badgeCount;
 
     badge.save();
   }
@@ -328,72 +328,72 @@ export function createFirstToCloseBadge(
     let badgeID =
       BADGE_NAME_FIRST_TO_CLOSE.concat("-").concat(subgraphDeploymentID);
     let entityStats = createOrLoadEntityStats();
-    let badgeDetail = createOrLoadBadgeDetail(
+    let badgeDefinition = createOrLoadBadgeDefinition(
       BADGE_NAME_FIRST_TO_CLOSE,
       BADGE_URL_HANDLE_FIRST_TO_CLOSE,
       BADGE_DESCRIPTION_FIRST_TO_CLOSE,
       BigDecimal.fromString(BADGE_VOTE_WEIGHT_FIRST_TO_CLOSE),
       "NFT_GOES_HERE"
     );
-    incrementBadgeCount(badgeDetail.id);
+    incrementBadgeCount(badgeDefinition.id);
 
     // FirstToCloseBadge hasn't been awarded for this subgraphDeploymentId yet
     // Award to this indexer
     firstToClose = new BadgeAward(badgeID);
     firstToClose.winner = indexer;
     firstToClose.blockAwarded = block.number;
-    firstToClose.badgeDetail = badgeDetail.id;
-    firstToClose.badgeNumber = badgeDetail.badgeCount;
+    firstToClose.definition = badgeDefinition.id;
+    firstToClose.badgeNumber = badgeDefinition.badgeCount;
     firstToClose.save();
 
     entityStats.save();
 
-    addVotingPower(indexer, badgeDetail.votingWeightMultiplier);
+    addVotingPower(indexer, badgeDefinition.votingWeightMultiplier);
   }
 }
 
-export function createOrLoadBadgeDetail(
+export function createOrLoadBadgeDefinition(
   name: string,
   description: string,
   urlHandle: string,
   voteWeight: BigDecimal,
   image: string
-): BadgeDetail {
-  let badgeDetail = BadgeDetail.load(name);
+): BadgeDefinition {
+  let badgeDefinition = BadgeDefinition.load(name);
 
-  if (badgeDetail == null) {
+  if (badgeDefinition == null) {
     let protocol = createOrLoadTheGraphProtocol();
 
-    badgeDetail = new BadgeDetail(name);
-    badgeDetail.protocol = protocol.id;
-    badgeDetail.description = description;
-    badgeDetail.image = image;
-    badgeDetail.urlHandle = urlHandle;
-    badgeDetail.votingWeightMultiplier = voteWeight;
-    badgeDetail.badgeCount = 0;
+    badgeDefinition = new BadgeDefinition(name);
+    badgeDefinition.protocol = protocol.id;
+    badgeDefinition.description = description;
+    badgeDefinition.image = image;
+    badgeDefinition.urlHandle = urlHandle;
+    badgeDefinition.votingWeightMultiplier = voteWeight;
+    badgeDefinition.badgeCount = 0;
 
-    badgeDetail.save();
+    badgeDefinition.save();
   }
 
-  return badgeDetail as BadgeDetail;
+  return badgeDefinition as BadgeDefinition;
 }
 
-export function incrementBadgeCount(badgeName: string): BadgeDetail {
-  let badgeDetail = BadgeDetail.load(badgeName);
-  badgeDetail.badgeCount = badgeDetail.badgeCount + 1;
-  badgeDetail.save();
+export function incrementBadgeCount(badgeName: string): BadgeDefinition {
+  let badgeDefinition = BadgeDefinition.load(badgeName);
+  badgeDefinition.badgeCount = badgeDefinition.badgeCount + 1;
+  badgeDefinition.save();
 
-  return badgeDetail as BadgeDetail;
+  return badgeDefinition as BadgeDefinition;
 }
 
 export function createOrLoadTheGraphProtocol(): Protocol {
-  let badgeDetail = Protocol.load(PROTOCOL_NAME_THE_GRAPH);
+  let protocol = Protocol.load(PROTOCOL_NAME_THE_GRAPH);
 
-  if (badgeDetail == null) {
-    badgeDetail = new Protocol(PROTOCOL_NAME_THE_GRAPH);
-    badgeDetail.urlHandle = PROTOCOL_URL_HANDLE_THE_GRAPH;
-    badgeDetail.save();
+  if (protocol == null) {
+    protocol = new Protocol(PROTOCOL_NAME_THE_GRAPH);
+    protocol.urlHandle = PROTOCOL_URL_HANDLE_THE_GRAPH;
+    protocol.save();
   }
 
-  return badgeDetail as Protocol;
+  return protocol as Protocol;
 }
