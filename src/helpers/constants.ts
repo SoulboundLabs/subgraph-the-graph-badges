@@ -38,6 +38,9 @@ export function oneDay(): BigInt {
 
 export const PROTOCOL_NAME_THE_GRAPH = "The Graph";
 export const PROTOCOL_URL_HANDLE_THE_GRAPH = "the-graph";
+export const PROTOCOL_DESCRIPTION_THE_GRAPH =
+  "The Graph is an indexing protocol for querying networks like Ethereum and IPFS. Anyone can build and publish open APIs, called subgraphs, making data easily accessible.";
+export const PROTOCOL_WEBSITE_THE_GRAPH = "https://thegraph.com";
 
 export const BADGE_NAME_FIRST_TO_CLOSE = "First To Close";
 export const BADGE_DESCRIPTION_FIRST_TO_CLOSE =

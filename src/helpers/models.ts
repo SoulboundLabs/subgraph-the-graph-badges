@@ -35,8 +35,10 @@ import {
   BADGE_VOTE_WEIGHT_DELEGATION_STREAK,
   BADGE_VOTE_WEIGHT_FIRST_TO_CLOSE,
   BADGE_VOTE_WEIGHT_NEVER_SLASHED,
+  PROTOCOL_DESCRIPTION_THE_GRAPH,
   PROTOCOL_NAME_THE_GRAPH,
   PROTOCOL_URL_HANDLE_THE_GRAPH,
+  PROTOCOL_WEBSITE_THE_GRAPH,
   zeroBD,
 } from "./constants";
 import { toBigInt } from "./typeConverter";
@@ -216,7 +218,8 @@ export function create28EpochsLaterBadge(
     BADGE_URL_HANDLE_28_EPOCHS_LATER,
     BADGE_DESCRIPTION_28_EPOCHS_LATER,
     BigDecimal.fromString(BADGE_VOTE_WEIGHT_28_EPOCHS_LATER),
-    "NFT_GOES_HERE"
+    "TBD",
+    "TBD"
   );
   incrementBadgeCount(badgeDefinition.id);
 
@@ -245,7 +248,8 @@ export function createNeverSlashedBadge(
     BADGE_URL_HANDLE_NEVER_SLASHED,
     BADGE_DESCRIPTION_NEVER_SLASHED,
     BigDecimal.fromString(BADGE_VOTE_WEIGHT_NEVER_SLASHED),
-    "NFT_GOES_HERE"
+    "TBD",
+    "TBD"
   );
   incrementBadgeCount(badgeDefinition.id);
 
@@ -273,7 +277,8 @@ export function createDelegationNationBadge(
     BADGE_URL_HANDLE_DELEGATION_NATION,
     BADGE_DESCRIPTION_DELEGATION_NATION,
     BigDecimal.fromString(BADGE_VOTE_WEIGHT_DELEGATION_NATION),
-    "NFT_GOES_HERE"
+    "TBD",
+    "TBD"
   );
   incrementBadgeCount(badgeDefinition.id);
 
@@ -301,7 +306,8 @@ export function createOrLoadDelegationStreakBadge(
       BADGE_URL_HANDLE_DELEGATION_STREAK,
       BADGE_DESCRIPTION_DELEGATION_STREAK,
       BigDecimal.fromString(BADGE_VOTE_WEIGHT_DELEGATION_STREAK),
-      "NFT_GOES_HERE"
+      "TBD",
+      "TBD"
     );
     incrementBadgeCount(badgeDefinition.id);
 
@@ -333,7 +339,8 @@ export function createFirstToCloseBadge(
       BADGE_URL_HANDLE_FIRST_TO_CLOSE,
       BADGE_DESCRIPTION_FIRST_TO_CLOSE,
       BigDecimal.fromString(BADGE_VOTE_WEIGHT_FIRST_TO_CLOSE),
-      "NFT_GOES_HERE"
+      "TBD",
+      "TBD"
     );
     incrementBadgeCount(badgeDefinition.id);
 
@@ -357,7 +364,8 @@ export function createOrLoadBadgeDefinition(
   urlHandle: string,
   description: string,
   voteWeight: BigDecimal,
-  image: string
+  image: string,
+  artist: string
 ): BadgeDefinition {
   let badgeDefinition = BadgeDefinition.load(name);
 
@@ -368,6 +376,7 @@ export function createOrLoadBadgeDefinition(
     badgeDefinition.protocol = protocol.id;
     badgeDefinition.description = description;
     badgeDefinition.image = image;
+    badgeDefinition.artist = artist;
     badgeDefinition.urlHandle = urlHandle;
     badgeDefinition.votingWeightMultiplier = voteWeight;
     badgeDefinition.badgeCount = 0;
@@ -392,6 +401,8 @@ export function createOrLoadTheGraphProtocol(): Protocol {
   if (protocol == null) {
     protocol = new Protocol(PROTOCOL_NAME_THE_GRAPH);
     protocol.urlHandle = PROTOCOL_URL_HANDLE_THE_GRAPH;
+    protocol.description = PROTOCOL_DESCRIPTION_THE_GRAPH;
+    protocol.website = PROTOCOL_WEBSITE_THE_GRAPH;
     protocol.save();
   }
 
