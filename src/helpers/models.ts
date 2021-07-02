@@ -354,8 +354,8 @@ export function createFirstToCloseBadge(
 
 export function createOrLoadBadgeDefinition(
   name: string,
-  description: string,
   urlHandle: string,
+  description: string,
   voteWeight: BigDecimal,
   image: string
 ): BadgeDefinition {
