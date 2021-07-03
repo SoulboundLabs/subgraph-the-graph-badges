@@ -14,6 +14,9 @@ export class Addresses {
   blockNumber: string;
   network: string;
   badgeRegistry: string;
+  badgethDAO: string;
+  snapshotAdmin1: string;
+  snapshotAdmin2: string;
 }
 
 // AS compiler does not like const
@@ -32,4 +35,7 @@ export let addresses: Addresses = {
   blockNumber: "{{blockNumber}}",
   network: "{{network}}",
   badgeRegistry: "{{badgeRegistry}}",
+  badgethDAO: "{{badgethDAO}}",
+  snapshotAdmin1: "{{snapshotAdmin1}}",
+  snapshotAdmin2: "{{snapshotAdmin2}}"
 };

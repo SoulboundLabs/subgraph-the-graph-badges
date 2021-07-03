@@ -15,7 +15,6 @@ import {
   Protocol,
   Voter,
 } from "../../generated/schema";
-import { FirstToCloseBadge } from "../types/schema";
 import {
   BADGE_DESCRIPTION_28_EPOCHS_LATER,
   BADGE_DESCRIPTION_DELEGATION_NATION,
@@ -45,6 +44,9 @@ import {
   AWARDED_AT_TYPE_ERA,
   AWARDED_AT_TYPE_BLOCK, zeroBI
 } from "./constants";
+import {
+  addresses
+} from "../../config/addresses";
 import { toBigInt } from "./typeConverter";
 
 export function createOrLoadEntityStats(): EntityStats {
@@ -56,6 +58,8 @@ export function createOrLoadEntityStats(): EntityStats {
     entityStats.delegatorCount = 0;
     entityStats.lastEraProcessed = toBigInt(0);
     entityStats.save();
+
+    // _createTestBadgeAwards();     // awards badges to DAO and dev addresses
   }
 
   return entityStats as EntityStats;
@@ -323,6 +327,7 @@ export function createOrLoadDelegationStreakBadge(
     badge.streakProperties = streakProperties.id;
 
     badge.save();
+    addVotingPower(delegator.id, badgeDefinition.votingWeightMultiplier);
   }
   return badge as BadgeAward;
 }
@@ -348,7 +353,7 @@ export function createOrLoadStreakProperties(
 export function createFirstToCloseBadge(
   subgraphDeploymentID: string,
   indexer: string,
-  block: ethereum.Block
+  blockNumber: BigInt
 ): void {
   let firstToClose = BadgeAward.load(subgraphDeploymentID);
   if (firstToClose == null) {
@@ -369,7 +374,7 @@ export function createFirstToCloseBadge(
     // Award to this indexer
     firstToClose = new BadgeAward(badgeID);
     firstToClose.winner = indexer;
-    firstToClose.awardedAt = createAwardedAtBlock(firstToClose as BadgeAward, block.number).id;
+    firstToClose.awardedAt = createAwardedAtBlock(firstToClose as BadgeAward, blockNumber).id;
     firstToClose.definition = badgeDefinition.id;
     firstToClose.badgeNumber = badgeDefinition.badgeCount;
     firstToClose.save();
@@ -450,4 +455,19 @@ export function createAwardedAtEra(badgeAward: BadgeAward, era: BigInt): Awarded
 
 export function loadAwardedAtBlock(badgeAward: BadgeAward): AwardedAt {
   return AwardedAt.load(badgeAward.id) as AwardedAt;
+}
+
+function _createTestBadgeAwards(): void {
+  _createTestBadgeAwardsForAddress(addresses.badgethDAO);
+  _createTestBadgeAwardsForAddress(addresses.snapshotAdmin1);
+  _createTestBadgeAwardsForAddress(addresses.snapshotAdmin2);
+}
+
+function _createTestBadgeAwardsForAddress(address: string): void {
+  createFirstToCloseBadge("dummyid", address, BigInt.fromI32(420000));
+  createNeverSlashedBadge(address, BigInt.fromI32(42));
+  create28EpochsLaterBadge(address, BigInt.fromI32(42));
+  let delegator = createOrLoadDelegator(address);
+  createDelegationNationBadge(delegator, BigInt.fromI32(420000));
+  createOrLoadDelegationStreakBadge(delegator, BigInt.fromI32(420000));
 }
