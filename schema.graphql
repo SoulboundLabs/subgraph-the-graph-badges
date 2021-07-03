@@ -35,8 +35,12 @@ type BadgeDefinition @entity {
   id: ID!
   "Description of the badge"
   description: String!
-  "IFTP link to the printable badge"
+  "IFTP link to the NFT badge"
   image: String!
+  "Name of the artist responsible for NFT badge"
+  artist: String!
+  "Optional link to the artist's portfolio"
+  artistWebsite: String
   "Multiplier for governance voting"
   votingWeightMultiplier: BigDecimal!
   "Total count of badges"
@@ -76,6 +80,10 @@ type Protocol @entity {
   id: ID!
   "URL slug for the frontend"
   urlHandle: String!
+  "Description for the protocol"
+  description: String!
+  "Website for the protocol"
+  website: String!
 }
 
 """
