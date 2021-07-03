@@ -1,10 +1,11 @@
 import { BigDecimal, BigInt, ethereum } from "@graphprotocol/graph-ts/index";
 import {
   Allocation,
+  AwardedAt,
   BadgeAward,
   BadgeDefinition,
+  BadgeStreakProperties,
   DelegatedStake,
-  DelegationStreakBadge,
   Delegator,
   DelegatorCount,
   EntityStats,
@@ -14,6 +15,7 @@ import {
   Protocol,
   Voter,
 } from "../../generated/schema";
+import { FirstToCloseBadge } from "../types/schema";
 import {
   BADGE_DESCRIPTION_28_EPOCHS_LATER,
   BADGE_DESCRIPTION_DELEGATION_NATION,
@@ -38,6 +40,8 @@ import {
   PROTOCOL_NAME_THE_GRAPH,
   PROTOCOL_URL_HANDLE_THE_GRAPH,
   zeroBD,
+  AWARDED_AT_TYPE_ERA,
+  AWARDED_AT_TYPE_BLOCK, zeroBI
 } from "./constants";
 import { toBigInt } from "./typeConverter";
 
@@ -205,7 +209,6 @@ export function addVotingPower(voterId: string, votingPower: BigDecimal): void {
 export function create28EpochsLaterBadge(
   indexerID: string,
   era: BigInt,
-  block: ethereum.Block
 ): BadgeAward {
   let badgeID = BADGE_NAME_28_EPOCHS_LATER.concat("-")
     .concat(indexerID)
@@ -222,7 +225,7 @@ export function create28EpochsLaterBadge(
 
   let twentyEightEpochsLater = new BadgeAward(badgeID);
   twentyEightEpochsLater.winner = indexerID;
-  twentyEightEpochsLater.blockAwarded = block.number;
+  twentyEightEpochsLater.awardedAt = createAwardedAtEra(twentyEightEpochsLater, era).id;
   twentyEightEpochsLater.definition = badgeDefinition.id;
   twentyEightEpochsLater.badgeNumber = badgeDefinition.badgeCount;
   twentyEightEpochsLater.save();
@@ -233,13 +236,12 @@ export function create28EpochsLaterBadge(
 
 export function createNeverSlashedBadge(
   indexerID: string,
-  currentEra: BigInt,
-  block: ethereum.Block
+  era: BigInt
 ): BadgeAward {
   let badgeID = BADGE_NAME_NEVER_SLASHED.concat("-")
     .concat(indexerID)
     .concat("-")
-    .concat(currentEra.toString());
+    .concat(era.toString());
   let badgeDefinition = createOrLoadBadgeDefinition(
     BADGE_NAME_NEVER_SLASHED,
     BADGE_URL_HANDLE_NEVER_SLASHED,
@@ -251,7 +253,7 @@ export function createNeverSlashedBadge(
 
   let neverSlashedBadge = new BadgeAward(badgeID);
   neverSlashedBadge.winner = indexerID;
-  neverSlashedBadge.blockAwarded = block.number;
+  neverSlashedBadge.awardedAt = createAwardedAtEra(neverSlashedBadge, era).id;
   neverSlashedBadge.definition = badgeDefinition.id;
   neverSlashedBadge.badgeNumber = badgeDefinition.badgeCount;
   neverSlashedBadge.save();
@@ -279,7 +281,7 @@ export function createDelegationNationBadge(
 
   let delegationNationBadge = new BadgeAward(badgeID);
   delegationNationBadge.winner = delegator.id;
-  delegationNationBadge.blockAwarded = blockNumber;
+  delegationNationBadge.awardedAt = createAwardedAtBlock(delegationNationBadge, blockNumber).id;
   delegationNationBadge.definition = badgeDefinition.id;
   delegationNationBadge.badgeNumber = badgeDefinition.badgeCount;
   delegationNationBadge.save();
@@ -289,12 +291,12 @@ export function createDelegationNationBadge(
 export function createOrLoadDelegationStreakBadge(
   delegator: Delegator,
   startBlockNumber: BigInt
-): DelegationStreakBadge {
+): BadgeAward {
   let badgeId = BADGE_NAME_DELEGATION_STREAK.concat("-")
     .concat(delegator.id)
     .concat("-")
     .concat(startBlockNumber.toString());
-  let badge = DelegationStreakBadge.load(badgeId);
+  let badge = BadgeAward.load(badgeId);
   if (badge == null) {
     let badgeDefinition = createOrLoadBadgeDefinition(
       BADGE_NAME_DELEGATION_STREAK,
@@ -303,19 +305,38 @@ export function createOrLoadDelegationStreakBadge(
       BigDecimal.fromString(BADGE_VOTE_WEIGHT_DELEGATION_STREAK),
       "NFT_GOES_HERE"
     );
+
     incrementBadgeCount(badgeDefinition.id);
 
-    badge = new DelegationStreakBadge(badgeId);
-    badge.delegator = delegator.id;
-    badge.startBlockNumber = startBlockNumber;
-    badge.lastCheckpointBlockNumber = startBlockNumber;
-    badge.blockAwarded = toBigInt(-1);
+    badge = new BadgeAward(badgeId);
+    badge.winner = delegator.id;
+    badge.awardedAt = createAwardedAtBlock(badge as BadgeAward, zeroBI()).id;
     badge.definition = badgeDefinition.id;
     badge.badgeNumber = badgeDefinition.badgeCount;
+    let streakProperties = createOrLoadStreakProperties(delegator.id, startBlockNumber, badge as BadgeAward);
+    badge.streakProperties = streakProperties.id;
 
     badge.save();
   }
-  return badge as DelegationStreakBadge;
+  return badge as BadgeAward;
+}
+
+export function createOrLoadStreakProperties(
+  delegator: string,
+  startBlockNumber: BigInt,
+  badgeAward: BadgeAward
+): BadgeStreakProperties {
+  let id = delegator.concat("-")
+    .concat(startBlockNumber.toString());
+
+  let streakProps = BadgeStreakProperties.load(id);
+  if (streakProps == null) {
+    streakProps = new BadgeStreakProperties(id);
+    streakProps.badgeAward = badgeAward.id;
+    streakProps.streakStartBlockNumber = startBlockNumber;
+    streakProps.save();
+  }
+  return streakProps as BadgeStreakProperties;
 }
 
 export function createFirstToCloseBadge(
@@ -341,7 +362,7 @@ export function createFirstToCloseBadge(
     // Award to this indexer
     firstToClose = new BadgeAward(badgeID);
     firstToClose.winner = indexer;
-    firstToClose.blockAwarded = block.number;
+    firstToClose.awardedAt = createAwardedAtBlock(firstToClose as BadgeAward, block.number).id;
     firstToClose.definition = badgeDefinition.id;
     firstToClose.badgeNumber = badgeDefinition.badgeCount;
     firstToClose.save();
@@ -396,4 +417,26 @@ export function createOrLoadTheGraphProtocol(): Protocol {
   }
 
   return protocol as Protocol;
+}
+
+export function createAwardedAtBlock(badgeAward: BadgeAward, blockNumber: BigInt): AwardedAt {
+  let awardedAt = new AwardedAt(badgeAward.id);
+  awardedAt.type = AWARDED_AT_TYPE_BLOCK;
+  awardedAt.value = blockNumber;
+  awardedAt.badgeAward = badgeAward.id;
+  awardedAt.save();
+  return awardedAt as AwardedAt;
+}
+
+export function createAwardedAtEra(badgeAward: BadgeAward, era: BigInt): AwardedAt {
+  let awardedAt = new AwardedAt(badgeAward.id);
+  awardedAt.type = AWARDED_AT_TYPE_ERA;
+  awardedAt.value = era;
+  awardedAt.badgeAward = badgeAward.id;
+  awardedAt.save();
+  return awardedAt as AwardedAt;
+}
+
+export function loadAwardedAtBlock(badgeAward: BadgeAward): AwardedAt {
+  return AwardedAt.load(badgeAward.id) as AwardedAt;
 }

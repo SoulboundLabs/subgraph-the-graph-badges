@@ -36,6 +36,13 @@ export function oneDay(): BigInt {
   return BigInt.fromI32(60 * 60 * 24);
 }
 
+export function minimumDelegationStreak(): BigInt {
+  return BigInt.fromI32(100000); // measured in blocks
+}
+
+export const AWARDED_AT_TYPE_BLOCK = "Block";
+export const AWARDED_AT_TYPE_ERA = "Era";
+
 export const PROTOCOL_NAME_THE_GRAPH = "The Graph";
 export const PROTOCOL_URL_HANDLE_THE_GRAPH = "the-graph";
 

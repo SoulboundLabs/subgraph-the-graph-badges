@@ -22,7 +22,7 @@ export function processAllocationCreatedFor28DaysLaterBadge(
     event.params.indexer.toHexString(),
     event.params.epoch
   );
-  transitionToNewEraIfNeeded(event.params.epoch, event.block);
+  transitionToNewEraIfNeeded(event.params.epoch);
 }
 
 export function processAllocationClosedFor28DaysLaterBadge(
@@ -33,12 +33,11 @@ export function processAllocationClosedFor28DaysLaterBadge(
     event.params.indexer.toHexString(),
     event.params.epoch
   );
-  transitionToNewEraIfNeeded(event.params.epoch, event.block);
+  transitionToNewEraIfNeeded(event.params.epoch);
 }
 
 export function process28DaysLaterBadgesForEra(
-  era: BigInt,
-  block: ethereum.Block
+  era: BigInt
 ): void {
   // finalize any "pending" badges from this epoch
   let entityStats = createOrLoadEntityStats();
@@ -47,7 +46,7 @@ export function process28DaysLaterBadgesForEra(
     let indexerCount = IndexerCount.load(i.toString());
     let indexerEra = createOrLoadIndexerEra(indexerCount.indexer, era);
     if (!indexerEra.isClosingAllocationLate) {
-      create28EpochsLaterBadge(indexerCount.indexer, era, block);
+      create28EpochsLaterBadge(indexerCount.indexer, era);
     }
   }
 }

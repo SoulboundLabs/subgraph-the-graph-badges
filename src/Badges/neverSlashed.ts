@@ -27,15 +27,14 @@ function _processStakeSlashed(indexerID: string): void {
 }
 
 export function processNeverSlashedBadgesForEra(
-  era: BigInt,
-  block: ethereum.Block
+  era: BigInt
 ): void {
   let entityStats = createOrLoadEntityStats();
   for (let i = 1; i < entityStats.indexerCount; i++) {
     let indexerCount = IndexerCount.load(i.toString());
     let indexerEra = createOrLoadIndexerEra(indexerCount.indexer, era);
     if (!indexerEra.isSlashed) {
-      createNeverSlashedBadge(indexerCount.indexer, era, block);
+      createNeverSlashedBadge(indexerCount.indexer, era);
     }
   }
 }

@@ -9,14 +9,13 @@ export function epochToEra(epoch: BigInt): BigInt {
 }
 
 export function transitionToNewEraIfNeeded(
-  epoch: BigInt,
-  block: ethereum.Block
+  epoch: BigInt
 ): void {
   let entityStats = createOrLoadEntityStats();
   let era = epochToEra(epoch);
   if (era.gt(entityStats.lastEraProcessed)) {
-    process28DaysLaterBadgesForEra(entityStats.lastEraProcessed, block);
-    processNeverSlashedBadgesForEra(entityStats.lastEraProcessed, block);
+    process28DaysLaterBadgesForEra(entityStats.lastEraProcessed);
+    processNeverSlashedBadgesForEra(entityStats.lastEraProcessed);
 
     entityStats.lastEraProcessed = era;
     entityStats.save();
