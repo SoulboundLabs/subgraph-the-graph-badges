@@ -41,8 +41,8 @@ type BadgeDefinition @entity {
   artist: String!
   "Optional link to the artist's portfolio"
   artistWebsite: String
-  "Multiplier for governance voting"
-  votingWeightMultiplier: BigDecimal!
+  "Voting power for governance voting"
+  votingPower: BigInt!
   "Total count of badges"
   badgeCount: Int!
   "URL slug for the frontend"
@@ -141,7 +141,7 @@ type Voter @entity {
   "Address of protocol worker"
   id: ID!
   "Cumulative voting power across all badges"
-  votingPower: BigDecimal!
+  votingPower: BigInt!
 }
 
 """

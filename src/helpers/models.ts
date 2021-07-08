@@ -31,11 +31,11 @@ import {
   BADGE_URL_HANDLE_DELEGATION_STREAK,
   BADGE_URL_HANDLE_FIRST_TO_CLOSE,
   BADGE_URL_HANDLE_NEVER_SLASHED,
-  BADGE_VOTE_WEIGHT_28_EPOCHS_LATER,
-  BADGE_VOTE_WEIGHT_DELEGATION_NATION,
-  BADGE_VOTE_WEIGHT_DELEGATION_STREAK,
-  BADGE_VOTE_WEIGHT_FIRST_TO_CLOSE,
-  BADGE_VOTE_WEIGHT_NEVER_SLASHED,
+  BADGE_VOTE_POWER_28_EPOCHS_LATER,
+  BADGE_VOTE_POWER_DELEGATION_NATION,
+  BADGE_VOTE_POWER_DELEGATION_STREAK,
+  BADGE_VOTE_POWER_FIRST_TO_CLOSE,
+  BADGE_VOTE_POWER_NEVER_SLASHED,
   PROTOCOL_DESCRIPTION_THE_GRAPH,
   PROTOCOL_NAME_THE_GRAPH,
   PROTOCOL_URL_HANDLE_THE_GRAPH,
@@ -197,8 +197,8 @@ export function createAllocation(
   }
 }
 
-export function addVotingPower(voterId: string, votingPower: BigDecimal): void {
-  if (votingPower.equals(zeroBD())) {
+export function addVotingPower(voterId: string, votingPower: BigInt): void {
+  if (votingPower.equals(zeroBI())) {
     return;
   }
 
@@ -224,7 +224,7 @@ export function create28EpochsLaterBadge(
     BADGE_NAME_28_EPOCHS_LATER,
     BADGE_URL_HANDLE_28_EPOCHS_LATER,
     BADGE_DESCRIPTION_28_EPOCHS_LATER,
-    BigDecimal.fromString(BADGE_VOTE_WEIGHT_28_EPOCHS_LATER),
+    BigInt.fromI32(BADGE_VOTE_POWER_28_EPOCHS_LATER),
     "TBD",
     "TBD"
   );
@@ -236,7 +236,7 @@ export function create28EpochsLaterBadge(
   twentyEightEpochsLater.definition = badgeDefinition.id;
   twentyEightEpochsLater.badgeNumber = badgeDefinition.badgeCount;
   twentyEightEpochsLater.save();
-  addVotingPower(indexerID, badgeDefinition.votingWeightMultiplier);
+  addVotingPower(indexerID, badgeDefinition.votingPower);
 
   return twentyEightEpochsLater as BadgeAward;
 }
@@ -253,7 +253,7 @@ export function createNeverSlashedBadge(
     BADGE_NAME_NEVER_SLASHED,
     BADGE_URL_HANDLE_NEVER_SLASHED,
     BADGE_DESCRIPTION_NEVER_SLASHED,
-    BigDecimal.fromString(BADGE_VOTE_WEIGHT_NEVER_SLASHED),
+    BigInt.fromI32(BADGE_VOTE_POWER_NEVER_SLASHED),
     "TBD",
     "TBD"
   );
@@ -265,7 +265,7 @@ export function createNeverSlashedBadge(
   neverSlashedBadge.definition = badgeDefinition.id;
   neverSlashedBadge.badgeNumber = badgeDefinition.badgeCount;
   neverSlashedBadge.save();
-  addVotingPower(indexerID, badgeDefinition.votingWeightMultiplier);
+  addVotingPower(indexerID, badgeDefinition.votingPower);
 
   return neverSlashedBadge as BadgeAward;
 }
@@ -282,7 +282,7 @@ export function createDelegationNationBadge(
     BADGE_NAME_DELEGATION_NATION,
     BADGE_URL_HANDLE_DELEGATION_NATION,
     BADGE_DESCRIPTION_DELEGATION_NATION,
-    BigDecimal.fromString(BADGE_VOTE_WEIGHT_DELEGATION_NATION),
+    BigInt.fromI32(BADGE_VOTE_POWER_DELEGATION_NATION),
     "TBD",
     "TBD"
   );
@@ -294,7 +294,7 @@ export function createDelegationNationBadge(
   delegationNationBadge.definition = badgeDefinition.id;
   delegationNationBadge.badgeNumber = badgeDefinition.badgeCount;
   delegationNationBadge.save();
-  addVotingPower(delegator.id, badgeDefinition.votingWeightMultiplier);
+  addVotingPower(delegator.id, badgeDefinition.votingPower);
 }
 
 export function createOrLoadDelegationStreakBadge(
@@ -311,7 +311,7 @@ export function createOrLoadDelegationStreakBadge(
       BADGE_NAME_DELEGATION_STREAK,
       BADGE_URL_HANDLE_DELEGATION_STREAK,
       BADGE_DESCRIPTION_DELEGATION_STREAK,
-      BigDecimal.fromString(BADGE_VOTE_WEIGHT_DELEGATION_STREAK),
+      BigInt.fromI32(BADGE_VOTE_POWER_DELEGATION_STREAK),
       "TBD",
       "TBD"
     );
@@ -327,7 +327,7 @@ export function createOrLoadDelegationStreakBadge(
     badge.streakProperties = streakProperties.id;
 
     badge.save();
-    addVotingPower(delegator.id, badgeDefinition.votingWeightMultiplier);
+    addVotingPower(delegator.id, badgeDefinition.votingPower);
   }
   return badge as BadgeAward;
 }
@@ -364,7 +364,7 @@ export function createFirstToCloseBadge(
       BADGE_NAME_FIRST_TO_CLOSE,
       BADGE_URL_HANDLE_FIRST_TO_CLOSE,
       BADGE_DESCRIPTION_FIRST_TO_CLOSE,
-      BigDecimal.fromString(BADGE_VOTE_WEIGHT_FIRST_TO_CLOSE),
+      BigInt.fromI32(BADGE_VOTE_POWER_FIRST_TO_CLOSE),
       "TBD",
       "TBD"
     );
@@ -381,7 +381,7 @@ export function createFirstToCloseBadge(
 
     entityStats.save();
 
-    addVotingPower(indexer, badgeDefinition.votingWeightMultiplier);
+    addVotingPower(indexer, badgeDefinition.votingPower);
   }
 }
 
@@ -389,7 +389,7 @@ export function createOrLoadBadgeDefinition(
   name: string,
   urlHandle: string,
   description: string,
-  voteWeight: BigDecimal,
+  voteWeight: BigInt,
   image: string,
   artist: string
 ): BadgeDefinition {
@@ -404,7 +404,7 @@ export function createOrLoadBadgeDefinition(
     badgeDefinition.image = image;
     badgeDefinition.artist = artist;
     badgeDefinition.urlHandle = urlHandle;
-    badgeDefinition.votingWeightMultiplier = voteWeight;
+    badgeDefinition.votingPower = voteWeight;
     badgeDefinition.badgeCount = 0;
 
     badgeDefinition.save();

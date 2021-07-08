@@ -11,7 +11,7 @@ import { toBigInt } from "../helpers/typeConverter";
 import { processUniqueDelegation } from "../Badges/delegationNation";
 import { log, BigInt, BigDecimal } from '@graphprotocol/graph-ts'
 import { 
-  BADGE_VOTE_WEIGHT_DELEGATION_STREAK,
+  BADGE_VOTE_POWER_DELEGATION_STREAK,
   minimumDelegationStreak,
   zeroBI
 } from "../helpers/constants";
@@ -100,6 +100,6 @@ function _finalizeDelegationStreak(delegator: Delegator, blockNumber: BigInt): v
   }
 
   // todo: add more voting power for longer delegation streaks
-  addVotingPower(delegator.id, BigDecimal.fromString(BADGE_VOTE_WEIGHT_DELEGATION_STREAK));
+  addVotingPower(delegator.id, BigInt.fromI32(BADGE_VOTE_POWER_DELEGATION_STREAK));
 }
 
