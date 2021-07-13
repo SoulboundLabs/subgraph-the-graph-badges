@@ -23,6 +23,9 @@ export let addresses: Addresses = {
   blockNumber: "",
   network: "",
   badgeRegistry: BadgethAddresses.rinkeby.BadgeRegistry,
+  badgethDAO: BadgethAddresses.rinkeby.BadgethDAO,
+  snapshotAdmin1: BadgethAddresses.rinkeby.SnapshotAdmin1,
+  snapshotAdmin2: BadgethAddresses.rinkeby.SnapshotAdmin2
 };
 
 const main = (): void => {

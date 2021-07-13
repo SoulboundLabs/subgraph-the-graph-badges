@@ -5,12 +5,16 @@ import {
   createOrLoadDelegatedStake,
   createOrLoadDelegationStreakBadge,
   delegatedStakeExists,
-  addVotingPower
+  addVotingPower, loadAwardedAtBlock
 } from "../helpers/models";
 import { toBigInt } from "../helpers/typeConverter";
 import { processUniqueDelegation } from "../Badges/delegationNation";
 import { log, BigInt, BigDecimal } from '@graphprotocol/graph-ts'
-import { BADGE_VOTE_WEIGHT_DELEGATION_STREAK } from "../helpers/constants";
+import { 
+  BADGE_VOTE_POWER_DELEGATION_STREAK,
+  minimumDelegationStreak,
+  zeroBI
+} from "../helpers/constants";
 
 
 
@@ -43,16 +47,13 @@ function _processStakeDelegated(
   log.debug("_processStakeDelegated: delegatorId - {}", [delegatorId]);
 
   let delegator = createOrLoadDelegator(delegatorId);
-  if (delegator.streakStartBlockNumber.equals(toBigInt(-1))) {
+  if (delegator.streakStartBlockNumber.equals(zeroBI())) {
     // start new streak
     delegator.streakStartBlockNumber = blockNumber;
-    createOrLoadDelegationStreakBadge(delegator, blockNumber);
   }
-  else {
-    // update ongoing streak
-    let badge = createOrLoadDelegationStreakBadge(delegator, delegator.streakStartBlockNumber);
-    badge.lastCheckpointBlockNumber = blockNumber;
-    badge.save();
+  else if (blockNumber.minus(delegator.streakStartBlockNumber).gt(minimumDelegationStreak())) {
+    // create ongoing award
+    createOrLoadDelegationStreakBadge(delegator, delegator.streakStartBlockNumber);
   }
 
   if (delegatedStakeExists(delegatorId, indexerId) == false) {
@@ -92,11 +93,13 @@ function _finalizeDelegationStreak(delegator: Delegator, blockNumber: BigInt): v
   log.debug("_finalizeDelegationStreak: streak ended for delegatorId - {}", [delegator.id]);
 
   let badge = createOrLoadDelegationStreakBadge(delegator, delegator.streakStartBlockNumber);
-  badge.blockAwarded = blockNumber;
-  badge.lastCheckpointBlockNumber = blockNumber;
-  badge.save();
+  let awardedAt = loadAwardedAtBlock(badge);
+  if (awardedAt != null) {
+    awardedAt.value = blockNumber;
+    awardedAt.save();
+  }
 
   // todo: add more voting power for longer delegation streaks
-  addVotingPower(delegator.id, BigDecimal.fromString(BADGE_VOTE_WEIGHT_DELEGATION_STREAK));
+  addVotingPower(delegator.id, BigInt.fromI32(BADGE_VOTE_POWER_DELEGATION_STREAK));
 }
 
