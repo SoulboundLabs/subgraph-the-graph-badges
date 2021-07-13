@@ -329,10 +329,11 @@ export function createFirstToCloseBadge(
   indexer: string,
   block: ethereum.Block
 ): void {
-  let firstToClose = BadgeAward.load(subgraphDeploymentID);
+  let badgeID =
+    BADGE_NAME_FIRST_TO_CLOSE.concat("-").concat(subgraphDeploymentID);
+  let firstToClose = BadgeAward.load(badgeID);
+
   if (firstToClose == null) {
-    let badgeID =
-      BADGE_NAME_FIRST_TO_CLOSE.concat("-").concat(subgraphDeploymentID);
     let entityStats = createOrLoadEntityStats();
     let badgeDefinition = createOrLoadBadgeDefinition(
       BADGE_NAME_FIRST_TO_CLOSE,
