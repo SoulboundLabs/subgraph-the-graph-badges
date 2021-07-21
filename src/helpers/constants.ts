@@ -63,7 +63,7 @@ export const BADGE_VOTE_POWER_28_EPOCHS_LATER = 1;
 
 export const BADGE_NAME_NEVER_SLASHED = "Never Slashed";
 export const BADGE_DESCRIPTION_NEVER_SLASHED =
-  "Awarded to indexers who are don't get slashed during a era";
+  "Awarded to indexers who don't get slashed during a era";
 export const BADGE_URL_HANDLE_NEVER_SLASHED = "never-slashed";
 export const BADGE_VOTE_POWER_NEVER_SLASHED = 1;
 
