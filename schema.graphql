@@ -12,13 +12,20 @@ type EntityStats @entity {
   lastEraProcessed: BigInt!
 }
 
+type Winner @entity {
+  "ETH address of the winner"
+  id: ID!
+  "Number of badges awarded to address"
+  badgesAwarded: Int!
+}
+
 """
 The badge that is awarded to winner
 """
 type BadgeAward @entity {
   id: ID!
   "Address of the winner"
-  winner: String!
+  winner: Winner!
   "Block number or era in which badge was awarded"
   awardedAt: AwardedAt!
   "Additional details about the badge"
