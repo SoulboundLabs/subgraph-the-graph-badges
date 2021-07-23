@@ -3,7 +3,8 @@ import { BigInt } from "@graphprotocol/graph-ts/index";
 import {
   addVotingPower,
   createAwardedAtBlock,
-  createOrLoadBadgeDefinition
+  createOrLoadBadgeDefinition,
+  incrementWinner
 } from "../helpers/models";
 import {
   BADGE_NAME_SUBGRAPH_CONNOISSEUR,
@@ -35,6 +36,8 @@ function _awardSubgraphConnoisseurBadge(curator: Curator, blockNumber: BigInt): 
   let badgeId = BADGE_NAME_SUBGRAPH_CONNOISSEUR.concat("-")
     .concat(badgeNumberString);
   let badge = new BadgeAward(badgeId);
+  let winner = incrementWinner(curator.id);
+  badge.winner = winner.id;
   badge.winner = curator.id;
   badge.definition = badgeDefinition.id;
   badge.awardedAt = createAwardedAtBlock(badge, blockNumber).id;
