@@ -58,6 +58,8 @@ type BadgeDefinition @entity {
   urlHandle: String!
   "Associated protocol for the badge"
   protocol: Protocol!
+  "All of the badge awards with this definition"
+  badgeAwards: [BadgeAward!]! @derivedFrom(field: "definition")
 }
 
 type BadgeStreakProperties @entity {
@@ -185,7 +187,6 @@ type SignalledStake @entity {
   signal: BigInt!
   tokenBalance: BigInt!
 }
-
 
 """
 Joins Indexer metrics over a particular era
