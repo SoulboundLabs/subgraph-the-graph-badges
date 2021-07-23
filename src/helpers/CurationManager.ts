@@ -74,6 +74,11 @@ function _processCurationSignal(
     
     _broadcastUniqueCurationSignal(curator, blockNumber);
   }
+  else {
+    signalledStake.tokenBalance = signalledStake.tokenBalance.plus(tokens);
+    signalledStake.signal = signalledStake.signal.plus(signal);
+    signalledStake.save();
+  }
 }
 
 function _broadcastUniqueCurationSignal(
@@ -96,6 +101,9 @@ function _processCurationBurn(
     let curator = createOrLoadCurator(curatorId);
     let avgCostBasis = signalledStake.signal.div(signalledStake.tokenBalance);
     let burnPrice = signal.div(tokens);
+    signalledStake.signal = signalledStake.signal.minus(signal);
+    signalledStake.tokenBalance = signalledStake.tokenBalance.minus(signal);
+    signalledStake.save();
 
     _broadcastCurationBurn(curator, avgCostBasis, burnPrice, blockNumber);
   }
