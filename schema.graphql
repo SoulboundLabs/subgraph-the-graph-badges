@@ -8,6 +8,8 @@ type EntityStats @entity {
   indexerCount: Int!
   "Number of delegators"
   delegatorCount: Int!
+  "Number of curators"
+  curatorCount: Int!
   "Most recent Era processed for Indexer badges"
   lastEraProcessed: BigInt!
 }
@@ -135,6 +137,16 @@ type Delegator @entity {
 }
 
 """
+Metadata for the Curator
+"""
+type Curator @entity {
+  "Address of Curator"
+  id: ID!
+  "Number of different subgraphs Curator has signalled"
+  uniqueSignalCount: Int!
+}
+
+"""
 Addresses that have been awarded badges that come with voting power
 """
 type Voter @entity {
@@ -154,6 +166,19 @@ type DelegatedStake @entity {
   indexer: Indexer!
   shares: BigInt!
 }
+
+"""
+Metadata for the Curator
+"""
+type SignalledStake @entity {
+  "{Curator}-{SubgraphId}"
+  id: ID!
+  curator: Curator!
+  subgraphId: String!
+  signal: BigInt!
+  tokenBalance: BigInt!
+}
+
 
 """
 Joins Indexer metrics over a particular era

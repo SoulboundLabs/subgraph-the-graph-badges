@@ -56,6 +56,7 @@ export function createOrLoadEntityStats(): EntityStats {
     entityStats = new EntityStats("1");
     entityStats.indexerCount = 0;
     entityStats.delegatorCount = 0;
+    entityStats.curatorCount = 0;
     entityStats.lastEraProcessed = toBigInt(0);
     entityStats.save();
 

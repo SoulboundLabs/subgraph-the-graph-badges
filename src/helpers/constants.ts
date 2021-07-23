@@ -78,3 +78,15 @@ export const BADGE_DESCRIPTION_DELEGATION_STREAK =
   "Awarded to delegators who delegate > 0 for > 0 consecutive blocks";
 export const BADGE_URL_HANDLE_DELEGATION_STREAK = "delegation-streak";
 export const BADGE_VOTE_POWER_DELEGATION_STREAK = 1;
+
+export const BADGE_NAME_SUBGRAPH_CONNOISSEUR = "Subgraph Connoisseur";
+export const BADGE_DESCRIPTION_SUBGRAPH_CONNOISSEUR = 
+  "Awarded to curators who signal on 3 or more subgraphs";
+export const BADGE_URL_HANDLE_SUBGRAPH_CONNOISSEUR = "subgraph-connoisseur";
+export const BADGE_VOTE_POWER_SUBGRAPH_CONNOISSEUR = 1;
+
+export const BADGE_NAME_SUBGRAPH_SHARK = "Subgraph Shark";
+export const BADGE_DESCRIPTION_SUBGRAPH_SHARK = 
+  "Awarded to curators who sell curation shares for a profit";
+export const BADGE_URL_HANDLE_SUBGRAPH_SHARK = "subgraph-shark";
+export const BADGE_VOTE_POWER_SUBGRAPH_SHARK = 1;
