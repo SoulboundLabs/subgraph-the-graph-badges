@@ -19,6 +19,8 @@ type Winner @entity {
   id: ID!
   "Number of badges awarded to address"
   badgesAwarded: Int!
+  "All of the badge awards"
+  badgeAwards: [BadgeAward!]! @derivedFrom(field: "winner")
 }
 
 """
