@@ -8,20 +8,20 @@ import {
   AllocationCreated,
   StakeDelegated,
   StakeDelegatedLocked,
-  StakeSlashed
+  StakeSlashed,
 } from "../../generated/Staking/Staking";
 import {
   processAllocationClosedFor28DaysLaterBadge,
-  processAllocationCreatedFor28DaysLaterBadge
+  processAllocationCreatedFor28DaysLaterBadge,
 } from "../Badges/28DaysLater";
 import { processStakeDelegatedForDelegationNationBadge } from "../Badges/delegationNation";
-import { 
+import {
   processStakeDelegatedForDelegationStreakBadge,
-  processStakeDelegatedLockedForDelegationStreakBadge 
+  processStakeDelegatedLockedForDelegationStreakBadge,
 } from "../Badges/delegationStreak";
 import { processAllocationClosedForFirstToCloseBadge } from "../Badges/firstToClose";
 import { processStakeSlashedForNeverSlashedBadge } from "../Badges/neverSlashed";
-import { log } from '@graphprotocol/graph-ts'
+import { log } from "@graphprotocol/graph-ts";
 
 /**
  * @dev Emitted when `indexer` allocated `tokens` amount to `subgraphDeploymentID`
@@ -37,7 +37,8 @@ import { log } from '@graphprotocol/graph-ts'
  *   bytes32 metadata
  */
 export function handleAllocationCreated(event: AllocationCreated): void {
-  log.debug("AllocationCreated event found", []);
+  const logStr: string = event.transaction.to.toHex();
+  log.debug(("AllocationCreated event found. Trx: " + logStr) as string, []);
   processAllocationCreatedFor28DaysLaterBadge(event);
 }
 
