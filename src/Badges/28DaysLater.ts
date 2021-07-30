@@ -21,7 +21,7 @@ export function processAllocationCreatedFor28DaysLaterBadge(
     event.params.allocationID.toHexString(),
     event.params.indexer.toHexString(),
     event.params.epoch,
-    event.params.subgraphDeploymentID.toBase58()
+    event.params.subgraphDeploymentID.toHexString()
   );
   transitionToNewEraIfNeeded(event.params.epoch);
 }
