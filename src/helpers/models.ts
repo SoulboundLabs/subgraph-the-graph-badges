@@ -188,14 +188,14 @@ export function createAllocation(
   allocationID: string,
   indexerID: string,
   epochCreated: BigInt,
-  subgraphDeploymentID: Bytes
+  subgraphDeploymentID: string
 ): void {
   if (Allocation.load(allocationID) == null) {
     let allocation = new Allocation(allocationID);
     allocation.createdAtEpoch = epochCreated;
     allocation.indexer = indexerID;
 
-    allocation.subgraphDeploymentID = subgraphDeploymentID.toString();
+    allocation.subgraphDeploymentID = subgraphDeploymentID;
     allocation.save();
   }
 }
