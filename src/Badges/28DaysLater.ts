@@ -20,7 +20,8 @@ export function processAllocationCreatedFor28DaysLaterBadge(
   createAllocation(
     event.params.allocationID.toHexString(),
     event.params.indexer.toHexString(),
-    event.params.epoch
+    event.params.epoch,
+    event.params.subgraphDeploymentID
   );
   transitionToNewEraIfNeeded(event.params.epoch);
 }
@@ -36,9 +37,7 @@ export function processAllocationClosedFor28DaysLaterBadge(
   transitionToNewEraIfNeeded(event.params.epoch);
 }
 
-export function process28DaysLaterBadgesForEra(
-  era: BigInt
-): void {
+export function process28DaysLaterBadgesForEra(era: BigInt): void {
   // finalize any "pending" badges from this epoch
   let entityStats = createOrLoadEntityStats();
 

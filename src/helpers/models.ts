@@ -1,4 +1,4 @@
-import { BigInt } from "@graphprotocol/graph-ts/index";
+import { BigInt, Bytes } from "@graphprotocol/graph-ts/index";
 import { addresses } from "../../config/addresses";
 import {
   Allocation,
@@ -187,13 +187,15 @@ export function delegatedStakeExists(
 export function createAllocation(
   allocationID: string,
   indexerID: string,
-  epochCreated: BigInt
+  epochCreated: BigInt,
+  subgraphDeploymentID: Bytes
 ): void {
   if (Allocation.load(allocationID) == null) {
     let allocation = new Allocation(allocationID);
     allocation.createdAtEpoch = epochCreated;
     allocation.indexer = indexerID;
 
+    allocation.subgraphDeploymentID = subgraphDeploymentID.toString();
     allocation.save();
   }
 }
