@@ -37,8 +37,7 @@ import { log } from "@graphprotocol/graph-ts";
  *   bytes32 metadata
  */
 export function handleAllocationCreated(event: AllocationCreated): void {
-  const logStr: string = event.transaction.to.toHex();
-  log.debug(("AllocationCreated event found. Trx: " + logStr) as string, []);
+  log.debug("AllocationCreated event found", []);
   processAllocationCreatedFor28DaysLaterBadge(event);
 }
 
