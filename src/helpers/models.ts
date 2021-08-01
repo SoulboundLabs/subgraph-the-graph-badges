@@ -181,6 +181,7 @@ export function delegatedStakeExists(
 ): boolean {
   let id = delegatorId.concat("-").concat(indexerId);
   let delegatedStake = DelegatedStake.load(id);
+
   return delegatedStake != null;
 }
 
@@ -192,10 +193,10 @@ export function createAllocation(
 ): void {
   if (Allocation.load(allocationID) == null) {
     let allocation = new Allocation(allocationID);
+
     allocation.createdAtEpoch = epochCreated;
     allocation.indexer = indexerID;
-
-    allocation.subgraphId = subgraphDeploymentID;
+    allocation.subgraphId = subgraphId;
     allocation.save();
   }
 }
