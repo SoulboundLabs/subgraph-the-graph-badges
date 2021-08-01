@@ -213,8 +213,8 @@ type Allocation @entity {
   closedAtEpoch: BigInt
   "Indexer that created this Allocation"
   indexer: Indexer!
-  "SubgraphDeploymentID of this Allocation"
-  subgraphDeploymentID: ID!
+  "Subgraph Deployment Id of this Allocation"
+  subgraphId: ID!
 }
 
 enum AllocationStatus {

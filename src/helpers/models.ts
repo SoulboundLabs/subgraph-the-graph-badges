@@ -188,14 +188,14 @@ export function createAllocation(
   allocationID: string,
   indexerID: string,
   epochCreated: BigInt,
-  subgraphDeploymentID: string
+  subgraphId: string
 ): void {
   if (Allocation.load(allocationID) == null) {
     let allocation = new Allocation(allocationID);
     allocation.createdAtEpoch = epochCreated;
     allocation.indexer = indexerID;
 
-    allocation.subgraphDeploymentID = subgraphDeploymentID;
+    allocation.subgraphId = subgraphDeploymentID;
     allocation.save();
   }
 }
@@ -370,12 +370,11 @@ export function createOrLoadStreakProperties(
 }
 
 export function createFirstToCloseBadge(
-  subgraphDeploymentID: string,
+  subgraphId: string,
   indexer: string,
   blockNumber: BigInt
 ): void {
-  let badgeID =
-    BADGE_NAME_FIRST_TO_CLOSE.concat("-").concat(subgraphDeploymentID);
+  let badgeID = BADGE_NAME_FIRST_TO_CLOSE.concat("-").concat(subgraphId);
   let firstToClose = BadgeAward.load(badgeID);
 
   if (firstToClose == null) {
