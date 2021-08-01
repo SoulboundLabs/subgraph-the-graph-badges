@@ -31,6 +31,7 @@
     "@graphprotocol/graph-cli": "graphprotocol/graph-cli",
     "husky": "^6.0.0",
     "lint-staged": "^11.0.0",
+    "mocha": "^9.0.3",
     "prettier": "^2.3.0",
     "typescript": "^4.1.5"
   },
@@ -39,7 +40,9 @@
     "@graphprotocol/graph-ts": "^0.20.0",
     "babel-polyfill": "^6.26.0",
     "babel-register": "^6.26.0",
+    "chai": "^4.3.4",
     "mustache": "^4.2.0",
+    "supertest": "^6.1.4",
     "truffle": "^5.0.4",
     "truffle-contract": "^4.0.5",
     "truffle-hdwallet-provider": "^1.0.4"
