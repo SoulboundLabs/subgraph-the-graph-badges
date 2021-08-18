@@ -1,72 +1,43 @@
-import { BigInt, ethereum } from "@graphprotocol/graph-ts/index";
-import { Allocation, IndexerCount } from "../../generated/schema";
+import { BigInt } from "@graphprotocol/graph-ts/index";
+import { Allocation, BadgeDefinition } from "../../generated/schema";
 import {
-  AllocationClosed,
-  AllocationCreated,
-} from "../../generated/Staking/Staking";
-import { epochToEra, transitionToNewEraIfNeeded } from "../helpers/epoch";
+  BADGE_DESCRIPTION_28_EPOCHS_LATER,
+  BADGE_NAME_28_EPOCHS_LATER,
+  BADGE_URL_HANDLE_28_EPOCHS_LATER,
+  BADGE_VOTE_POWER_28_EPOCHS_LATER,
+  BADGE_STREAK_MIN_CLOSES_28_EPOCHS_LATER,
+} from "../helpers/constants";
+import { createOrLoadIndexer } from "../helpers/indexerManager";
 import {
-  create28EpochsLaterBadge,
-  createAllocation,
-  createOrLoadEntityStats,
-  createOrLoadIndexer,
-  createOrLoadIndexerEra,
+  createBadgeAward,
+  createOrLoadBadgeDefinitionWithStreak,
 } from "../helpers/models";
-import { toBigInt } from "../helpers/typeConverter";
-
-export function processAllocationCreatedFor28DaysLaterBadge(
-  event: AllocationCreated
-): void {
-  createAllocation(
-    event.params.allocationID.toHexString(),
-    event.params.indexer.toHexString(),
-    event.params.epoch
-  );
-  transitionToNewEraIfNeeded(event.params.epoch);
-}
 
 export function processAllocationClosedFor28DaysLaterBadge(
-  event: AllocationClosed
+  allocation: Allocation,
+  epoch: BigInt,
+  blockNumber: BigInt
 ): void {
-  checkClosingAllocationLate(
-    event.params.allocationID.toHexString(),
-    event.params.indexer.toHexString(),
-    event.params.epoch
-  );
-  transitionToNewEraIfNeeded(event.params.epoch);
-}
-
-export function process28DaysLaterBadgesForEra(
-  era: BigInt
-): void {
-  // finalize any "pending" badges from this epoch
-  let entityStats = createOrLoadEntityStats();
-
-  for (let i = 1; i < entityStats.indexerCount; i++) {
-    let indexerCount = IndexerCount.load(i.toString());
-    let indexerEra = createOrLoadIndexerEra(indexerCount.indexer, era);
-    if (!indexerEra.isClosingAllocationLate) {
-      create28EpochsLaterBadge(indexerCount.indexer, era);
+  if (epoch.minus(allocation.createdAtEpoch).lt(BigInt.fromI32(28))) {
+    let indexer = createOrLoadIndexer(allocation.indexer);
+    if (
+      indexer.uniqueOpenAllocationCount %
+        BADGE_STREAK_MIN_CLOSES_28_EPOCHS_LATER ==
+      0
+    ) {
+      createBadgeAward(_badgeDefinition(), allocation.indexer, blockNumber);
     }
   }
 }
 
-function checkClosingAllocationLate(
-  allocationId: string,
-  indexerId: string,
-  currentEpoch: BigInt
-): void {
-  let indexer = createOrLoadIndexer(indexerId);
-  let era = epochToEra(currentEpoch);
-  let indexerEra = createOrLoadIndexerEra(indexer.id, era);
-
-  let allocation = Allocation.load(allocationId);
-
-  let epochsToClose = currentEpoch.minus(allocation.createdAtEpoch);
-  let isUnder28Epochs = epochsToClose.lt(toBigInt(28));
-
-  if (!isUnder28Epochs) {
-    indexerEra.isClosingAllocationLate = true;
-    indexerEra.save();
-  }
+function _badgeDefinition(): BadgeDefinition {
+  return createOrLoadBadgeDefinitionWithStreak(
+    BADGE_NAME_28_EPOCHS_LATER,
+    BADGE_URL_HANDLE_28_EPOCHS_LATER,
+    BADGE_DESCRIPTION_28_EPOCHS_LATER,
+    BigInt.fromI32(BADGE_VOTE_POWER_28_EPOCHS_LATER),
+    "TBD",
+    "TBD",
+    BigInt.fromI32(BADGE_STREAK_MIN_CLOSES_28_EPOCHS_LATER)
+  );
 }

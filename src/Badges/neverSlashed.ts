@@ -1,40 +1,72 @@
-import { BigInt, ethereum } from "@graphprotocol/graph-ts/index";
-import { IndexerCount } from "../../generated/schema";
-import { StakeSlashed } from "../../generated/Staking/Staking";
+import { BigInt } from "@graphprotocol/graph-ts/index";
 import {
-  createNeverSlashedBadge,
-  createOrLoadEntityStats,
-  createOrLoadIndexer,
-  createOrLoadIndexerEra,
+  BADGE_DESCRIPTION_NEVER_SLASHED,
+  BADGE_NAME_NEVER_SLASHED,
+  BADGE_STREAK_MIN_BLOCKS_NEVER_SLASHED,
+  BADGE_URL_HANDLE_NEVER_SLASHED,
+  BADGE_VOTE_POWER_NEVER_SLASHED,
+} from "../helpers/constants";
+import {
+  createOrLoadBadgeDefinition,
+  createBadgeAward,
 } from "../helpers/models";
+import { BadgeDefinition, Winner, Indexer } from "../../generated/schema";
+import {
+  createOrLoadOngoingBadgeStreak,
+  endBadgeStreak,
+  restartBadgeStreak,
+  setBadgeStreak,
+} from "../helpers/streakManager";
+
+export function processAllocationCreatedForNeverSlashed(
+  indexer: Indexer,
+  epoch: BigInt
+): void {
+  // start a streak if indexer went from 0 allocations to 1
+  if (indexer.uniqueOpenAllocationCount == 1) {
+    setBadgeStreak(BADGE_NAME_NEVER_SLASHED, indexer.id, epoch);
+  }
+}
+
+export function processAllocationClosedForNeverSlashed(indexer: Indexer): void {
+  // end streak if indexer went from 1 allocations to 0
+  if (indexer.uniqueOpenAllocationCount == 0) {
+    endBadgeStreak(BADGE_NAME_NEVER_SLASHED, indexer.id);
+  }
+}
+
+export function updateNeverSlashedStreak(
+  winner: Winner,
+  blockNumber: BigInt
+): void {
+  let badgeStreak = createOrLoadOngoingBadgeStreak(
+    BADGE_NAME_NEVER_SLASHED,
+    winner.id
+  );
+  let minBlocks = BigInt.fromI32(BADGE_STREAK_MIN_BLOCKS_NEVER_SLASHED);
+  if (
+    blockNumber.minus(badgeStreak.streakStartBlock).gt(minBlocks) &&
+    winner.lastSyncBlockNumber.minus(badgeStreak.streakStartBlock).lt(minBlocks)
+  ) {
+    createBadgeAward(_badgeDefinition(), winner.id, blockNumber);
+    restartBadgeStreak(BADGE_NAME_NEVER_SLASHED, winner.id, blockNumber);
+  }
+}
 
 export function processStakeSlashedForNeverSlashedBadge(
-  event: StakeSlashed
+  indexer: string,
+  blockNumber: BigInt
 ): void {
-  _processStakeSlashed(event.params.indexer.toHexString());
+  restartBadgeStreak(BADGE_NAME_NEVER_SLASHED, indexer, blockNumber);
 }
 
-function _processStakeSlashed(indexerID: string): void {
-  let entityStats = createOrLoadEntityStats();
-  let indexer = createOrLoadIndexer(indexerID);
-  let indexerEra = createOrLoadIndexerEra(
-    indexer.id,
-    entityStats.lastEraProcessed
+function _badgeDefinition(): BadgeDefinition {
+  return createOrLoadBadgeDefinition(
+    BADGE_NAME_NEVER_SLASHED,
+    BADGE_URL_HANDLE_NEVER_SLASHED,
+    BADGE_DESCRIPTION_NEVER_SLASHED,
+    BigInt.fromI32(BADGE_VOTE_POWER_NEVER_SLASHED),
+    "TBD",
+    "TBD"
   );
-
-  indexerEra.isSlashed = true;
-  indexerEra.save();
-}
-
-export function processNeverSlashedBadgesForEra(
-  era: BigInt
-): void {
-  let entityStats = createOrLoadEntityStats();
-  for (let i = 1; i < entityStats.indexerCount; i++) {
-    let indexerCount = IndexerCount.load(i.toString());
-    let indexerEra = createOrLoadIndexerEra(indexerCount.indexer, era);
-    if (!indexerEra.isSlashed) {
-      createNeverSlashedBadge(indexerCount.indexer, era);
-    }
-  }
 }

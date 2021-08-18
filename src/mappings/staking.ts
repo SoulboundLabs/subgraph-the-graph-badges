@@ -8,20 +8,18 @@ import {
   AllocationCreated,
   StakeDelegated,
   StakeDelegatedLocked,
-  StakeSlashed
+  StakeSlashed,
 } from "../../generated/Staking/Staking";
 import {
-  processAllocationClosedFor28DaysLaterBadge,
-  processAllocationCreatedFor28DaysLaterBadge
-} from "../Badges/28DaysLater";
-import { processStakeDelegatedForDelegationNationBadge } from "../Badges/delegationNation";
-import { 
-  processStakeDelegatedForDelegationStreakBadge,
-  processStakeDelegatedLockedForDelegationStreakBadge 
-} from "../Badges/delegationStreak";
-import { processAllocationClosedForFirstToCloseBadge } from "../Badges/firstToClose";
-import { processStakeSlashedForNeverSlashedBadge } from "../Badges/neverSlashed";
-import { log } from '@graphprotocol/graph-ts'
+  processAllocationClosed,
+  processAllocationCreated,
+  processStakeSlashed,
+} from "../helpers/indexerManager";
+import {
+  processStakeDelegated,
+  processStakeDelegatedLocked,
+} from "../helpers/delegationManager";
+import { log } from "@graphprotocol/graph-ts";
 
 /**
  * @dev Emitted when `indexer` allocated `tokens` amount to `subgraphDeploymentID`
@@ -38,7 +36,7 @@ import { log } from '@graphprotocol/graph-ts'
  */
 export function handleAllocationCreated(event: AllocationCreated): void {
   log.debug("AllocationCreated event found", []);
-  processAllocationCreatedFor28DaysLaterBadge(event);
+  processAllocationCreated(event);
 }
 
 /**
@@ -60,8 +58,7 @@ export function handleAllocationCreated(event: AllocationCreated): void {
  */
 export function handleAllocationClosed(event: AllocationClosed): void {
   log.debug("AllocationClosed event found", []);
-  processAllocationClosedForFirstToCloseBadge(event);
-  processAllocationClosedFor28DaysLaterBadge(event);
+  processAllocationClosed(event);
 }
 
 /**
@@ -75,9 +72,7 @@ export function handleAllocationClosed(event: AllocationClosed): void {
  */
 export function handleStakeDelegated(event: StakeDelegated): void {
   log.debug("StakeDelegated event found", []);
-  // can skip notifying DelegationNation code if streak badge notifies nation badge when unique delegations are found
-  //processStakeDelegatedForDelegationNationBadge(event);
-  processStakeDelegatedForDelegationStreakBadge(event);
+  processStakeDelegated(event);
 }
 
 /**
@@ -92,7 +87,7 @@ export function handleStakeDelegated(event: StakeDelegated): void {
  */
 export function handleStakeDelegatedLocked(event: StakeDelegatedLocked): void {
   log.debug("StakeDelegatedLocked event found", []);
-  processStakeDelegatedLockedForDelegationStreakBadge(event);
+  processStakeDelegatedLocked(event);
 }
 
 /**
@@ -106,5 +101,5 @@ export function handleStakeDelegatedLocked(event: StakeDelegatedLocked): void {
  */
 export function handleStakeSlashed(event: StakeSlashed): void {
   log.debug("StakeSlashed event found", []);
-  processStakeSlashedForNeverSlashedBadge(event);
+  processStakeSlashed(event);
 }

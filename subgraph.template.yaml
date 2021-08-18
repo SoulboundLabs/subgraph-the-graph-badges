@@ -43,7 +43,9 @@ dataSources:
       language: wasm/assemblyscript
       file: ./src/mappings/staking.ts
       entities:
-        - SubgraphDeployment
+        - BadgeAward
+        - Indexer
+        - Delegator
       abis:
         - name: Staking
           file: ./node_modules/@graphprotocol/contracts/dist/abis/Staking.json
@@ -72,6 +74,11 @@ dataSources:
       file: ./src/mappings/curation.ts
       entities:
         - Curator
+        - GraphAccount
+        - Winner
+        - SignalledStake
+        - BadgeDefinition
+        - BadgeAward
       abis:
         - name: Curation
           file: ./node_modules/@graphprotocol/contracts/dist/abis/Curation.json
@@ -80,3 +87,34 @@ dataSources:
           handler: handleCurationSignal
         - event: Burned(indexed address,indexed bytes32,uint256,uint256)
           handler: handleCurationBurn
+  - kind: ethereum/contract
+    name: GNS
+    network: "{{network}}"
+    source:
+      address: "{{gns}}"
+      abi: GNS
+      startBlock: {{blockNumber}}
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.4
+      language: wasm/assemblyscript
+      file: ./src/mappings/gns.ts
+      entities:
+        - Subgraph
+        - Publisher
+        - Curator
+        - GraphAccount
+        - Winner
+        - SignalledStake
+        - BadgeDefinition
+        - BadgeAward
+      abis:
+        - name: GNS
+          file: ./node_modules/@graphprotocol/contracts/dist/abis/GNS.json
+        - name: ENS
+          file: ./node_modules/@graphprotocol/contracts/dist/abis/IENS.json
+        - name: ENSPublicResolver
+          file: ./node_modules/@graphprotocol/contracts/dist/abis/IPublicResolver.json
+      eventHandlers:
+        - event: SubgraphPublished(indexed address,indexed uint256,indexed bytes32,bytes32)
+          handler: handleSubgraphPublished

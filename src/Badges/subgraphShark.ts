@@ -1,16 +1,14 @@
-import { BadgeAward, Curator, BadgeDefinition, SignalledStake } from "../../generated/schema";
+import { Curator, BadgeDefinition } from "../../generated/schema";
 import { BigInt } from "@graphprotocol/graph-ts/index";
 import {
-  createAwardedAtBlock,
+  createBadgeAward,
   createOrLoadBadgeDefinition,
-  addVotingPower,
-  incrementWinner
 } from "../helpers/models";
 import {
   BADGE_NAME_SUBGRAPH_SHARK,
   BADGE_DESCRIPTION_SUBGRAPH_SHARK,
   BADGE_URL_HANDLE_SUBGRAPH_SHARK,
-  BADGE_VOTE_POWER_SUBGRAPH_SHARK
+  BADGE_VOTE_POWER_SUBGRAPH_SHARK,
 } from "../helpers/constants";
 
 export function processCurationBurnForSubgraphShark(
@@ -20,32 +18,8 @@ export function processCurationBurnForSubgraphShark(
   blockNumber: BigInt
 ): void {
   if (burnPrice.gt(costBasis)) {
-    _awardSubgraphSharkBadge(curator, blockNumber);
+    createBadgeAward(_badgeDefinition(), curator.id, blockNumber);
   }
-}
-
-function _awardSubgraphSharkBadge(
-  curator: Curator, 
-  blockNumber: BigInt): void {
-
-  let badgeDefinition = _badgeDefinition();
-  badgeDefinition.badgeCount = badgeDefinition.badgeCount + 1;
-  badgeDefinition.save();
-
-  let badgeNumberString = BigInt.fromI32(badgeDefinition.badgeCount).toString();
-
-  // award badge
-  let badgeId = BADGE_NAME_SUBGRAPH_SHARK.concat("-")
-    .concat(badgeNumberString);
-  let badge = new BadgeAward(badgeId);
-  let winner = incrementWinner(curator.id);
-  badge.winner = winner.id;
-  badge.definition = badgeDefinition.id;
-  badge.awardedAt = createAwardedAtBlock(badge, blockNumber).id;
-  badge.badgeNumber = badgeDefinition.badgeCount;
-  badge.save();
-
-  addVotingPower(curator.id, badgeDefinition.votingPower);
 }
 
 function _badgeDefinition(): BadgeDefinition {

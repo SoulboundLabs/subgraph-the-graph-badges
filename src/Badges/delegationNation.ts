@@ -1,46 +1,34 @@
-import { DelegatedStake, Delegator } from "../../generated/schema";
-import { StakeDelegated } from "../../generated/Staking/Staking";
+import { Delegator, BadgeDefinition } from "../../generated/schema";
 import { BigInt } from "@graphprotocol/graph-ts/index";
 import {
-  createDelegationNationBadge,
-  createOrLoadDelegator,
+  createBadgeAward,
+  createOrLoadBadgeDefinition,
 } from "../helpers/models";
+import {
+  BADGE_NAME_DELEGATION_NATION,
+  BADGE_DESCRIPTION_DELEGATION_NATION,
+  BADGE_URL_HANDLE_DELEGATION_NATION,
+  BADGE_VOTE_POWER_DELEGATION_NATION,
+} from "../helpers/constants";
 
-export function processStakeDelegatedForDelegationNationBadge(
-  event: StakeDelegated
+export function processUniqueDelegationForDelegationNationBadge(
+  delegator: Delegator,
+  blockNumber: BigInt
 ): void {
-  // let indexerID = event.params.indexer.toHexString();
-  // let delegatorID = event.params.delegator.toHexString();
-  // let id = delegatorID.concat("-").concat(indexerID);
-  // let delegatedStake = DelegatedStake.load(id);
-
-  // if (delegatedStake == null) {
-  //   delegatedStake = new DelegatedStake(id);
-  //   delegatedStake.save();
-
-  //   let delegator = createOrLoadDelegator(delegatorID);
-  //   let uniqueDelegationCount = delegator.uniqueDelegationCount + 1;
-
-  //   delegator.uniqueDelegationCount = uniqueDelegationCount;
-  //   delegator.save();
-
-  //   awardDelegationNationBadge(delegator);
-  // }
-}
-
-// DelegationNation shares Delegator entities with DelegationStreak. createOrLoadDelegatedStake
-// can call this function to piggy-back on listeners
-export function processUniqueDelegation(delegator: Delegator, blockNumber: BigInt): void {
-  delegator.uniqueDelegationCount = delegator.uniqueDelegationCount + 1;
-  delegator.save();
-  awardDelegationNationBadge(delegator, blockNumber);
-}
-
-function awardDelegationNationBadge(delegator: Delegator, blockNumber: BigInt): void {
-  let minUniqueDelegations = delegator.uniqueDelegationCount >= 3;
-  let matchesBadgeLevel = delegator.uniqueDelegationCount % 3 == 0;
-
+  let minUniqueDelegations = delegator.uniqueActiveDelegationCount >= 3;
+  let matchesBadgeLevel = delegator.uniqueActiveDelegationCount % 3 == 0;
   if (minUniqueDelegations && matchesBadgeLevel) {
-    createDelegationNationBadge(delegator, blockNumber);
+    createBadgeAward(_badgeDefinition(), delegator.id, blockNumber);
   }
+}
+
+function _badgeDefinition(): BadgeDefinition {
+  return createOrLoadBadgeDefinition(
+    BADGE_NAME_DELEGATION_NATION,
+    BADGE_URL_HANDLE_DELEGATION_NATION,
+    BADGE_DESCRIPTION_DELEGATION_NATION,
+    BigInt.fromI32(BADGE_VOTE_POWER_DELEGATION_NATION),
+    "TBD",
+    "TBD"
+  );
 }
