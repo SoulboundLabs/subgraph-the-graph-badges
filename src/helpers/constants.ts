@@ -68,20 +68,20 @@ export const BADGE_STREAK_MIN_CLOSES_28_EPOCHS_LATER = 3;
 
 export const BADGE_NAME_NEVER_SLASHED = "Never Slashed";
 export const BADGE_DESCRIPTION_NEVER_SLASHED =
-  "Awarded to indexers who don't get slashed during a era";
+  "Awarded to indexers who don't get slashed for at least 30 days";
 export const BADGE_URL_HANDLE_NEVER_SLASHED = "never-slashed";
 export const BADGE_VOTE_POWER_NEVER_SLASHED = 1;
 export const BADGE_STREAK_MIN_BLOCKS_NEVER_SLASHED = 1000;
 
 export const BADGE_NAME_DELEGATION_NATION = "Delegation Nation";
 export const BADGE_DESCRIPTION_DELEGATION_NATION =
-  "Awarded to delegators who delegate to 3 or more indexers during any epoch";
+  "Awarded to delegators who delegate to 3 or more indexers";
 export const BADGE_URL_HANDLE_DELEGATION_NATION = "delegation-nation";
 export const BADGE_VOTE_POWER_DELEGATION_NATION = 1;
 
 export const BADGE_NAME_DELEGATION_STREAK = "Delegation Streak";
 export const BADGE_DESCRIPTION_DELEGATION_STREAK =
-  "Awarded to delegators who delegate > 0 for > 0 consecutive blocks";
+  "Awarded to delegators who delegate for at least 30 consecutive days";
 export const BADGE_URL_HANDLE_DELEGATION_STREAK = "delegation-streak";
 export const BADGE_VOTE_POWER_DELEGATION_STREAK = 1;
 export const BADGE_STREAK_MIN_BLOCKS_DELEGATION_STREAK = 1000;
