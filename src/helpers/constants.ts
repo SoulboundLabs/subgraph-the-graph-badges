@@ -32,6 +32,10 @@ export function oneBI(): BigInt {
   return BigInt.fromI32(1);
 }
 
+export function negOneBI(): BigInt {
+  return BigInt.fromI32(-1);
+}
+
 export function oneDay(): BigInt {
   return BigInt.fromI32(60 * 60 * 24);
 }
@@ -60,12 +64,14 @@ export const BADGE_DESCRIPTION_28_EPOCHS_LATER =
   "Awarded to indexers who close their allocations every 28 epochs or fewer";
 export const BADGE_URL_HANDLE_28_EPOCHS_LATER = "28-epochs-later";
 export const BADGE_VOTE_POWER_28_EPOCHS_LATER = 1;
+export const BADGE_STREAK_MIN_CLOSES_28_EPOCHS_LATER = 3;
 
 export const BADGE_NAME_NEVER_SLASHED = "Never Slashed";
 export const BADGE_DESCRIPTION_NEVER_SLASHED =
   "Awarded to indexers who don't get slashed during a era";
 export const BADGE_URL_HANDLE_NEVER_SLASHED = "never-slashed";
 export const BADGE_VOTE_POWER_NEVER_SLASHED = 1;
+export const BADGE_STREAK_MIN_BLOCKS_NEVER_SLASHED = 1000;
 
 export const BADGE_NAME_DELEGATION_NATION = "Delegation Nation";
 export const BADGE_DESCRIPTION_DELEGATION_NATION =
@@ -78,15 +84,16 @@ export const BADGE_DESCRIPTION_DELEGATION_STREAK =
   "Awarded to delegators who delegate > 0 for > 0 consecutive blocks";
 export const BADGE_URL_HANDLE_DELEGATION_STREAK = "delegation-streak";
 export const BADGE_VOTE_POWER_DELEGATION_STREAK = 1;
+export const BADGE_STREAK_MIN_BLOCKS_DELEGATION_STREAK = 1000;
 
-export const BADGE_NAME_SUBGRAPH_CONNOISSEUR = "Subgraph Connoisseur";
-export const BADGE_DESCRIPTION_SUBGRAPH_CONNOISSEUR = 
-  "Awarded to curators who signal on 3 or more subgraphs";
-export const BADGE_URL_HANDLE_SUBGRAPH_CONNOISSEUR = "subgraph-connoisseur";
-export const BADGE_VOTE_POWER_SUBGRAPH_CONNOISSEUR = 1;
+export const BADGE_NAME_PLANET_OF_THE_APED = "Planet Of The Aped";
+export const BADGE_DESCRIPTION_PLANET_OF_THE_APED =
+  "Awarded to curators who signal within 420 blocks of a subgraph being published";
+export const BADGE_URL_HANDLE_PLANET_OF_THE_APED = "planet-of-the-aped";
+export const BADGE_VOTE_POWER_PLANET_OF_THE_APED = 1;
 
 export const BADGE_NAME_SUBGRAPH_SHARK = "Subgraph Shark";
-export const BADGE_DESCRIPTION_SUBGRAPH_SHARK = 
+export const BADGE_DESCRIPTION_SUBGRAPH_SHARK =
   "Awarded to curators who sell curation shares for a profit";
 export const BADGE_URL_HANDLE_SUBGRAPH_SHARK = "subgraph-shark";
 export const BADGE_VOTE_POWER_SUBGRAPH_SHARK = 1;

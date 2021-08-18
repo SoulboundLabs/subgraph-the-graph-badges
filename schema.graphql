@@ -1,3 +1,7 @@
+########################
+## The Graph Entities ##
+########################
+
 """
 Singleton entity that tracks numbers and stats
 """
@@ -10,6 +14,8 @@ type EntityStats @entity {
   delegatorCount: Int!
   "Number of curators"
   curatorCount: Int!
+  "Number of publishers"
+  publisherCount: Int!
   "Most recent Era processed for Indexer badges"
   lastEraProcessed: BigInt!
 }
@@ -17,28 +23,188 @@ type EntityStats @entity {
 type Winner @entity {
   "ETH address of the winner"
   id: ID!
-  "Number of badges awarded to address"
-  badgesAwarded: Int!
+  "Number of badges won"
+  badgeCount: Int!
+  "Number of badges minted"
+  mintedBadgeCount: Int!
+  "Voting power accumulated from all badges"
+  votingPower: BigInt!
+  "Tracks the last block this subgraph updated the internal status of this account"
+  lastSyncBlockNumber: BigInt!
+  "Badges awarded to address"
+  badgesAwarded: [BadgeAward!]! @derivedFrom(field: "winner")
+  "Graph Account associated with this ETH address. Null until activity is detected"
+  graphAccount: GraphAccount @derivedFrom(field: "winner")
 }
+
+type GraphAccount @entity {
+  "ETH address of Graph Account"
+  id: ID!
+  "Winner associated with this Graph Account"
+  winner: Winner!
+  "Number of Graph badges awarded to this account"
+  badgeCount: Int!
+  "Voting power accumulated from graph badges"
+  votingPower: BigInt!
+  "Indexer fields for this Graph Account. Null if never indexed"
+  indexer: Indexer @derivedFrom(field: "account")
+  "Delegator fields for this Graph Account. Null if never delegated"
+  delegator: Delegator @derivedFrom(field: "account")
+  "Curator fields for this Graph Account. Null if never curated"
+  curator: Curator @derivedFrom(field: "account")
+  "Developer fields for this Graph Account. Null if never published subgraphs"
+  publisher: Publisher @derivedFrom(field: "account")
+}
+
+"""
+Metadata for the Indexer along with parameters and staking data
+"""
+type Indexer @entity {
+  "Address of Indexer"
+  id: ID!
+  "Graph Account associated with this indexer"
+  account: GraphAccount!
+  "Number of currently open allocations"
+  uniqueOpenAllocationCount: Int!
+  "Allocations created by this indexer"
+  allocations: [Allocation!]! @derivedFrom(field: "indexer")
+}
+
+"""
+A state channel Allocation representing a single Indexer-Subgraph stake
+"""
+type Allocation @entity {
+  "Channel Address"
+  id: ID!
+  "Epoch this allocation was created"
+  createdAtEpoch: BigInt!
+  "Epoch this allocation was closed in"
+  closedAtEpoch: BigInt
+  "Indexer that created this allocation"
+  indexer: Indexer!
+  "Subgraph for this allocation"
+  subgraph: Subgraph!
+}
+
+"""
+Metadata for the Delegator
+"""
+type Delegator @entity {
+  "Address of Delegator"
+  id: ID!
+  "Graph Account associated with this delegator"
+  account: GraphAccount!
+  "Number of active delegations with unique indexers"
+  uniqueActiveDelegationCount: Int!
+}
+
+"""
+Metadata for the Delegator
+"""
+type DelegatedStake @entity {
+  "Delegator + Indexer"
+  id: ID!
+  "Delegator or this stake"
+  delegator: Delegator!
+  "Indexer that was delegated to"
+  indexer: Indexer!
+  "Delegation shares"
+  shares: BigInt!
+}
+
+"""
+Metadata for the Curator
+"""
+type Curator @entity {
+  "Address of Curator"
+  id: ID!
+  "Graph Account associated with this curator"
+  account: GraphAccount!
+  "Number of different subgraphs Curator has signalled"
+  uniqueSignalCount: Int!
+}
+
+"""
+Metadata for the Curator
+"""
+type SignalledStake @entity {
+  "{Curator}-{SubgraphId}"
+  id: ID!
+  "Curator who signalled"
+  curator: Curator!
+  "Subgraph that was signalled on"
+  subgraphId: Subgraph!
+  "Amount of signal shares"
+  signal: BigInt!
+  "Amount of GRT gained/lost"
+  tokenBalance: BigInt!
+}
+
+type Publisher @entity {
+  "ETH address of Publisher Account"
+  id: ID!
+  "Graph Account associated with this publisher"
+  account: GraphAccount!
+  "Subgraphs published by this account"
+  subgraphs: [Subgraph!]! @derivedFrom(field: "owner")
+}
+
+type Subgraph @entity {
+  "subgraph deployment id"
+  id: ID!
+  "Graph Account that published this subgraph"
+  owner: Publisher!
+  "First indexer to close an allocation on this subgraph"
+  firstToClose: Indexer
+  "block which this subgraph was published (ignores versioning)"
+  blockPublished: BigInt!
+}
+
+
+########################
+#### Badge Entities ####
+########################
 
 """
 The badge that is awarded to winner
 """
 type BadgeAward @entity {
+  "{badgeName}-{winner}"
   id: ID!
   "Address of the winner"
   winner: Winner!
-  "Block number or era in which badge was awarded"
-  awardedAt: AwardedAt!
+  "Block number in which badge was awarded"
+  blockAwarded: BigInt!
   "Additional details about the badge"
   definition: BadgeDefinition!
   "Number in which the badge was awarded"
   badgeNumber: Int!
   "Properties for streak type badges"
-  streakProperties: BadgeStreakProperties
+  streakProperties: BadgeStreakProperties @derivedFrom(field: "badgeAward")
 }
 
-"Additional details related to the badge"
+"""
+Properties for streak badges. Assigned when streak has ended.
+"""
+type BadgeStreakProperties @entity {
+  "{badgeName}-{winner}"
+  id: ID!
+  "BadgeAward associated with this streak"
+  badgeAward: BadgeAward!
+  "Block number when the streak started"
+  streakStartBlock: BigInt!
+}
+
+type OngoingBadgeStreak @entity {
+  "{badgeName}-{winner}"
+  id: ID!
+  "Block when this streak started"
+  streakStartBlock: BigInt!
+}
+
+"""
+Additional details related to the badge
+"""
 type BadgeDefinition @entity {
   "Name of the badge"
   id: ID!
@@ -58,32 +224,25 @@ type BadgeDefinition @entity {
   urlHandle: String!
   "Associated protocol for the badge"
   protocol: Protocol!
+  "Optional definition for streak badges"
+  streakDefinition: BadgeStreakDefinition
 }
 
-type BadgeStreakProperties @entity {
+"""
+Definition properties for streak badges
+"""
+type BadgeStreakDefinition @entity {
+  "Name of the badge"
   id: ID!
-  badgeAward: BadgeAward!
-  "Useful for calculating delegation streak length"
-  streakStartBlockNumber: BigInt!
+  "Associated BadgeDefinition"
+  badgeDefinition: BadgeDefinition!
+  "Minimum streak length for badge to be awarded (blocks)"
+  minimumBlocks: BigInt!
 }
 
-"Every BadgeAward was awarded at a block or era"
-type AwardedAt @entity {
-  id: ID!
-  "Type (block, era, etc.) of value property"
-  type: AwardedAtType!
-  "Number representing a point in time the badge was awarded"
-  value: BigInt!
-  "Badge that was awarded"
-  badgeAward: BadgeAward!
-}
-
-"BadgeAwards are created on a per block or per era basis"
-enum AwardedAtType {
-  Block
-  Era
-}
-
+"""
+Protocols indexed by this subgraph
+"""
 type Protocol @entity {
   "Name of the protocol"
   id: ID!
@@ -93,129 +252,4 @@ type Protocol @entity {
   description: String!
   "Website for the protocol"
   website: String!
-}
-
-"""
-Created when any indexer is instantiated to track order of indexers
-"""
-type IndexerCount @entity {
-  "Numeric count of Indexer used during for loops"
-  id: ID!
-  "Associated indexer"
-  indexer: Indexer!
-}
-
-"""
-Created when any delegator is instantiated to track order of delegators
-"""
-type DelegatorCount @entity {
-  "Numeric count of Delegator used during for loops"
-  id: ID!
-  "Associated delegator"
-  delegator: Delegator!
-}
-
-"""
-Metadata for the Indexer along with parameters and staking data
-"""
-type Indexer @entity {
-  "Address of Indexer"
-  id: ID!
-  "Percentage of eras indexer has earned badge"
-  twentyEightEpochsLaterBadgePercentage: BigDecimal!
-  "Number of eras indexer failed to earn badge"
-  ineligibleTwentyEightEpochsLaterBadgeCount: Int!
-  "Number of times indexer failed to earn badge"
-  isClosingAllocationLateCount: Int!
-}
-
-"""
-Metadata for the Delegator
-"""
-type Delegator @entity {
-  "Address of Delegator"
-  id: ID!
-  "Number of delegations with unique indexers"
-  uniqueDelegationCount: Int!
-  "Number of active delegations with unique indexers"
-  uniqueActiveDelegationCount: Int!
-  "Block number when most recent delegation streak was started"
-  streakStartBlockNumber: BigInt!
-}
-
-"""
-Metadata for the Curator
-"""
-type Curator @entity {
-  "Address of Curator"
-  id: ID!
-  "Number of different subgraphs Curator has signalled"
-  uniqueSignalCount: Int!
-}
-
-"""
-Addresses that have been awarded badges that come with voting power
-"""
-type Voter @entity {
-  "Address of protocol worker"
-  id: ID!
-  "Cumulative voting power across all badges"
-  votingPower: BigInt!
-}
-
-"""
-Metadata for the Delegator
-"""
-type DelegatedStake @entity {
-  "Delegator + Indexer"
-  id: ID!
-  delegator: Delegator!
-  indexer: Indexer!
-  shares: BigInt!
-}
-
-"""
-Metadata for the Curator
-"""
-type SignalledStake @entity {
-  "{Curator}-{SubgraphId}"
-  id: ID!
-  curator: Curator!
-  subgraphId: String!
-  signal: BigInt!
-  tokenBalance: BigInt!
-}
-
-
-"""
-Joins Indexer metrics over a particular era
-"""
-type IndexerEra @entity {
-  id: ID! # {indexer}-{era}
-  indexer: Indexer!
-  era: BigInt!
-  isClosingAllocationLate: Boolean!
-  isSlashed: Boolean!
-}
-
-"""
-A state channel Allocation representing a single Indexer-SubgraphDeployment stake
-"""
-type Allocation @entity {
-  "Channel Address"
-  id: ID!
-  "Epoch this allocation was created"
-  createdAtEpoch: BigInt!
-  "Epoch this allocation was closed in"
-  closedAtEpoch: BigInt
-  "Indexer that created this Allocation"
-  indexer: Indexer!
-}
-
-enum AllocationStatus {
-  Null # == indexer == address(0)
-  Active # == not Null && tokens > 0 #
-  Closed # == Active && closedAtEpoch != 0. Still can collect, while you are waiting to be finalized. a.k.a settling
-  Finalized # == Closing && closedAtEpoch + channelDisputeEpochs > now(). Note, the subgraph has no way to return this value. it is implied
-  Claimed # == not Null && tokens == 0 - i.e. finalized, and all tokens withdrawn
 }
