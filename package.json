@@ -12,8 +12,8 @@
     "create-local": "graph create badgeth-dao/the-graph-badges --node http://127.0.0.1:8020",
     "codegen": "graph codegen",
     "build": "graph build",
-    "deploy": "graph deploy badgeth-dao/the-graph-badges --ipfs https://api.thegraph.com/ipfs/ --node https://api.thegraph.com/deploy/",
-    "deploy-dev": "graph deploy badgeth-dao/the-graph-badges-rinkeby --ipfs https://api.thegraph.com/ipfs/ --node https://api.thegraph.com/deploy/",
+    "deploy": "graph deploy --studio badgeth-the-graph",
+    "deploy-dev": "graph deploy --studio badgeth-the-graph-rinkeby",
     "deploy-hardforks": "graph deploy hardforksoverknives/Badgeth-dev --ipfs https://api.thegraph.com/ipfs/ --node https://api.thegraph.com/deploy/",
     "deploy-local": "graph deploy badgeth-dao/the-graph-badges --ipfs http://localhost:5001 --node http://127.0.0.1:8020",
     "prep:addresses:mainnet": "ts-node config/mainnetAddressScript.ts && mustache ./config/generatedAddresses.json ./config/addresses.template.ts > ./config/addresses.ts",
@@ -26,7 +26,7 @@
     "**/*.ts": "prettier --write --ignore-unknown"
   },
   "devDependencies": {
-    "@graphprotocol/graph-cli": "graphprotocol/graph-cli",
+    "@graphprotocol/graph-cli": "^0.21.1",
     "husky": "^6.0.0",
     "lint-staged": "^11.0.0",
     "prettier": "^2.3.0",

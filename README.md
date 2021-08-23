@@ -21,6 +21,7 @@ npm run prep:addresses:mainnet
 2. Deploy Locally (Please ensure that graph-node docker processes are running)
 
 ```bash
+npm run
 npm run create-local
 npm run deploy-local
 ```
