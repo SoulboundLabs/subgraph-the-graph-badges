@@ -47,13 +47,11 @@ npm i
 
 3. Create your subgraph.yaml on Rinkeby or Mainent
 
-Option A: Rinkeby
-
 ```bash
 npm run prep:addresses:rinkeby
 ```
 
-Option B: Mainnet
+OR
 
 ```bash
 npm run prep:addresses:mainnet
@@ -78,15 +76,7 @@ npm run deploy-local
 graph auth  --studio <YOUR_AUTH_TOKEN_HERE>
 ```
 
-7. Deploy to The Graph Studio. Authentication to our Studio account required.
-
-Option A: Rinkeby
-
-```bash
-npm run deploy-dev
-```
-
-Option B: Mainnet
+7. Deploy to The Graph Studio.
 
 ```bash
 npm run deploy
