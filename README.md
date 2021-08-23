@@ -1,6 +1,6 @@
 # The Graph Badges
 
-Badgeth is a dApp for identifying and rewarding noteworthy behavior on the Ethereum blockchain by issuing NFT badges. This repo houses the subgraph responsible for monitoring and rewarding users within The Graph protocol. For more information, please visit [Badgeth](https://badgeth.com) or join our [Discord](https://discord.gg/464p6GzrWq).
+Badgeth is a dApp for identifying and rewarding noteworthy behavior on the Ethereum blockchain by issuing NFT badges. This repo houses the subgraph responsible for monitoring and rewarding users within The Graph protocol. For more information, please visit our [website](https://badgeth.com) or join our [Discord](https://discord.gg/464p6GzrWq).
 
 ## Setup
 
@@ -10,7 +10,7 @@ Badgeth is a dApp for identifying and rewarding noteworthy behavior on the Ether
 npm i
 ```
 
-2. Start your local graph-node (If you have a M1 Macbook, please talk with us on Discord for some custom workarounds for the following steps.)
+2. Start your local graph-node. If you have a M1 Macbook, please talk with us on Discord for some custom workarounds for the following steps.
 
    - Clone graph-node
 
@@ -78,7 +78,7 @@ npm run deploy-local
 graph auth  --studio <YOUR_AUTH_TOKEN_HERE>
 ```
 
-7. Deploy to The Graph Studio (Authentication to Badgeth's The Graph account required)
+7. Deploy to The Graph Studio. Authentication to our Studio account required.
 
 Option A: Rinkeby
 
