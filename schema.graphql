@@ -226,7 +226,7 @@ type BadgeDefinition @entity {
   "Optional definition for streak badges"
   streakDefinition: BadgeStreakDefinition
   "Badges awarded from this definition"
-  badgesAwarded: [BadgeAward!]! @derivedFrom(field: "definition")
+  badgeAwards: [BadgeAward!]! @derivedFrom(field: "definition")
 }
 
 """
