@@ -160,7 +160,6 @@ type Subgraph @entity {
   blockPublished: BigInt!
 }
 
-
 ########################
 #### Badge Entities ####
 ########################
@@ -226,6 +225,8 @@ type BadgeDefinition @entity {
   protocol: Protocol!
   "Optional definition for streak badges"
   streakDefinition: BadgeStreakDefinition
+  "Badges awarded from this definition"
+  badgesAwarded: [BadgeAward!]! @derivedFrom(field: "definition")
 }
 
 """
