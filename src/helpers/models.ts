@@ -1,6 +1,7 @@
 import { BigInt } from "@graphprotocol/graph-ts/index";
 import {
   BadgeAward,
+  BadgeAwardCount,
   BadgeDefinition,
   BadgeStreakProperties,
   EntityStats,
@@ -14,7 +15,6 @@ import {
   PROTOCOL_NAME_THE_GRAPH,
   PROTOCOL_URL_HANDLE_THE_GRAPH,
   PROTOCOL_WEBSITE_THE_GRAPH,
-  zeroBD,
   zeroBI,
 } from "./constants";
 import { createOrLoadBadgeStreakDefinition } from "./streakManager";
@@ -105,6 +105,27 @@ export function createOrLoadStreakProperties(
   return streakProps as BadgeStreakProperties;
 }
 
+export function createOrLoadBadgeAwardCount(
+  badgeDefinition: BadgeDefinition,
+  winnerId: string
+): BadgeAwardCount {
+  let id = badgeDefinition.id.concat("-").concat(winnerId);
+
+  let badgeAwardCount = BadgeAwardCount.load(id);
+
+  if (badgeAwardCount == null) {
+    badgeAwardCount = new BadgeAwardCount(id);
+    badgeAwardCount.winner = winnerId;
+    badgeAwardCount.definition = badgeDefinition.id;
+    badgeAwardCount.badgeCount = 0;
+  }
+
+  badgeAwardCount.badgeCount = badgeAwardCount.badgeCount + 1;
+  badgeAwardCount.save();
+
+  return badgeAwardCount as BadgeAwardCount;
+}
+
 export function createBadgeAward(
   badgeDefinition: BadgeDefinition,
   winnerId: string,
@@ -119,12 +140,15 @@ export function createBadgeAward(
   // award badge
   let badgeId = badgeDefinition.id.concat("-").concat(badgeNumberString);
   let badgeAward = BadgeAward.load(badgeId);
+
+  let badgeAwardCount = createOrLoadBadgeAwardCount(badgeDefinition, winnerId);
   if (badgeAward == null) {
     badgeAward = new BadgeAward(badgeId);
     badgeAward.winner = winnerId;
     badgeAward.definition = badgeDefinition.id;
     badgeAward.blockAwarded = blockNumber;
-    badgeAward.badgeNumber = badgeDefinition.badgeCount;
+    badgeAward.globalBadgeNumber = badgeDefinition.badgeCount;
+    badgeAward.winnerBadgeNumber = badgeAwardCount.badgeCount;
     badgeAward.save();
   }
 

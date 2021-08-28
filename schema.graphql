@@ -168,7 +168,7 @@ type Subgraph @entity {
 The badge that is awarded to winner
 """
 type BadgeAward @entity {
-  "{badgeName}-{winner}"
+  "{badgeName}-{badgeCount}"
   id: ID!
   "Address of the winner"
   winner: Winner!
@@ -176,10 +176,26 @@ type BadgeAward @entity {
   blockAwarded: BigInt!
   "Additional details about the badge"
   definition: BadgeDefinition!
-  "Number in which the badge was awarded"
-  badgeNumber: Int!
+  "Ordered number in which the badge was awarded across all winners"
+  globalBadgeNumber: Int!
+  "Ordered number in which the badge was awarded for this winner"
+  winnerBadgeNumber: Int!
   "Properties for streak type badges"
   streakProperties: BadgeStreakProperties @derivedFrom(field: "badgeAward")
+}
+
+"""
+Tracks the number of badge awards on a per-winner/per-badge basis
+"""
+type BadgeAwardCount @entity {
+  "{badgeName}-{winner}"
+  id: ID!
+  "Address of the winner"
+  winner: Winner!
+  "Additional details about the badge"
+  definition: BadgeDefinition!
+  "Current Count of the "
+  badgeCount: Int!
 }
 
 """
