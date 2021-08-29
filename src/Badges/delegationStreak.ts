@@ -1,26 +1,25 @@
-import { Winner, BadgeDefinition } from "../../generated/schema";
+import { BigInt, log } from "@graphprotocol/graph-ts";
+import { BadgeDefinition, Winner } from "../../generated/schema";
+import {
+  BADGE_DESCRIPTION_DELEGATION_STREAK,
+  BADGE_NAME_DELEGATION_STREAK,
+  BADGE_STREAK_MIN_BLOCKS_DELEGATION_STREAK,
+  BADGE_VOTE_POWER_DELEGATION_STREAK,
+  negOneBI,
+} from "../helpers/constants";
+import {
+  createOrLoadDelegatedStake,
+  createOrLoadDelegator,
+} from "../helpers/delegationManager";
 import {
   createBadgeAward,
   createOrLoadBadgeDefinitionWithStreak,
 } from "../helpers/models";
-import { toBigInt } from "../helpers/typeConverter";
-import { log, BigInt } from "@graphprotocol/graph-ts";
-import {
-  BADGE_NAME_DELEGATION_STREAK,
-  BADGE_DESCRIPTION_DELEGATION_STREAK,
-  BADGE_URL_HANDLE_DELEGATION_STREAK,
-  BADGE_VOTE_POWER_DELEGATION_STREAK,
-  BADGE_STREAK_MIN_BLOCKS_DELEGATION_STREAK,
-  negOneBI,
-} from "../helpers/constants";
 import {
   createOrLoadOngoingBadgeStreak,
   endBadgeStreak,
 } from "../helpers/streakManager";
-import {
-  createOrLoadDelegator,
-  createOrLoadDelegatedStake,
-} from "../helpers/delegationManager";
+import { toBigInt } from "../helpers/typeConverter";
 
 export function processStakeDelegatedForDelegationStreakBadge(
   delegatorId: string,
@@ -96,7 +95,6 @@ export function updateDelegationStreak(
 function _badgeDefinition(): BadgeDefinition {
   return createOrLoadBadgeDefinitionWithStreak(
     BADGE_NAME_DELEGATION_STREAK,
-    BADGE_URL_HANDLE_DELEGATION_STREAK,
     BADGE_DESCRIPTION_DELEGATION_STREAK,
     BigInt.fromI32(BADGE_VOTE_POWER_DELEGATION_STREAK),
     "TBD",

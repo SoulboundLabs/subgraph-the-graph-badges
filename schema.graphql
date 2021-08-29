@@ -263,10 +263,4 @@ Protocols indexed by this subgraph
 type Protocol @entity {
   "Name of the protocol"
   id: ID!
-  "URL slug for the frontend"
-  urlHandle: String!
-  "Description for the protocol"
-  description: String!
-  "Website for the protocol"
-  website: String!
 }

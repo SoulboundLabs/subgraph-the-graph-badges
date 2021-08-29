@@ -10,13 +10,7 @@ import {
   Publisher,
   Winner,
 } from "../../generated/schema";
-import {
-  PROTOCOL_DESCRIPTION_THE_GRAPH,
-  PROTOCOL_NAME_THE_GRAPH,
-  PROTOCOL_URL_HANDLE_THE_GRAPH,
-  PROTOCOL_WEBSITE_THE_GRAPH,
-  zeroBI,
-} from "./constants";
+import { PROTOCOL_NAME_THE_GRAPH, zeroBI } from "./constants";
 import { createOrLoadBadgeStreakDefinition } from "./streakManager";
 import { toBigInt } from "./typeConverter";
 
@@ -171,7 +165,6 @@ function _updateAccountWithBadgeAward(badgeAward: BadgeAward): void {
 
 export function createOrLoadBadgeDefinition(
   name: string,
-  urlHandle: string,
   description: string,
   voteWeight: BigInt,
   image: string,
@@ -187,7 +180,6 @@ export function createOrLoadBadgeDefinition(
     badgeDefinition.description = description;
     badgeDefinition.image = image;
     badgeDefinition.artist = artist;
-    badgeDefinition.urlHandle = urlHandle;
     badgeDefinition.votingPower = voteWeight;
     badgeDefinition.badgeCount = 0;
 
@@ -237,9 +229,6 @@ export function createOrLoadTheGraphProtocol(): Protocol {
 
   if (protocol == null) {
     protocol = new Protocol(PROTOCOL_NAME_THE_GRAPH);
-    protocol.urlHandle = PROTOCOL_URL_HANDLE_THE_GRAPH;
-    protocol.description = PROTOCOL_DESCRIPTION_THE_GRAPH;
-    protocol.website = PROTOCOL_WEBSITE_THE_GRAPH;
     protocol.save();
   }
 

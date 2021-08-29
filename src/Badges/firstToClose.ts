@@ -1,17 +1,16 @@
 // FirstToCloseBadge - awarded to indexers who are first to close an allocation for a subgraph
 
 import { BigInt } from "@graphprotocol/graph-ts/index";
-import { Subgraph, BadgeDefinition, Allocation } from "../../generated/schema";
+import { Allocation, BadgeDefinition, Subgraph } from "../../generated/schema";
 import {
-  createOrLoadBadgeDefinition,
-  createBadgeAward,
-} from "../helpers/models";
-import {
-  BADGE_NAME_FIRST_TO_CLOSE,
   BADGE_DESCRIPTION_FIRST_TO_CLOSE,
-  BADGE_URL_HANDLE_FIRST_TO_CLOSE,
+  BADGE_NAME_FIRST_TO_CLOSE,
   BADGE_VOTE_POWER_FIRST_TO_CLOSE,
 } from "../helpers/constants";
+import {
+  createBadgeAward,
+  createOrLoadBadgeDefinition,
+} from "../helpers/models";
 
 export function processAllocationClosedForFirstToCloseBadge(
   allocation: Allocation,
@@ -31,7 +30,6 @@ export function processAllocationClosedForFirstToCloseBadge(
 function _badgeDefinition(): BadgeDefinition {
   return createOrLoadBadgeDefinition(
     BADGE_NAME_FIRST_TO_CLOSE,
-    BADGE_URL_HANDLE_FIRST_TO_CLOSE,
     BADGE_DESCRIPTION_FIRST_TO_CLOSE,
     BigInt.fromI32(BADGE_VOTE_POWER_FIRST_TO_CLOSE),
     "TBD",
