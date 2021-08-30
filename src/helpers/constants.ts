@@ -71,7 +71,7 @@ export const BADGE_DESCRIPTION_NEVER_SLASHED =
   "Awarded to indexers who don't get slashed for at least 30 days";
 export const BADGE_URL_HANDLE_NEVER_SLASHED = "never-slashed";
 export const BADGE_VOTE_POWER_NEVER_SLASHED = 1;
-export const BADGE_STREAK_MIN_BLOCKS_NEVER_SLASHED = 1000;
+export const BADGE_STREAK_MIN_BLOCKS_NEVER_SLASHED = 200000;
 
 export const BADGE_NAME_DELEGATION_NATION = "Delegation Nation";
 export const BADGE_DESCRIPTION_DELEGATION_NATION =
@@ -84,7 +84,7 @@ export const BADGE_DESCRIPTION_DELEGATION_STREAK =
   "Awarded to delegators who delegate for at least 30 consecutive days";
 export const BADGE_URL_HANDLE_DELEGATION_STREAK = "delegation-streak";
 export const BADGE_VOTE_POWER_DELEGATION_STREAK = 1;
-export const BADGE_STREAK_MIN_BLOCKS_DELEGATION_STREAK = 1000;
+export const BADGE_STREAK_MIN_BLOCKS_DELEGATION_STREAK = 200000;
 
 export const BADGE_NAME_PLANET_OF_THE_APED = "Planet Of The Aped";
 export const BADGE_DESCRIPTION_PLANET_OF_THE_APED =
