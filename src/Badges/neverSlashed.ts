@@ -1,30 +1,31 @@
-import { BigInt } from "@graphprotocol/graph-ts/index";
+import { BigInt, log } from "@graphprotocol/graph-ts";
 import {
   BADGE_DESCRIPTION_NEVER_SLASHED,
   BADGE_NAME_NEVER_SLASHED,
-  BADGE_STREAK_MIN_BLOCKS_NEVER_SLASHED,
+  BADGE_STREAK_MIN_DAYS_NEVER_SLASHED,
   BADGE_URL_HANDLE_NEVER_SLASHED,
   BADGE_VOTE_POWER_NEVER_SLASHED,
+  negOneBI,
 } from "../helpers/constants";
 import {
-  createOrLoadBadgeDefinition,
+  createOrLoadBadgeDefinitionWithStreak,
   createBadgeAward,
 } from "../helpers/models";
 import { BadgeDefinition, Winner, Indexer } from "../../generated/schema";
 import {
   createOrLoadOngoingBadgeStreak,
   endBadgeStreak,
-  restartBadgeStreak,
-  setBadgeStreak,
+  setBadgeStreakStart,
 } from "../helpers/streakManager";
+import { daysToBlocks } from "../helpers/typeConverter";
 
 export function processAllocationCreatedForNeverSlashed(
   indexer: Indexer,
-  epoch: BigInt
+  blockNumber: BigInt
 ): void {
   // start a streak if indexer went from 0 allocations to 1
   if (indexer.uniqueOpenAllocationCount == 1) {
-    setBadgeStreak(BADGE_NAME_NEVER_SLASHED, indexer.id, epoch);
+    setBadgeStreakStart(BADGE_NAME_NEVER_SLASHED, indexer.id, blockNumber);
   }
 }
 
@@ -39,17 +40,29 @@ export function updateNeverSlashedStreak(
   winner: Winner,
   blockNumber: BigInt
 ): void {
+  let minBlocks = daysToBlocks(
+    BigInt.fromI32(BADGE_STREAK_MIN_DAYS_NEVER_SLASHED)
+  );
   let badgeStreak = createOrLoadOngoingBadgeStreak(
     BADGE_NAME_NEVER_SLASHED,
     winner.id
   );
-  let minBlocks = BigInt.fromI32(BADGE_STREAK_MIN_BLOCKS_NEVER_SLASHED);
+  let hasOngoingStreak = badgeStreak.streakStartBlock.notEqual(negOneBI());
   if (
+    hasOngoingStreak &&
     blockNumber.minus(badgeStreak.streakStartBlock).gt(minBlocks) &&
     winner.lastSyncBlockNumber.minus(badgeStreak.streakStartBlock).lt(minBlocks)
   ) {
+    log.debug(
+      "awarding NeverSlashed badge\nstreak start block: {}\ncurrent block: {}\nwinner: {}",
+      [
+        badgeStreak.streakStartBlock.toString(),
+        blockNumber.toString(),
+        winner.id,
+      ]
+    );
     createBadgeAward(_badgeDefinition(), winner.id, blockNumber);
-    restartBadgeStreak(BADGE_NAME_NEVER_SLASHED, winner.id, blockNumber);
+    setBadgeStreakStart(BADGE_NAME_NEVER_SLASHED, winner.id, blockNumber);
   }
 }
 
@@ -57,16 +70,17 @@ export function processStakeSlashedForNeverSlashedBadge(
   indexer: string,
   blockNumber: BigInt
 ): void {
-  restartBadgeStreak(BADGE_NAME_NEVER_SLASHED, indexer, blockNumber);
+  setBadgeStreakStart(BADGE_NAME_NEVER_SLASHED, indexer, blockNumber);
 }
 
 function _badgeDefinition(): BadgeDefinition {
-  return createOrLoadBadgeDefinition(
+  return createOrLoadBadgeDefinitionWithStreak(
     BADGE_NAME_NEVER_SLASHED,
-    BADGE_URL_HANDLE_NEVER_SLASHED,
     BADGE_DESCRIPTION_NEVER_SLASHED,
+    BADGE_URL_HANDLE_NEVER_SLASHED,
     BigInt.fromI32(BADGE_VOTE_POWER_NEVER_SLASHED),
     "TBD",
-    "TBD"
+    "TBD",
+    daysToBlocks(BigInt.fromI32(BADGE_STREAK_MIN_DAYS_NEVER_SLASHED))
   );
 }

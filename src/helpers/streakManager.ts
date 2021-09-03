@@ -1,19 +1,32 @@
-import { BigInt } from "@graphprotocol/graph-ts/index";
+import { BigInt, log } from "@graphprotocol/graph-ts";
 import {
   OngoingBadgeStreak,
-  Winner,
   BadgeStreakDefinition,
 } from "../../generated/schema";
 import { negOneBI } from "./constants";
 import { updateDelegationStreak } from "../Badges/delegationStreak";
 import { updateNeverSlashedStreak } from "../Badges/neverSlashed";
+import { createOrLoadWinner } from "./models";
 
 export function syncAllStreaksForWinner(
-  winner: Winner,
+  winnerId: string,
   blockNumber: BigInt
 ): void {
+  log.debug("Syncing streaks for winner {}", [winnerId]);
+  let winner = createOrLoadWinner(winnerId);
   updateDelegationStreak(winner, blockNumber);
   updateNeverSlashedStreak(winner, blockNumber);
+  winner.lastSyncBlockNumber = blockNumber;
+  winner.save();
+}
+
+export function syncAllStreaksForWinners(
+  winnerIds: string[],
+  blockNumber: BigInt
+): void {
+  for (let i = 0; i < winnerIds.length; i++) {
+    syncAllStreaksForWinner(winnerIds[i], blockNumber);
+  }
 }
 
 export function createOrLoadBadgeStreakDefinition(
@@ -54,17 +67,7 @@ export function endBadgeStreak(badgeName: string, winner: string): void {
   badgeStreak.save();
 }
 
-export function restartBadgeStreak(
-  badgeName: string,
-  winner: string,
-  blockNumber: BigInt
-): void {
-  let badgeStreak = createOrLoadOngoingBadgeStreak(badgeName, winner);
-  badgeStreak.streakStartBlock = blockNumber;
-  badgeStreak.save();
-}
-
-export function setBadgeStreak(
+export function setBadgeStreakStart(
   badgeName: string,
   winner: string,
   streakStartBlock: BigInt

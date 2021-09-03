@@ -1,7 +1,12 @@
 // FirstToCloseBadge - awarded to indexers who are first to close an allocation for a subgraph
 
 import { BigInt } from "@graphprotocol/graph-ts/index";
-import { Subgraph, BadgeDefinition, Allocation } from "../../generated/schema";
+import {
+  Subgraph,
+  BadgeDefinition,
+  Allocation,
+  SubgraphDeployment,
+} from "../../generated/schema";
 import {
   createOrLoadBadgeDefinition,
   createBadgeAward,
@@ -15,16 +20,15 @@ import {
 
 export function processAllocationClosedForFirstToCloseBadge(
   allocation: Allocation,
+  subgraphDeploymentId: string,
   blockNumber: BigInt
 ): void {
-  let subgraph = Subgraph.load(allocation.subgraph);
-  if (subgraph != null) {
-    if (subgraph.firstToClose == null) {
-      subgraph.firstToClose = allocation.indexer;
-      subgraph.save();
+  let subgraphDeployment = SubgraphDeployment.load(subgraphDeploymentId);
+  if (subgraphDeployment == null) {
+    subgraphDeployment.firstToClose = allocation.indexer;
+    subgraphDeployment.save();
 
-      createBadgeAward(_badgeDefinition(), allocation.indexer, blockNumber);
-    }
+    createBadgeAward(_badgeDefinition(), allocation.indexer, blockNumber);
   }
 }
 

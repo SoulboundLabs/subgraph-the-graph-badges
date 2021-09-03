@@ -14,8 +14,10 @@ import {
   processStakeDelegatedForDelegationStreakBadge,
   processStakeDelegatedLockedForDelegationStreakBadge,
 } from "../Badges/delegationStreak";
-import { syncAllStreaksForWinner } from "./streakManager";
-import { createOrLoadWinner } from "./models";
+import { syncAllStreaksForWinners } from "./streakManager";
+import { processNewDelegatorForDelegatorTribeBadge } from "../Badges/delegationTribe";
+
+////////////////      Public
 
 export function processStakeDelegated(event: StakeDelegated): void {
   let delegatorId = event.params.delegator.toHexString();
@@ -41,9 +43,11 @@ function _processStakeDelegated(
   shares: BigInt,
   blockNumber: BigInt
 ): void {
+  syncAllStreaksForWinners([delegatorId, indexerId], blockNumber);
+
   if (_delegatedStakeExists(delegatorId, indexerId) == false) {
     createOrLoadDelegatedStake(delegatorId, indexerId);
-    let delegator = createOrLoadDelegator(delegatorId);
+    let delegator = createOrLoadDelegator(delegatorId, blockNumber);
     delegator.uniqueActiveDelegationCount =
       delegator.uniqueActiveDelegationCount + 1;
     delegator.save();
@@ -58,6 +62,8 @@ function _processStakeDelegatedLocked(
   shares: BigInt,
   blockNumber: BigInt
 ): void {
+  syncAllStreaksForWinners([delegatorId, indexerId], blockNumber);
+
   _broadcastStakeDelegatedLocked(delegatorId, indexerId, shares, blockNumber);
 }
 
@@ -67,7 +73,6 @@ function _broadcastUniqueDelegation(
   delegator: Delegator,
   blockNumber: BigInt
 ): void {
-  syncAllStreaksForWinner(createOrLoadWinner(delegator.id), blockNumber);
   processUniqueDelegationForDelegationNationBadge(delegator, blockNumber);
 }
 
@@ -77,7 +82,6 @@ function _broadcastStakeDelegated(
   shares: BigInt,
   blockNumber: BigInt
 ): void {
-  syncAllStreaksForWinner(createOrLoadWinner(delegatorId), blockNumber);
   processStakeDelegatedForDelegationStreakBadge(
     delegatorId,
     indexerId,
@@ -92,17 +96,20 @@ function _broadcastStakeDelegatedLocked(
   shares: BigInt,
   blockNumber: BigInt
 ): void {
-  syncAllStreaksForWinner(createOrLoadWinner(delegatorId), blockNumber);
   processStakeDelegatedLockedForDelegationStreakBadge(
     delegatorId,
     indexerId,
-    shares
+    shares,
+    blockNumber
   );
 }
 
 ////////////////      Models
 
-export function createOrLoadDelegator(id: string): Delegator {
+export function createOrLoadDelegator(
+  id: string,
+  blockNumber: BigInt
+): Delegator {
   let delegator = Delegator.load(id);
 
   if (delegator == null) {
@@ -116,6 +123,8 @@ export function createOrLoadDelegator(id: string): Delegator {
     let delegatorCount = entityStats.delegatorCount + 1;
     entityStats.delegatorCount = delegatorCount;
     entityStats.save();
+
+    processNewDelegatorForDelegatorTribeBadge(id, blockNumber);
   }
 
   return delegator as Delegator;

@@ -1,107 +1,185 @@
-import { Signalled, Burned } from "../../generated/Curation/Curation";
+import { NSignalMinted, NSignalBurned } from "../../generated/GNS/GNS";
 import { processUniqueSignalForPlanetOfTheAped } from "../Badges/planetOfTheAped";
-import { BigInt } from "@graphprotocol/graph-ts/index";
-import { Curator, SignalledStake } from "../../generated/schema";
+import { BigDecimal, BigInt } from "@graphprotocol/graph-ts/index";
+import { Curator, NameSignal } from "../../generated/schema";
 import { createOrLoadEntityStats } from "./models";
 import { processCurationBurnForSubgraphShark } from "../Badges/subgraphShark";
+import { zeroBD } from "./constants";
+import { log } from "@graphprotocol/graph-ts";
+import { syncAllStreaksForWinners } from "./streakManager";
+import { processNewCuratorForCuratorTribeBadge } from "../Badges/curatorTribe";
 
-export function processCurationSignal(event: Signalled): void {
-  let curatorId = event.params.curator.toHexString();
-  let subgraphId = event.params.subgraphDeploymentID.toHexString();
-  let signal = event.params.signal;
-  let tokens = event.params.tokens;
-  let blockNumber = event.block.number;
-  _processCurationSignal(curatorId, subgraphId, signal, tokens, blockNumber);
+////////////////      Public
+
+export function processCurationSignal(event: NSignalMinted): void {
+  let subgraphOwner = event.params.graphAccount.toHexString();
+  let subgraphNumber = event.params.subgraphNumber.toString();
+  let curatorId = event.params.nameCurator.toHexString();
+  let nSignal = event.params.nSignalCreated;
+  let vSignal = event.params.vSignalCreated.toBigDecimal();
+  let tokensDeposited = event.params.tokensDeposited;
+  _processCurationSignal(
+    subgraphOwner,
+    subgraphNumber,
+    curatorId,
+    nSignal,
+    vSignal,
+    tokensDeposited,
+    event.block.number
+  );
 }
 
-export function processCurationBurn(event: Burned): void {
-  let curatorId = event.params.curator.toHexString();
-  let subgraphId = event.params.subgraphDeploymentID.toHexString();
-  let signal = event.params.signal;
-  let tokens = event.params.tokens;
-  let blockNumber = event.block.number;
-  _processCurationBurn(curatorId, subgraphId, tokens, signal, blockNumber);
+export function processCurationBurn(event: NSignalBurned): void {
+  let subgraphOwner = event.params.graphAccount.toHexString();
+  let subgraphNumber = event.params.subgraphNumber.toString();
+  let curatorId = event.params.nameCurator.toHexString();
+  let nSignalBurnt = event.params.nSignalBurnt;
+  let vSignalBurnt = event.params.vSignalBurnt.toBigDecimal();
+  let tokensReceived = event.params.tokensReceived;
+  _processCurationBurn(
+    subgraphOwner,
+    subgraphNumber,
+    curatorId,
+    nSignalBurnt,
+    vSignalBurnt,
+    tokensReceived,
+    event.block.number
+  );
 }
 
 ////////////////      Event Processing
 
 function _processCurationSignal(
+  subgraphOwner: string,
+  subgraphNumber: string,
   curatorId: string,
-  subgraphId: string,
-  signal: BigInt,
-  tokens: BigInt,
+  nSignal: BigInt,
+  vSignal: BigDecimal,
+  tokensDeposited: BigInt,
   blockNumber: BigInt
 ): void {
-  let id = curatorId.concat("-").concat(subgraphId);
-  let signalledStake = SignalledStake.load(id);
-  if (signalledStake == null) {
-    signalledStake = _createSignalledStake(
-      id,
-      curatorId,
-      subgraphId,
-      tokens,
-      signal
-    );
-    let curator = createOrLoadCurator(curatorId);
-    curator.uniqueSignalCount = curator.uniqueSignalCount + 1;
-    curator.save();
+  syncAllStreaksForWinners([subgraphOwner, curatorId], blockNumber);
 
+  let subgraphId = subgraphOwner.concat("-").concat(subgraphNumber);
+  let curator = _createOrLoadCurator(curatorId, blockNumber);
+  let nameSignal = createOrLoadNameSignal(curatorId, subgraphId);
+
+  let isNameSignalBecomingActive =
+    nameSignal.nameSignal.isZero() && !nSignal.isZero();
+  if (isNameSignalBecomingActive) {
     _broadcastUniqueCurationSignal(curator, subgraphId, blockNumber);
-  } else {
-    signalledStake.tokenBalance = signalledStake.tokenBalance.plus(tokens);
-    signalledStake.signal = signalledStake.signal.plus(signal);
-    signalledStake.save();
   }
+
+  nameSignal.nameSignal = nameSignal.nameSignal.plus(nSignal);
+  nameSignal.signal = nameSignal.signal.plus(vSignal);
+  nameSignal.signalledTokens = nameSignal.signalledTokens.plus(tokensDeposited);
+
+  // nSignal
+  nameSignal.nameSignalAverageCostBasis =
+    nameSignal.nameSignalAverageCostBasis.plus(tokensDeposited.toBigDecimal());
+
+  // zero division protection
+  if (nameSignal.nameSignal.toBigDecimal() != zeroBD()) {
+    nameSignal.nameSignalAverageCostBasisPerSignal =
+      nameSignal.nameSignalAverageCostBasis
+        .div(tokensDeposited.toBigDecimal())
+        .truncate(18);
+  }
+
+  // vSignal
+  nameSignal.signalAverageCostBasis = nameSignal.signalAverageCostBasis.plus(
+    tokensDeposited.toBigDecimal()
+  );
+
+  // zero division protection
+  if (nameSignal.signal != zeroBD()) {
+    nameSignal.signalAverageCostBasisPerSignal =
+      nameSignal.signalAverageCostBasis.div(nameSignal.signal).truncate(18);
+  }
+  nameSignal.save();
 }
 
 function _processCurationBurn(
+  subgraphOwner: string,
+  subgraphNumber: string,
   curatorId: string,
-  subgraphId: string,
-  tokens: BigInt,
-  signal: BigInt,
+  nSignalBurnt: BigInt,
+  vSignalBurnt: BigDecimal,
+  tokensReceived: BigInt,
   blockNumber: BigInt
 ): void {
-  let id = curatorId.concat("-").concat(subgraphId);
-  let signalledStake = SignalledStake.load(id);
-  if (signalledStake != null) {
-    let curator = createOrLoadCurator(curatorId);
-    let avgCostBasis = signalledStake.signal.div(signalledStake.tokenBalance);
-    let burnPrice = signal.div(tokens);
-    signalledStake.signal = signalledStake.signal.minus(signal);
-    signalledStake.tokenBalance = signalledStake.tokenBalance.minus(signal);
-    signalledStake.save();
+  syncAllStreaksForWinners([subgraphOwner, curatorId], blockNumber);
 
-    _broadcastCurationBurn(curator, avgCostBasis, burnPrice, blockNumber);
+  let subgraphId = subgraphOwner.concat("-").concat(subgraphNumber);
+  let curator = _createOrLoadCurator(curatorId, blockNumber);
+
+  let nameSignal = createOrLoadNameSignal(curatorId, subgraphId);
+
+  nameSignal.nameSignal = nameSignal.nameSignal.minus(nSignalBurnt);
+  nameSignal.signal = nameSignal.signal.minus(vSignalBurnt);
+  nameSignal.unsignalledTokens =
+    nameSignal.unsignalledTokens.plus(tokensReceived);
+
+  // nSignal ACB
+  // update acb to reflect new name signal balance
+  let previousACBNameSignal = nameSignal.nameSignalAverageCostBasis;
+  nameSignal.nameSignalAverageCostBasis = nameSignal.nameSignal
+    .toBigDecimal()
+    .times(nameSignal.nameSignalAverageCostBasisPerSignal)
+    .truncate(18);
+
+  _broadcastCurationBurn(
+    curator,
+    previousACBNameSignal,
+    nameSignal.nameSignalAverageCostBasis,
+    blockNumber
+  );
+
+  if (nameSignal.nameSignalAverageCostBasis == BigDecimal.fromString("0")) {
+    nameSignal.nameSignalAverageCostBasisPerSignal = BigDecimal.fromString("0");
   }
+  nameSignal.save();
 }
 
 ////////////////      Broadcasting
+
+function _broadcastFirstTimeCurator(
+  curatorId: string,
+  blockNumber: BigInt
+): void {
+  processNewCuratorForCuratorTribeBadge(curatorId, blockNumber);
+}
 
 function _broadcastUniqueCurationSignal(
   curator: Curator,
   subgraphId: string,
   blockNumber: BigInt
 ): void {
+  log.debug(
+    "broadcasting unique curation signal---\ncurator: {}\nsubgraphId: {}\n",
+    [curator.id, subgraphId]
+  );
+
   processUniqueSignalForPlanetOfTheAped(curator, subgraphId, blockNumber);
 }
 
 function _broadcastCurationBurn(
   curator: Curator,
-  costBasis: BigInt,
-  burnPrice: BigInt,
+  oldACB: BigDecimal,
+  currentACB: BigDecimal,
   blockNumber: BigInt
 ): void {
-  processCurationBurnForSubgraphShark(
-    curator,
-    costBasis,
-    burnPrice,
-    blockNumber
+  log.debug(
+    "broadcasting curation burn---\noldACB: {}\ncurrentACB: {}\ncurator: {}\n",
+    [oldACB.toString(), currentACB.toString(), curator.id]
   );
+
+  processCurationBurnForSubgraphShark(curator, oldACB, currentACB, blockNumber);
 }
 
 ////////////////      Models
 
-export function createOrLoadCurator(id: string): Curator {
+function _createOrLoadCurator(id: string, blockNumber: BigInt): Curator {
   let curator = Curator.load(id);
 
   if (curator == null) {
@@ -114,24 +192,36 @@ export function createOrLoadCurator(id: string): Curator {
     let curatorCount = entityStats.curatorCount + 1;
     entityStats.curatorCount = curatorCount;
     entityStats.save();
+
+    _broadcastFirstTimeCurator(id, blockNumber);
   }
 
   return curator as Curator;
 }
 
-function _createSignalledStake(
-  id: string,
-  curator: string,
-  subgraph: string,
-  tokens: BigInt,
-  signal: BigInt
-): SignalledStake {
-  let signalledStake = new SignalledStake(id);
-  signalledStake.curator = curator;
-  signalledStake.subgraphId = subgraph;
-  signalledStake.tokenBalance = tokens;
-  signalledStake.signal = signal;
-  signalledStake.save();
+export function createOrLoadNameSignal(
+  curatorId: string,
+  subgraphId: string
+): NameSignal {
+  let nameSignalID = curatorId.concat("-").concat(subgraphId);
+  let nameSignal = NameSignal.load(nameSignalID);
+  if (nameSignal == null) {
+    nameSignal = new NameSignal(nameSignalID);
+    let curator = Curator.load(curatorId);
+    nameSignal.curator = curator.id;
+    nameSignal.subgraphId = subgraphId;
+    nameSignal.signalledTokens = BigInt.fromI32(0);
+    nameSignal.unsignalledTokens = BigInt.fromI32(0);
+    nameSignal.nameSignal = BigInt.fromI32(0);
+    nameSignal.signal = BigDecimal.fromString("0");
+    nameSignal.nameSignalAverageCostBasis = BigDecimal.fromString("0");
+    nameSignal.nameSignalAverageCostBasisPerSignal = BigDecimal.fromString("0");
+    nameSignal.signalAverageCostBasis = BigDecimal.fromString("0");
+    nameSignal.signalAverageCostBasisPerSignal = BigDecimal.fromString("0");
+    nameSignal.save();
 
-  return signalledStake;
+    curator.uniqueSignalCount = curator.uniqueSignalCount + 1;
+    curator.save();
+  }
+  return nameSignal as NameSignal;
 }

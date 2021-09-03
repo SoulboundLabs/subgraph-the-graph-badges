@@ -82,8 +82,8 @@ type Allocation @entity {
   closedAtEpoch: BigInt
   "Indexer that created this allocation"
   indexer: Indexer!
-  "Subgraph for this allocation"
-  subgraph: Subgraph!
+  "Subgraph Deployment for this allocation"
+  subgraph: SubgraphDeployment!
 }
 
 """
@@ -120,24 +120,36 @@ type Curator @entity {
   id: ID!
   "Graph Account associated with this curator"
   account: GraphAccount!
-  "Number of different subgraphs Curator has signalled"
+  "Number of different subgraphs Curator has signalled (cumulative)"
   uniqueSignalCount: Int!
 }
 
 """
 Metadata for the Curator
 """
-type SignalledStake @entity {
+type NameSignal @entity {
   "{Curator}-{SubgraphId}"
   id: ID!
   "Curator who signalled"
   curator: Curator!
   "Subgraph that was signalled on"
   subgraphId: Subgraph!
-  "Amount of signal shares"
-  signal: BigInt!
-  "Amount of GRT gained/lost"
-  tokenBalance: BigInt!
+  "CUMULATIVE number of tokens the curator has signalled"
+  signalledTokens: BigInt!
+  "CUMULATIVE number of tokens the curator has unsignalled"
+  unsignalledTokens: BigInt!
+  "Shares of the name pool (GNS) that the curator has from signaling their GRT"
+  nameSignal: BigInt!
+  "Actual signal shares that the name pool minted with the GRT provided by the curator"
+  signal: BigDecimal!
+  "Curator average cost basis for this name signal on this subgraph"
+  nameSignalAverageCostBasis: BigDecimal! # note this is ONLY name signal. This is okay for the protocol for now
+  "nameSignalAverageCostBasis / nameSignal"
+  nameSignalAverageCostBasisPerSignal: BigDecimal!
+  "Curator average cost basis for the version signal on this subgraph name pool"
+  signalAverageCostBasis: BigDecimal!
+  "signalAverageCostBasis / signal"
+  signalAverageCostBasisPerSignal: BigDecimal!
 }
 
 type Publisher @entity {
@@ -147,10 +159,12 @@ type Publisher @entity {
   account: GraphAccount!
   "Subgraphs published by this account"
   subgraphs: [Subgraph!]! @derivedFrom(field: "owner")
+  "Number of Subgraphs this Publisher has deployed"
+  subgraphCount: Int!
 }
 
 type Subgraph @entity {
-  "subgraph deployment id"
+  "{publisher}-{subgraph number}"
   id: ID!
   "Graph Account that published this subgraph"
   owner: Publisher!
@@ -158,6 +172,12 @@ type Subgraph @entity {
   firstToClose: Indexer
   "block which this subgraph was published (ignores versioning)"
   blockPublished: BigInt!
+}
+
+type SubgraphDeployment @entity {
+  id: ID!
+  blockPublished: BigInt!
+  firstToClose: Indexer
 }
 
 

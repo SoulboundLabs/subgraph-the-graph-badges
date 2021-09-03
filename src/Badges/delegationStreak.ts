@@ -10,7 +10,7 @@ import {
   BADGE_DESCRIPTION_DELEGATION_STREAK,
   BADGE_URL_HANDLE_DELEGATION_STREAK,
   BADGE_VOTE_POWER_DELEGATION_STREAK,
-  BADGE_STREAK_MIN_BLOCKS_DELEGATION_STREAK,
+  BADGE_STREAK_MIN_DAYS_DELEGATION_STREAK,
   negOneBI,
 } from "../helpers/constants";
 import {
@@ -21,6 +21,7 @@ import {
   createOrLoadDelegator,
   createOrLoadDelegatedStake,
 } from "../helpers/delegationManager";
+import { daysToBlocks } from "../helpers/typeConverter";
 
 export function processStakeDelegatedForDelegationStreakBadge(
   delegatorId: string,
@@ -30,7 +31,7 @@ export function processStakeDelegatedForDelegationStreakBadge(
 ): void {
   log.debug("_processStakeDelegated: delegatorId - {}", [delegatorId]);
 
-  let delegator = createOrLoadDelegator(delegatorId);
+  let delegator = createOrLoadDelegator(delegatorId, blockNumber);
   let ongoingBadgeStreak = createOrLoadOngoingBadgeStreak(
     BADGE_NAME_DELEGATION_STREAK,
     delegatorId
@@ -49,11 +50,12 @@ export function processStakeDelegatedForDelegationStreakBadge(
 export function processStakeDelegatedLockedForDelegationStreakBadge(
   delegatorId: string,
   indexerId: string,
-  shares: BigInt
+  shares: BigInt,
+  blockNumber: BigInt
 ): void {
   log.debug("_processStakeDelegatedLocked: delegatorId - {}", [delegatorId]);
 
-  let delegator = createOrLoadDelegator(delegatorId);
+  let delegator = createOrLoadDelegator(delegatorId, blockNumber);
   let delegatedStake = createOrLoadDelegatedStake(delegatorId, indexerId);
   delegatedStake.shares = delegatedStake.shares.minus(shares);
   if (delegatedStake.shares.equals(toBigInt(0))) {
@@ -80,16 +82,30 @@ export function updateDelegationStreak(
   );
   if (ongoingBadgeStreak.streakStartBlock.notEqual(negOneBI())) {
     let streakLength = blockNumber.minus(ongoingBadgeStreak.streakStartBlock);
-    let previousStreakLength = winner.lastSyncBlockNumber;
-    let minimumBlocks = BigInt.fromI32(
-      BADGE_STREAK_MIN_BLOCKS_DELEGATION_STREAK
+    let previousStreakLength = winner.lastSyncBlockNumber.minus(
+      ongoingBadgeStreak.streakStartBlock
+    );
+    let minimumBlocks = daysToBlocks(
+      BigInt.fromI32(BADGE_STREAK_MIN_DAYS_DELEGATION_STREAK)
     );
     if (
       streakLength.ge(minimumBlocks) &&
       previousStreakLength.lt(minimumBlocks)
     ) {
+      log.debug(
+        "awarding DelegationStreak badge---\nblock number: {}\nprevious streak: {}\ncurrent streak: {}\nwinner: {}\n",
+        [
+          blockNumber.toString(),
+          previousStreakLength.toString(),
+          streakLength.toString(),
+          winner.id,
+        ]
+      );
+
       createBadgeAward(_badgeDefinition(), winner.id, blockNumber);
     }
+    ongoingBadgeStreak.streakStartBlock = blockNumber;
+    ongoingBadgeStreak.save();
   }
 }
 
@@ -101,6 +117,6 @@ function _badgeDefinition(): BadgeDefinition {
     BigInt.fromI32(BADGE_VOTE_POWER_DELEGATION_STREAK),
     "TBD",
     "TBD",
-    BigInt.fromI32(BADGE_STREAK_MIN_BLOCKS_DELEGATION_STREAK)
+    daysToBlocks(BigInt.fromI32(BADGE_STREAK_MIN_DAYS_DELEGATION_STREAK))
   ) as BadgeDefinition;
 }

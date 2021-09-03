@@ -19,12 +19,10 @@ export function processUniqueSignalForPlanetOfTheAped(
   blockNumber: BigInt
 ): void {
   let subgraph = Subgraph.load(subgraphId);
+  let blocksSincePublish = blockNumber.minus(subgraph.blockPublished);
+  let blockThreshold = BigInt.fromI32(420);
   if (subgraph != null) {
-    if (
-      blockNumber
-        .minus(subgraph.blockPublished)
-        .lt(daysToBlocks(BigInt.fromI32(1)))
-    ) {
+    if (blocksSincePublish.le(blockThreshold)) {
       createBadgeAward(_badgeDefinition(), curator.id, blockNumber);
     }
   }

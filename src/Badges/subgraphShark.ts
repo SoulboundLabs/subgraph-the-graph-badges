@@ -1,5 +1,5 @@
 import { Curator, BadgeDefinition } from "../../generated/schema";
-import { BigInt } from "@graphprotocol/graph-ts/index";
+import { BigDecimal, BigInt } from "@graphprotocol/graph-ts/index";
 import {
   createBadgeAward,
   createOrLoadBadgeDefinition,
@@ -13,11 +13,11 @@ import {
 
 export function processCurationBurnForSubgraphShark(
   curator: Curator,
-  costBasis: BigInt,
-  burnPrice: BigInt,
+  oldACB: BigDecimal,
+  currentACB: BigDecimal,
   blockNumber: BigInt
 ): void {
-  if (burnPrice.gt(costBasis)) {
+  if (currentACB.lt(oldACB)) {
     createBadgeAward(_badgeDefinition(), curator.id, blockNumber);
   }
 }

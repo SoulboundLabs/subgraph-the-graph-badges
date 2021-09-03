@@ -2,7 +2,6 @@ import { Allocation, Indexer } from "../../generated/schema";
 import {
   createOrLoadEntityStats,
   createOrLoadGraphAccount,
-  createOrLoadWinner,
 } from "../helpers/models";
 import {
   AllocationClosed,
@@ -17,7 +16,12 @@ import {
   processStakeSlashedForNeverSlashedBadge,
 } from "../Badges/neverSlashed";
 import { processAllocationClosedFor28DaysLaterBadge } from "../Badges/28DaysLater";
-import { syncAllStreaksForWinner } from "./streakManager";
+import {
+  syncAllStreaksForWinner,
+  syncAllStreaksForWinners,
+} from "./streakManager";
+
+////////////////      Public
 
 export function processAllocationCreated(event: AllocationCreated): void {
   _processAllocationCreated(
@@ -32,19 +36,22 @@ export function processAllocationCreated(event: AllocationCreated): void {
 export function processAllocationClosed(event: AllocationClosed): void {
   _processAllocationClosed(
     event.params.allocationID.toHexString(),
+    event.params.subgraphDeploymentID.toHex(),
+    event.params.indexer.toHexString(),
     event.params.epoch,
     event.block.number
   );
 }
 
 export function processStakeSlashed(event: StakeSlashed): void {
-  _processStakeSlashed(event.params.indexer.toHexString(), event.block.number);
+  _processStakeSlashed(
+    event.params.indexer.toHexString(),
+    event.params.beneficiary.toHexString(),
+    event.block.number
+  );
 }
 
-function _processStakeSlashed(indexerId: string, blockNumber: BigInt): void {
-  syncAllStreaksForWinner(createOrLoadWinner(indexerId), blockNumber);
-  _broadcastStakeSlashed(indexerId, blockNumber);
-}
+////////////////      Event Processing
 
 function _processAllocationCreated(
   channelId: string,
@@ -53,7 +60,7 @@ function _processAllocationCreated(
   epoch: BigInt,
   blockNumber: BigInt
 ): void {
-  syncAllStreaksForWinner(createOrLoadWinner(indexerId), blockNumber);
+  syncAllStreaksForWinner(indexerId, blockNumber);
 
   let allocation = Allocation.load(channelId);
   if (allocation == null) {
@@ -62,38 +69,40 @@ function _processAllocationCreated(
     indexer.save();
     _createAllocation(channelId, subgraphId, indexerId, epoch);
 
-    _broadcastAllocationCreated(indexer, epoch);
+    _broadcastAllocationCreated(indexer, blockNumber);
   }
 }
 
 function _processAllocationClosed(
   channelId: string,
+  subgraphDeploymentID: string,
+  indexerId: string,
   epoch: BigInt,
   blockNumber: BigInt
 ): void {
+  syncAllStreaksForWinner(indexerId, blockNumber);
+
   let allocation = Allocation.load(channelId) as Allocation;
   let indexer = createOrLoadIndexer(allocation.indexer);
-  syncAllStreaksForWinner(createOrLoadWinner(indexer.id), blockNumber);
 
   indexer.uniqueOpenAllocationCount = indexer.uniqueOpenAllocationCount - 1;
   indexer.save();
 
-  _broadcastAllocationClosed(allocation, epoch, blockNumber);
+  _broadcastAllocationClosed(
+    allocation,
+    subgraphDeploymentID,
+    epoch,
+    blockNumber
+  );
 }
 
-function _createAllocation(
-  channelId: string,
-  subgraphId: string,
-  indexerID: string,
-  epochCreated: BigInt
-): Allocation {
-  let allocation = new Allocation(channelId);
-  allocation.createdAtEpoch = epochCreated;
-  allocation.indexer = indexerID;
-  allocation.subgraph = subgraphId;
-  allocation.save();
-
-  return allocation;
+function _processStakeSlashed(
+  indexerId: string,
+  beneficiaryId: string,
+  blockNumber: BigInt
+): void {
+  syncAllStreaksForWinners([indexerId, beneficiaryId], blockNumber);
+  _broadcastStakeSlashed(indexerId, blockNumber);
 }
 
 ////////////////      Broadcasting
@@ -104,18 +113,23 @@ function _broadcastAllocationCreated(indexer: Indexer, epoch: BigInt): void {
 
 function _broadcastAllocationClosed(
   allocation: Allocation,
+  subgraphDeploymentID: string,
   epoch: BigInt,
   blockNumber: BigInt
 ): void {
   processAllocationClosedFor28DaysLaterBadge(allocation, epoch, blockNumber);
-  processAllocationClosedForFirstToCloseBadge(allocation, blockNumber);
+  processAllocationClosedForFirstToCloseBadge(
+    allocation,
+    subgraphDeploymentID,
+    blockNumber
+  );
 }
 
 function _broadcastStakeSlashed(indexerId: string, blockNumber: BigInt): void {
   processStakeSlashedForNeverSlashedBadge(indexerId, blockNumber);
 }
 
-////////////////      Indexer
+////////////////      Models
 
 export function createOrLoadIndexer(id: string): Indexer {
   log.debug("Loading indexer with id: {}", [id]);
@@ -135,4 +149,19 @@ export function createOrLoadIndexer(id: string): Indexer {
   }
 
   return indexer as Indexer;
+}
+
+function _createAllocation(
+  channelId: string,
+  subgraphId: string,
+  indexerID: string,
+  epochCreated: BigInt
+): Allocation {
+  let allocation = new Allocation(channelId);
+  allocation.createdAtEpoch = epochCreated;
+  allocation.indexer = indexerID;
+  allocation.subgraph = subgraphId;
+  allocation.save();
+
+  return allocation;
 }

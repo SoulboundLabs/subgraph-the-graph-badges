@@ -9,31 +9,23 @@ import {
   NSignalBurned,
 } from "../../generated/GNS/GNS";
 import { processSubgraphPublished } from "../helpers/subgraphManager";
-import { Subgraph } from "../../generated/schema";
 import { log } from "@graphprotocol/graph-ts";
+import {
+  processCurationBurn,
+  processCurationSignal,
+} from "../helpers/CurationManager";
 
 export function handleSubgraphPublished(event: SubgraphPublished): void {
   log.debug("SubgraphPublished event found", []);
   processSubgraphPublished(event);
 }
 
-// export function handleNSSignalMinted(event: NSignalMinted): void {
+export function handleNSignalMinted(event: NSignalMinted): void {
+  log.debug("NSignalMinted event found", []);
+  processCurationSignal(event);
+}
 
-// }
-
-// export function handleNSignalBurned(event: NSignalBurned): void {
-//   let graphAccount = event.params.graphAccount.toHexString()
-//   let subgraph = Subgraph.load();
-// }
-
-// function _processSignalMinted(
-
-// ): void {
-
-// }
-
-// function _processSignalBurned(
-
-// ): void {
-
-// }
+export function handleNSignalBurned(event: NSignalBurned): void {
+  log.debug("NSignalBurned event found", []);
+  processCurationBurn(event);
+}

@@ -74,20 +74,6 @@ export function createOrLoadGraphAccount(address: string): GraphAccount {
   return graphAccount as GraphAccount;
 }
 
-////////////////      Publisher
-
-export function createOrLoadPublisher(publisherId: string): Publisher {
-  let publisher = Publisher.load(publisherId);
-  if (publisher == null) {
-    createOrLoadGraphAccount(publisherId);
-    let publisher = new Publisher(publisherId);
-    publisher.account = publisherId;
-    publisher.save();
-  }
-
-  return publisher as Publisher;
-}
-
 export function createOrLoadStreakProperties(
   delegator: string,
   startBlockNumber: BigInt,
