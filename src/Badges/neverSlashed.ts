@@ -1,17 +1,17 @@
 import { BigInt, log } from "@graphprotocol/graph-ts";
+import { BadgeDefinition, Indexer, Winner } from "../../generated/schema";
 import {
   BADGE_DESCRIPTION_NEVER_SLASHED,
   BADGE_NAME_NEVER_SLASHED,
   BADGE_STREAK_MIN_DAYS_NEVER_SLASHED,
-  BADGE_URL_HANDLE_NEVER_SLASHED,
   BADGE_VOTE_POWER_NEVER_SLASHED,
   negOneBI,
 } from "../helpers/constants";
 import {
   createOrLoadBadgeDefinitionWithStreak,
   createBadgeAward,
+  createOrLoadBadgeDefinition,
 } from "../helpers/models";
-import { BadgeDefinition, Winner, Indexer } from "../../generated/schema";
 import {
   createOrLoadOngoingBadgeStreak,
   endBadgeStreak,
@@ -77,7 +77,6 @@ function _badgeDefinition(): BadgeDefinition {
   return createOrLoadBadgeDefinitionWithStreak(
     BADGE_NAME_NEVER_SLASHED,
     BADGE_DESCRIPTION_NEVER_SLASHED,
-    BADGE_URL_HANDLE_NEVER_SLASHED,
     BigInt.fromI32(BADGE_VOTE_POWER_NEVER_SLASHED),
     "TBD",
     "TBD",

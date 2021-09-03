@@ -11,6 +11,7 @@
     "create": "graph create badgeth-dao/the-graph-badges --node https://api.thegraph.com/deploy/",
     "create-local": "graph create badgeth-dao/the-graph-badges --node http://127.0.0.1:8020",
     "build": "graph codegen && graph build",
+    "codegen": "graph codegen",
     "deploy": "graph deploy --studio badgeth-the-graph",
     "deploy-hardforks": "graph deploy hardforksoverknives/Badgeth-dev --ipfs https://api.thegraph.com/ipfs/ --node https://api.thegraph.com/deploy/",
     "deploy-local": "graph deploy badgeth-dao/the-graph-badges --ipfs http://localhost:5001 --node http://127.0.0.1:8020",

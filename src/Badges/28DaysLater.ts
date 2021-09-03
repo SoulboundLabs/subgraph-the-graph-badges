@@ -3,9 +3,8 @@ import { Allocation, BadgeDefinition } from "../../generated/schema";
 import {
   BADGE_DESCRIPTION_28_EPOCHS_LATER,
   BADGE_NAME_28_EPOCHS_LATER,
-  BADGE_URL_HANDLE_28_EPOCHS_LATER,
-  BADGE_VOTE_POWER_28_EPOCHS_LATER,
   BADGE_STREAK_MIN_CLOSES_28_EPOCHS_LATER,
+  BADGE_VOTE_POWER_28_EPOCHS_LATER,
 } from "../helpers/constants";
 import { createOrLoadIndexer } from "../helpers/indexerManager";
 import {
@@ -33,7 +32,6 @@ export function processAllocationClosedFor28DaysLaterBadge(
 function _badgeDefinition(): BadgeDefinition {
   return createOrLoadBadgeDefinitionWithStreak(
     BADGE_NAME_28_EPOCHS_LATER,
-    BADGE_URL_HANDLE_28_EPOCHS_LATER,
     BADGE_DESCRIPTION_28_EPOCHS_LATER,
     BigInt.fromI32(BADGE_VOTE_POWER_28_EPOCHS_LATER),
     "TBD",
