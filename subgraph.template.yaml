@@ -61,33 +61,6 @@ dataSources:
         - event: StakeDelegatedLocked(indexed address,indexed address,uint256,uint256,uint256)
           handler: handleStakeDelegatedLocked
   - kind: ethereum/contract
-    name: Curation
-    network: "{{network}}"
-    source:
-      address: "{{curation}}"
-      abi: Curation
-      startBlock: {{blockNumber}}
-    mapping:
-      kind: ethereum/events
-      apiVersion: 0.0.4
-      language: wasm/assemblyscript
-      file: ./src/mappings/curation.ts
-      entities:
-        - Curator
-        - GraphAccount
-        - Winner
-        - SignalledStake
-        - BadgeDefinition
-        - BadgeAward
-      abis:
-        - name: Curation
-          file: ./node_modules/@graphprotocol/contracts/dist/abis/Curation.json
-      eventHandlers:
-        - event: Signalled(indexed address,indexed bytes32,uint256,uint256,uint256)
-          handler: handleCurationSignal
-        - event: Burned(indexed address,indexed bytes32,uint256,uint256)
-          handler: handleCurationBurn
-  - kind: ethereum/contract
     name: GNS
     network: "{{network}}"
     source:
@@ -105,7 +78,7 @@ dataSources:
         - Curator
         - GraphAccount
         - Winner
-        - SignalledStake
+        - NameSignal
         - BadgeDefinition
         - BadgeAward
       abis:
@@ -118,3 +91,7 @@ dataSources:
       eventHandlers:
         - event: SubgraphPublished(indexed address,indexed uint256,indexed bytes32,bytes32)
           handler: handleSubgraphPublished
+        - event: NSignalMinted(indexed address,indexed uint256,indexed address,uint256,uint256,uint256)
+          handler: handleNSignalMinted
+        - event: NSignalBurned(indexed address,indexed uint256,indexed address,uint256,uint256,uint256)
+          handler: handleNSignalBurned
