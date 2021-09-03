@@ -90,16 +90,13 @@ export const BADGE_VOTE_POWER_SUBGRAPH_SHARK = 1;
 export const BADGE_NAME_SUBGRAPH_DEVELOPER = "Captain Subgraph";
 export const BADGE_DESCRIPTION_SUBGRAPH_DEVELOPER =
   "Awarded to developers who publish their first subgraph";
-export const BADGE_URL_HANDLE_SUBGRAPH_DEVELOPER = "captain-subgraph";
 export const BADGE_VOTE_POWER_SUBGRAPH_DEVELOPER = 1;
 
 export const BADGE_NAME_CURATOR_TRIBE = "Curator Tribe";
 export const BADGE_DESCRIPTION_CURATOR_TRIBE = "Awarded to first-time curators";
-export const BADGE_URL_HANDLE_CURATOR_TRIBE = "curator-tribe";
 export const BADGE_VOTE_POWER_CURATOR_TRIBE = 1;
 
 export const BADGE_NAME_DELEGATION_TRIBE = "Delegation Tribe";
 export const BADGE_DESCRIPTION_DELEGATION_TRIBE =
   "Awarded to first-time delegators";
-export const BADGE_URL_HANDLE_DELEGATION_TRIBE = "delegation-tribe";
 export const BADGE_VOTE_POWER_DELEGATION_TRIBE = 1;

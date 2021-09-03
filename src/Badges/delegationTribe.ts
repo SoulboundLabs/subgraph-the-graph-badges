@@ -6,7 +6,6 @@ import {
 import {
   BADGE_NAME_DELEGATION_TRIBE,
   BADGE_DESCRIPTION_DELEGATION_TRIBE,
-  BADGE_URL_HANDLE_DELEGATION_TRIBE,
   BADGE_VOTE_POWER_DELEGATION_TRIBE,
 } from "../helpers/constants";
 import { BigInt } from "@graphprotocol/graph-ts/index";
@@ -21,7 +20,6 @@ export function processNewDelegatorForDelegatorTribeBadge(
 function _badgeDefinition(): BadgeDefinition {
   return createOrLoadBadgeDefinition(
     BADGE_NAME_DELEGATION_TRIBE,
-    BADGE_URL_HANDLE_DELEGATION_TRIBE,
     BADGE_DESCRIPTION_DELEGATION_TRIBE,
     BigInt.fromI32(BADGE_VOTE_POWER_DELEGATION_TRIBE),
     "TBD",

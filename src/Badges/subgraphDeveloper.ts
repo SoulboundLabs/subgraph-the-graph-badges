@@ -7,7 +7,6 @@ import {
 import {
   BADGE_NAME_SUBGRAPH_DEVELOPER,
   BADGE_DESCRIPTION_SUBGRAPH_DEVELOPER,
-  BADGE_URL_HANDLE_SUBGRAPH_DEVELOPER,
   BADGE_VOTE_POWER_SUBGRAPH_DEVELOPER,
 } from "../helpers/constants";
 
@@ -23,7 +22,6 @@ export function processSubgraphPublishedForSubgraphDeveloperBadge(
 function _badgeDefinition(): BadgeDefinition {
   return createOrLoadBadgeDefinition(
     BADGE_NAME_SUBGRAPH_DEVELOPER,
-    BADGE_URL_HANDLE_SUBGRAPH_DEVELOPER,
     BADGE_DESCRIPTION_SUBGRAPH_DEVELOPER,
     BigInt.fromI32(BADGE_VOTE_POWER_SUBGRAPH_DEVELOPER),
     "TBD",

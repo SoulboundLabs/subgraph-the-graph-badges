@@ -7,7 +7,6 @@ import {
   EntityStats,
   GraphAccount,
   Protocol,
-  Publisher,
   Winner,
 } from "../../generated/schema";
 import { PROTOCOL_NAME_THE_GRAPH, zeroBI } from "./constants";
@@ -177,7 +176,6 @@ export function createOrLoadBadgeDefinition(
 
 export function createOrLoadBadgeDefinitionWithStreak(
   name: string,
-  urlHandle: string,
   description: string,
   voteWeight: BigInt,
   image: string,
@@ -189,7 +187,6 @@ export function createOrLoadBadgeDefinitionWithStreak(
   if (badgeDefinition == null) {
     badgeDefinition = createOrLoadBadgeDefinition(
       name,
-      urlHandle,
       description,
       voteWeight,
       image,

@@ -256,8 +256,6 @@ type BadgeDefinition @entity {
   votingPower: BigInt!
   "Total count of badges"
   badgeCount: Int!
-  "URL slug for the frontend"
-  urlHandle: String!
   "Associated protocol for the badge"
   protocol: Protocol!
   "Optional definition for streak badges"
