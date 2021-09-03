@@ -22,7 +22,7 @@ export function processAllocationClosedForFirstToCloseBadge(
   blockNumber: BigInt
 ): void {
   let subgraphDeployment = SubgraphDeployment.load(subgraphDeploymentId);
-  if (subgraphDeployment == null) {
+  if (subgraphDeployment.firstToClose == null) {
     subgraphDeployment.firstToClose = allocation.indexer;
     subgraphDeployment.save();
 
