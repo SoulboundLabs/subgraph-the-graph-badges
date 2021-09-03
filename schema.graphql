@@ -66,6 +66,8 @@ type Indexer @entity {
   account: GraphAccount!
   "Number of currently open allocations"
   uniqueOpenAllocationCount: Int!
+  "Cumulative number of Allocations closed by this indexer"
+  allocationsClosedOnTime: Int!
   "Allocations created by this indexer"
   allocations: [Allocation!]! @derivedFrom(field: "indexer")
 }

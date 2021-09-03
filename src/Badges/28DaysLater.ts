@@ -12,20 +12,16 @@ import {
   createOrLoadBadgeDefinitionWithStreak,
 } from "../helpers/models";
 
-export function processAllocationClosedFor28DaysLaterBadge(
+export function processAllocationClosedOnTimeFor28DaysLaterBadge(
   allocation: Allocation,
-  epoch: BigInt,
   blockNumber: BigInt
 ): void {
-  if (epoch.minus(allocation.createdAtEpoch).lt(BigInt.fromI32(28))) {
-    let indexer = createOrLoadIndexer(allocation.indexer);
-    if (
-      indexer.uniqueOpenAllocationCount %
-        BADGE_STREAK_MIN_CLOSES_28_EPOCHS_LATER ==
-      0
-    ) {
-      createBadgeAward(_badgeDefinition(), allocation.indexer, blockNumber);
-    }
+  let indexer = createOrLoadIndexer(allocation.indexer);
+  if (
+    indexer.allocationsClosedOnTime % BADGE_STREAK_MIN_CLOSES_28_EPOCHS_LATER ==
+    0
+  ) {
+    createBadgeAward(_badgeDefinition(), allocation.indexer, blockNumber);
   }
 }
 

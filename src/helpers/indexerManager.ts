@@ -15,7 +15,7 @@ import {
   processAllocationCreatedForNeverSlashed,
   processStakeSlashedForNeverSlashedBadge,
 } from "../Badges/neverSlashed";
-import { processAllocationClosedFor28DaysLaterBadge } from "../Badges/28DaysLater";
+import { processAllocationClosedOnTimeFor28DaysLaterBadge } from "../Badges/28DaysLater";
 import {
   syncAllStreaksForWinner,
   syncAllStreaksForWinners,
@@ -55,22 +55,18 @@ export function processStakeSlashed(event: StakeSlashed): void {
 
 function _processAllocationCreated(
   channelId: string,
-  subgraphId: string,
+  subgraphDeploymentId: string,
   indexerId: string,
   epoch: BigInt,
   blockNumber: BigInt
 ): void {
   syncAllStreaksForWinner(indexerId, blockNumber);
+  _createAllocation(channelId, subgraphDeploymentId, indexerId, epoch);
+  let indexer = createOrLoadIndexer(indexerId);
+  indexer.uniqueOpenAllocationCount = indexer.uniqueOpenAllocationCount + 1;
+  indexer.save();
 
-  let allocation = Allocation.load(channelId);
-  if (allocation == null) {
-    let indexer = createOrLoadIndexer(indexerId);
-    indexer.uniqueOpenAllocationCount = indexer.uniqueOpenAllocationCount + 1;
-    indexer.save();
-    _createAllocation(channelId, subgraphId, indexerId, epoch);
-
-    _broadcastAllocationCreated(indexer, blockNumber);
-  }
+  _broadcastAllocationCreated(indexer, blockNumber);
 }
 
 function _processAllocationClosed(
@@ -86,14 +82,17 @@ function _processAllocationClosed(
   let indexer = createOrLoadIndexer(allocation.indexer);
 
   indexer.uniqueOpenAllocationCount = indexer.uniqueOpenAllocationCount - 1;
-  indexer.save();
 
-  _broadcastAllocationClosed(
-    allocation,
-    subgraphDeploymentID,
-    epoch,
-    blockNumber
-  );
+  if (epoch.minus(allocation.createdAtEpoch).le(BigInt.fromI32(28))) {
+    indexer.allocationsClosedOnTime = indexer.allocationsClosedOnTime + 1;
+    _broadcastAllocationClosedOnTime(
+      allocation,
+      subgraphDeploymentID,
+      blockNumber
+    );
+  }
+
+  indexer.save();
 }
 
 function _processStakeSlashed(
@@ -111,13 +110,12 @@ function _broadcastAllocationCreated(indexer: Indexer, epoch: BigInt): void {
   processAllocationCreatedForNeverSlashed(indexer, epoch);
 }
 
-function _broadcastAllocationClosed(
+function _broadcastAllocationClosedOnTime(
   allocation: Allocation,
   subgraphDeploymentID: string,
-  epoch: BigInt,
   blockNumber: BigInt
 ): void {
-  processAllocationClosedFor28DaysLaterBadge(allocation, epoch, blockNumber);
+  processAllocationClosedOnTimeFor28DaysLaterBadge(allocation, blockNumber);
   processAllocationClosedForFirstToCloseBadge(
     allocation,
     subgraphDeploymentID,
@@ -141,6 +139,7 @@ export function createOrLoadIndexer(id: string): Indexer {
     indexer = new Indexer(id);
     indexer.account = id;
     indexer.uniqueOpenAllocationCount = 0;
+    indexer.allocationsClosedOnTime = 0;
     indexer.save();
 
     let entityStats = createOrLoadEntityStats();
@@ -153,14 +152,14 @@ export function createOrLoadIndexer(id: string): Indexer {
 
 function _createAllocation(
   channelId: string,
-  subgraphId: string,
+  subgraphDeploymentId: string,
   indexerID: string,
   epochCreated: BigInt
 ): Allocation {
   let allocation = new Allocation(channelId);
   allocation.createdAtEpoch = epochCreated;
   allocation.indexer = indexerID;
-  allocation.subgraph = subgraphId;
+  allocation.subgraph = subgraphDeploymentId;
   allocation.save();
 
   return allocation;
