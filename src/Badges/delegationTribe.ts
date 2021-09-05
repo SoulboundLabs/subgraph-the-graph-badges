@@ -2,6 +2,7 @@ import { BadgeDefinition } from "../../generated/schema";
 import {
   createBadgeAward,
   createOrLoadBadgeDefinition,
+  EventDataForBadgeAward,
 } from "../helpers/models";
 import {
   BADGE_NAME_DELEGATION_TRIBE,
@@ -12,9 +13,9 @@ import { BigInt } from "@graphprotocol/graph-ts/index";
 
 export function processNewDelegatorForDelegatorTribeBadge(
   delegatorId: string,
-  blockNumber: BigInt
+  eventData: EventDataForBadgeAward
 ): void {
-  createBadgeAward(_badgeDefinition(), delegatorId, blockNumber);
+  createBadgeAward(_badgeDefinition(), delegatorId, eventData);
 }
 
 function _badgeDefinition(): BadgeDefinition {

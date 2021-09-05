@@ -6,6 +6,7 @@ import {
 import {
   createOrLoadEntityStats,
   createOrLoadGraphAccount,
+  EventDataForBadgeAward,
 } from "../helpers/models";
 import { toBigInt } from "../helpers/typeConverter";
 import { processUniqueDelegationForDelegationNationBadge } from "../Badges/delegationNation";
@@ -23,16 +24,16 @@ export function processStakeDelegated(event: StakeDelegated): void {
   let delegatorId = event.params.delegator.toHexString();
   let indexerId = event.params.indexer.toHexString();
   let shares = event.params.shares;
-  let blockNumber = event.block.number;
-  _processStakeDelegated(delegatorId, indexerId, shares, blockNumber);
+  let eventData = new EventDataForBadgeAward(event);
+  _processStakeDelegated(delegatorId, indexerId, shares, eventData);
 }
 
 export function processStakeDelegatedLocked(event: StakeDelegatedLocked): void {
   let delegatorId = event.params.delegator.toHexString();
   let indexerId = event.params.indexer.toHexString();
   let shares = event.params.shares;
-  let blockNumber = event.block.number;
-  _processStakeDelegatedLocked(delegatorId, indexerId, shares, blockNumber);
+  let eventData = new EventDataForBadgeAward(event);
+  _processStakeDelegatedLocked(delegatorId, indexerId, shares, eventData);
 }
 
 ////////////////      Event Processing
@@ -41,52 +42,52 @@ function _processStakeDelegated(
   delegatorId: string,
   indexerId: string,
   shares: BigInt,
-  blockNumber: BigInt
+  eventData: EventDataForBadgeAward
 ): void {
-  syncAllStreaksForWinners([delegatorId, indexerId], blockNumber);
+  syncAllStreaksForWinners([delegatorId, indexerId], eventData);
 
   if (_delegatedStakeExists(delegatorId, indexerId) == false) {
     createOrLoadDelegatedStake(delegatorId, indexerId);
-    let delegator = createOrLoadDelegator(delegatorId, blockNumber);
+    let delegator = createOrLoadDelegator(delegatorId, eventData);
     delegator.uniqueActiveDelegationCount =
       delegator.uniqueActiveDelegationCount + 1;
     delegator.save();
-    _broadcastUniqueDelegation(delegator, blockNumber);
+    _broadcastUniqueDelegation(delegator, eventData);
   }
-  _broadcastStakeDelegated(delegatorId, indexerId, shares, blockNumber);
+  _broadcastStakeDelegated(delegatorId, indexerId, shares, eventData);
 }
 
 function _processStakeDelegatedLocked(
   delegatorId: string,
   indexerId: string,
   shares: BigInt,
-  blockNumber: BigInt
+  eventData: EventDataForBadgeAward
 ): void {
-  syncAllStreaksForWinners([delegatorId, indexerId], blockNumber);
+  syncAllStreaksForWinners([delegatorId, indexerId], eventData);
 
-  _broadcastStakeDelegatedLocked(delegatorId, indexerId, shares, blockNumber);
+  _broadcastStakeDelegatedLocked(delegatorId, indexerId, shares, eventData);
 }
 
 ////////////////      Broadcasting
 
 function _broadcastUniqueDelegation(
   delegator: Delegator,
-  blockNumber: BigInt
+  eventData: EventDataForBadgeAward
 ): void {
-  processUniqueDelegationForDelegationNationBadge(delegator, blockNumber);
+  processUniqueDelegationForDelegationNationBadge(delegator, eventData);
 }
 
 function _broadcastStakeDelegated(
   delegatorId: string,
   indexerId: string,
   shares: BigInt,
-  blockNumber: BigInt
+  eventData: EventDataForBadgeAward
 ): void {
   processStakeDelegatedForDelegationStreakBadge(
     delegatorId,
     indexerId,
     shares,
-    blockNumber
+    eventData
   );
 }
 
@@ -94,13 +95,13 @@ function _broadcastStakeDelegatedLocked(
   delegatorId: string,
   indexerId: string,
   shares: BigInt,
-  blockNumber: BigInt
+  eventData: EventDataForBadgeAward
 ): void {
   processStakeDelegatedLockedForDelegationStreakBadge(
     delegatorId,
     indexerId,
     shares,
-    blockNumber
+    eventData
   );
 }
 
@@ -108,7 +109,7 @@ function _broadcastStakeDelegatedLocked(
 
 export function createOrLoadDelegator(
   id: string,
-  blockNumber: BigInt
+  eventData: EventDataForBadgeAward
 ): Delegator {
   let delegator = Delegator.load(id);
 
@@ -124,7 +125,7 @@ export function createOrLoadDelegator(
     entityStats.delegatorCount = delegatorCount;
     entityStats.save();
 
-    processNewDelegatorForDelegatorTribeBadge(id, blockNumber);
+    processNewDelegatorForDelegatorTribeBadge(id, eventData);
   }
 
   return delegator as Delegator;

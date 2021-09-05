@@ -8,16 +8,17 @@ import {
 import {
   createBadgeAward,
   createOrLoadBadgeDefinition,
+  EventDataForBadgeAward,
 } from "../helpers/models";
 
 export function processCurationBurnForSubgraphShark(
   curator: Curator,
   oldACB: BigDecimal,
   currentACB: BigDecimal,
-  blockNumber: BigInt
+  eventData: EventDataForBadgeAward
 ): void {
   if (currentACB.lt(oldACB)) {
-    createBadgeAward(_badgeDefinition(), curator.id, blockNumber);
+    createBadgeAward(_badgeDefinition(), curator.id, eventData);
   }
 }
 

@@ -6,26 +6,26 @@ import {
 import { negOneBI } from "./constants";
 import { updateDelegationStreak } from "../Badges/delegationStreak";
 import { updateNeverSlashedStreak } from "../Badges/neverSlashed";
-import { createOrLoadWinner } from "./models";
+import { createOrLoadWinner, EventDataForBadgeAward } from "./models";
 
 export function syncAllStreaksForWinner(
   winnerId: string,
-  blockNumber: BigInt
+  eventData: EventDataForBadgeAward
 ): void {
   log.debug("Syncing streaks for winner {}", [winnerId]);
   let winner = createOrLoadWinner(winnerId);
-  updateDelegationStreak(winner, blockNumber);
-  updateNeverSlashedStreak(winner, blockNumber);
-  winner.lastSyncBlockNumber = blockNumber;
+  updateDelegationStreak(winner, eventData);
+  updateNeverSlashedStreak(winner, eventData);
+  winner.lastSyncBlockNumber = eventData.blockNumber;
   winner.save();
 }
 
 export function syncAllStreaksForWinners(
   winnerIds: string[],
-  blockNumber: BigInt
+  eventData: EventDataForBadgeAward
 ): void {
   for (let i = 0; i < winnerIds.length; i++) {
-    syncAllStreaksForWinner(winnerIds[i], blockNumber);
+    syncAllStreaksForWinner(winnerIds[i], eventData);
   }
 }
 

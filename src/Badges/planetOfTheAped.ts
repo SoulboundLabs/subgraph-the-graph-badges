@@ -8,6 +8,7 @@ import {
 import {
   createBadgeAward,
   createOrLoadBadgeDefinition,
+  EventDataForBadgeAward,
 } from "../helpers/models";
 import { daysToBlocks } from "../helpers/typeConverter";
 
@@ -15,14 +16,14 @@ import { daysToBlocks } from "../helpers/typeConverter";
 export function processUniqueSignalForPlanetOfTheAped(
   curator: Curator,
   subgraphId: string,
-  blockNumber: BigInt
+  eventData: EventDataForBadgeAward
 ): void {
   let subgraph = Subgraph.load(subgraphId);
-  let blocksSincePublish = blockNumber.minus(subgraph.blockPublished);
+  let blocksSincePublish = eventData.blockNumber.minus(subgraph.blockPublished);
   let blockThreshold = BigInt.fromI32(420);
   if (subgraph != null) {
     if (blocksSincePublish.le(blockThreshold)) {
-      createBadgeAward(_badgeDefinition(), curator.id, blockNumber);
+      createBadgeAward(_badgeDefinition(), curator.id, eventData);
     }
   }
 }

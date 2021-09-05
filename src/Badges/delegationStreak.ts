@@ -14,6 +14,7 @@ import {
 import {
   createBadgeAward,
   createOrLoadBadgeDefinitionWithStreak,
+  EventDataForBadgeAward,
 } from "../helpers/models";
 import {
   createOrLoadOngoingBadgeStreak,
@@ -26,17 +27,17 @@ export function processStakeDelegatedForDelegationStreakBadge(
   delegatorId: string,
   indexerId: string,
   shares: BigInt,
-  blockNumber: BigInt
+  eventData: EventDataForBadgeAward
 ): void {
   log.debug("_processStakeDelegated: delegatorId - {}", [delegatorId]);
 
-  let delegator = createOrLoadDelegator(delegatorId, blockNumber);
+  let delegator = createOrLoadDelegator(delegatorId, eventData);
   let ongoingBadgeStreak = createOrLoadOngoingBadgeStreak(
     BADGE_NAME_DELEGATION_STREAK,
     delegatorId
   );
   if (ongoingBadgeStreak.streakStartBlock.equals(negOneBI())) {
-    ongoingBadgeStreak.streakStartBlock = blockNumber;
+    ongoingBadgeStreak.streakStartBlock = eventData.blockNumber;
     ongoingBadgeStreak.save();
   }
 
@@ -50,11 +51,11 @@ export function processStakeDelegatedLockedForDelegationStreakBadge(
   delegatorId: string,
   indexerId: string,
   shares: BigInt,
-  blockNumber: BigInt
+  eventData: EventDataForBadgeAward
 ): void {
   log.debug("_processStakeDelegatedLocked: delegatorId - {}", [delegatorId]);
 
-  let delegator = createOrLoadDelegator(delegatorId, blockNumber);
+  let delegator = createOrLoadDelegator(delegatorId, eventData);
   let delegatedStake = createOrLoadDelegatedStake(delegatorId, indexerId);
   delegatedStake.shares = delegatedStake.shares.minus(shares);
   if (delegatedStake.shares.equals(toBigInt(0))) {
@@ -73,14 +74,16 @@ export function processStakeDelegatedLockedForDelegationStreakBadge(
 // awards a badge if there's an ongoing streak and minimum threshold was passed since last sync
 export function updateDelegationStreak(
   winner: Winner,
-  blockNumber: BigInt
+  eventData: EventDataForBadgeAward
 ): void {
   let ongoingBadgeStreak = createOrLoadOngoingBadgeStreak(
     BADGE_NAME_DELEGATION_STREAK,
     winner.id
   );
   if (ongoingBadgeStreak.streakStartBlock.notEqual(negOneBI())) {
-    let streakLength = blockNumber.minus(ongoingBadgeStreak.streakStartBlock);
+    let streakLength = eventData.blockNumber.minus(
+      ongoingBadgeStreak.streakStartBlock
+    );
     let previousStreakLength = winner.lastSyncBlockNumber.minus(
       ongoingBadgeStreak.streakStartBlock
     );
@@ -94,16 +97,16 @@ export function updateDelegationStreak(
       log.debug(
         "awarding DelegationStreak badge---\nblock number: {}\nprevious streak: {}\ncurrent streak: {}\nwinner: {}\n",
         [
-          blockNumber.toString(),
+          eventData.blockNumber.toString(),
           previousStreakLength.toString(),
           streakLength.toString(),
           winner.id,
         ]
       );
 
-      createBadgeAward(_badgeDefinition(), winner.id, blockNumber);
+      createBadgeAward(_badgeDefinition(), winner.id, eventData);
     }
-    ongoingBadgeStreak.streakStartBlock = blockNumber;
+    ongoingBadgeStreak.streakStartBlock = eventData.blockNumber;
     ongoingBadgeStreak.save();
   }
 }

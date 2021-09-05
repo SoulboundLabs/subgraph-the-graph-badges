@@ -8,16 +8,17 @@ import {
 import {
   createBadgeAward,
   createOrLoadBadgeDefinition,
+  EventDataForBadgeAward,
 } from "../helpers/models";
 
 export function processUniqueDelegationForDelegationNationBadge(
   delegator: Delegator,
-  blockNumber: BigInt
+  eventData: EventDataForBadgeAward
 ): void {
   let minUniqueDelegations = delegator.uniqueActiveDelegationCount >= 5;
   let matchesBadgeLevel = delegator.uniqueActiveDelegationCount % 5 == 0;
   if (minUniqueDelegations && matchesBadgeLevel) {
-    createBadgeAward(_badgeDefinition(), delegator.id, blockNumber);
+    createBadgeAward(_badgeDefinition(), delegator.id, eventData);
   }
 }
 

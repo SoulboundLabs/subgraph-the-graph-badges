@@ -2,7 +2,7 @@ import { NSignalMinted, NSignalBurned } from "../../generated/GNS/GNS";
 import { processUniqueSignalForPlanetOfTheAped } from "../Badges/planetOfTheAped";
 import { BigDecimal, BigInt } from "@graphprotocol/graph-ts/index";
 import { Curator, NameSignal } from "../../generated/schema";
-import { createOrLoadEntityStats } from "./models";
+import { createOrLoadEntityStats, EventDataForBadgeAward } from "./models";
 import { processCurationBurnForSubgraphShark } from "../Badges/subgraphShark";
 import { zeroBD } from "./constants";
 import { log } from "@graphprotocol/graph-ts";
@@ -18,6 +18,7 @@ export function processCurationSignal(event: NSignalMinted): void {
   let nSignal = event.params.nSignalCreated;
   let vSignal = event.params.vSignalCreated.toBigDecimal();
   let tokensDeposited = event.params.tokensDeposited;
+  let eventData = new EventDataForBadgeAward(event);
   _processCurationSignal(
     subgraphOwner,
     subgraphNumber,
@@ -25,7 +26,7 @@ export function processCurationSignal(event: NSignalMinted): void {
     nSignal,
     vSignal,
     tokensDeposited,
-    event.block.number
+    eventData
   );
 }
 
@@ -36,6 +37,7 @@ export function processCurationBurn(event: NSignalBurned): void {
   let nSignalBurnt = event.params.nSignalBurnt;
   let vSignalBurnt = event.params.vSignalBurnt.toBigDecimal();
   let tokensReceived = event.params.tokensReceived;
+  let eventData = new EventDataForBadgeAward(event);
   _processCurationBurn(
     subgraphOwner,
     subgraphNumber,
@@ -43,7 +45,7 @@ export function processCurationBurn(event: NSignalBurned): void {
     nSignalBurnt,
     vSignalBurnt,
     tokensReceived,
-    event.block.number
+    eventData
   );
 }
 
@@ -56,18 +58,18 @@ function _processCurationSignal(
   nSignal: BigInt,
   vSignal: BigDecimal,
   tokensDeposited: BigInt,
-  blockNumber: BigInt
+  eventData: EventDataForBadgeAward
 ): void {
-  syncAllStreaksForWinners([subgraphOwner, curatorId], blockNumber);
+  syncAllStreaksForWinners([subgraphOwner, curatorId], eventData);
 
   let subgraphId = subgraphOwner.concat("-").concat(subgraphNumber);
-  let curator = _createOrLoadCurator(curatorId, blockNumber);
+  let curator = _createOrLoadCurator(curatorId, eventData);
   let nameSignal = createOrLoadNameSignal(curatorId, subgraphId);
 
   let isNameSignalBecomingActive =
     nameSignal.nameSignal.isZero() && !nSignal.isZero();
   if (isNameSignalBecomingActive) {
-    _broadcastUniqueCurationSignal(curator, subgraphId, blockNumber);
+    _broadcastUniqueCurationSignal(curator, subgraphId, eventData);
   }
 
   nameSignal.nameSignal = nameSignal.nameSignal.plus(nSignal);
@@ -106,12 +108,12 @@ function _processCurationBurn(
   nSignalBurnt: BigInt,
   vSignalBurnt: BigDecimal,
   tokensReceived: BigInt,
-  blockNumber: BigInt
+  eventData: EventDataForBadgeAward
 ): void {
-  syncAllStreaksForWinners([subgraphOwner, curatorId], blockNumber);
+  syncAllStreaksForWinners([subgraphOwner, curatorId], eventData);
 
   let subgraphId = subgraphOwner.concat("-").concat(subgraphNumber);
-  let curator = _createOrLoadCurator(curatorId, blockNumber);
+  let curator = _createOrLoadCurator(curatorId, eventData);
 
   let nameSignal = createOrLoadNameSignal(curatorId, subgraphId);
 
@@ -132,7 +134,7 @@ function _processCurationBurn(
     curator,
     previousACBNameSignal,
     nameSignal.nameSignalAverageCostBasis,
-    blockNumber
+    eventData
   );
 
   if (nameSignal.nameSignalAverageCostBasis == BigDecimal.fromString("0")) {
@@ -145,41 +147,44 @@ function _processCurationBurn(
 
 function _broadcastFirstTimeCurator(
   curatorId: string,
-  blockNumber: BigInt
+  eventData: EventDataForBadgeAward
 ): void {
-  processNewCuratorForCuratorTribeBadge(curatorId, blockNumber);
+  processNewCuratorForCuratorTribeBadge(curatorId, eventData);
 }
 
 function _broadcastUniqueCurationSignal(
   curator: Curator,
   subgraphId: string,
-  blockNumber: BigInt
+  eventData: EventDataForBadgeAward
 ): void {
   log.debug(
     "broadcasting unique curation signal---\ncurator: {}\nsubgraphId: {}\n",
     [curator.id, subgraphId]
   );
 
-  processUniqueSignalForPlanetOfTheAped(curator, subgraphId, blockNumber);
+  processUniqueSignalForPlanetOfTheAped(curator, subgraphId, eventData);
 }
 
 function _broadcastCurationBurn(
   curator: Curator,
   oldACB: BigDecimal,
   currentACB: BigDecimal,
-  blockNumber: BigInt
+  eventData: EventDataForBadgeAward
 ): void {
   log.debug(
     "broadcasting curation burn---\noldACB: {}\ncurrentACB: {}\ncurator: {}\n",
     [oldACB.toString(), currentACB.toString(), curator.id]
   );
 
-  processCurationBurnForSubgraphShark(curator, oldACB, currentACB, blockNumber);
+  processCurationBurnForSubgraphShark(curator, oldACB, currentACB, eventData);
 }
 
 ////////////////      Models
 
-function _createOrLoadCurator(id: string, blockNumber: BigInt): Curator {
+function _createOrLoadCurator(
+  id: string,
+  eventData: EventDataForBadgeAward
+): Curator {
   let curator = Curator.load(id);
 
   if (curator == null) {
@@ -193,7 +198,7 @@ function _createOrLoadCurator(id: string, blockNumber: BigInt): Curator {
     entityStats.curatorCount = curatorCount;
     entityStats.save();
 
-    _broadcastFirstTimeCurator(id, blockNumber);
+    _broadcastFirstTimeCurator(id, eventData);
   }
 
   return curator as Curator;

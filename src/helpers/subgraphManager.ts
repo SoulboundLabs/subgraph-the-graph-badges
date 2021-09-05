@@ -5,17 +5,18 @@ import {
 } from "../../generated/schema";
 import { log, BigInt } from "@graphprotocol/graph-ts";
 import { SubgraphPublished } from "../../generated/GNS/GNS";
-import { createOrLoadGraphAccount } from "./models";
+import { createOrLoadGraphAccount, EventDataForBadgeAward } from "./models";
 import { processSubgraphPublishedForSubgraphDeveloperBadge } from "../Badges/subgraphDeveloper";
 
 ////////////////      Public
 
 export function processSubgraphPublished(event: SubgraphPublished): void {
+  let eventData = new EventDataForBadgeAward(event);
   _processSubgraphPublished(
     event.params.graphAccount.toHexString(),
     event.params.subgraphNumber,
     event.params.subgraphDeploymentID.toHexString(),
-    event.block.number
+    eventData
   );
 }
 
@@ -25,23 +26,23 @@ function _processSubgraphPublished(
   publisherId: string,
   subgraphNumber: BigInt,
   subgraphDeploymentId: string,
-  blockPublished: BigInt
+  eventData: EventDataForBadgeAward
 ): void {
   let subgraphId = publisherId.concat("-").concat(subgraphNumber.toString());
-  _createOrLoadSubgraph(subgraphId, publisherId, blockPublished);
+  _createOrLoadSubgraph(subgraphId, publisherId, eventData.blockNumber);
   let publisher = _createOrLoadPublisher(publisherId);
-  _createOrLoadSubgraphDeployment(subgraphDeploymentId, blockPublished);
-  _broadcastSubgraphPublished(publisher, blockPublished);
+  _createOrLoadSubgraphDeployment(subgraphDeploymentId, eventData.blockNumber);
+  _broadcastSubgraphPublished(publisher, eventData);
 }
 
 ////////////////      Broadcasting
 
 function _broadcastSubgraphPublished(
   publisher: Publisher,
-  blockNumber: BigInt
+  eventData: EventDataForBadgeAward
 ): void {
   log.debug("broadcasting SubgraphPublished", []);
-  processSubgraphPublishedForSubgraphDeveloperBadge(publisher, blockNumber);
+  processSubgraphPublishedForSubgraphDeveloperBadge(publisher, eventData);
 }
 
 ////////////////      Models

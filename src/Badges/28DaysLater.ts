@@ -10,18 +10,19 @@ import { createOrLoadIndexer } from "../helpers/indexerManager";
 import {
   createBadgeAward,
   createOrLoadBadgeDefinitionWithStreak,
+  EventDataForBadgeAward,
 } from "../helpers/models";
 
 export function processAllocationClosedOnTimeFor28DaysLaterBadge(
   allocation: Allocation,
-  blockNumber: BigInt
+  eventData: EventDataForBadgeAward
 ): void {
   let indexer = createOrLoadIndexer(allocation.indexer);
   if (
     indexer.allocationsClosedOnTime % BADGE_STREAK_MIN_CLOSES_28_EPOCHS_LATER ==
     0
   ) {
-    createBadgeAward(_badgeDefinition(), allocation.indexer, blockNumber);
+    createBadgeAward(_badgeDefinition(), allocation.indexer, eventData);
   }
 }
 

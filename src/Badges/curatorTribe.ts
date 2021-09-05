@@ -2,6 +2,7 @@ import { BadgeDefinition } from "../../generated/schema";
 import {
   createBadgeAward,
   createOrLoadBadgeDefinition,
+  EventDataForBadgeAward,
 } from "../helpers/models";
 import {
   BADGE_NAME_CURATOR_TRIBE,
@@ -12,9 +13,9 @@ import { BigInt } from "@graphprotocol/graph-ts/index";
 
 export function processNewCuratorForCuratorTribeBadge(
   curatorId: string,
-  blockNumber: BigInt
+  eventData: EventDataForBadgeAward
 ): void {
-  createBadgeAward(_badgeDefinition(), curatorId, blockNumber);
+  createBadgeAward(_badgeDefinition(), curatorId, eventData);
 }
 
 function _badgeDefinition(): BadgeDefinition {

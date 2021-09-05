@@ -14,19 +14,20 @@ import {
 import {
   createBadgeAward,
   createOrLoadBadgeDefinition,
+  EventDataForBadgeAward,
 } from "../helpers/models";
 
 export function processAllocationClosedForFirstToCloseBadge(
   allocation: Allocation,
   subgraphDeploymentId: string,
-  blockNumber: BigInt
+  eventData: EventDataForBadgeAward
 ): void {
   let subgraphDeployment = SubgraphDeployment.load(subgraphDeploymentId);
   if (subgraphDeployment.firstToClose == null) {
     subgraphDeployment.firstToClose = allocation.indexer;
     subgraphDeployment.save();
 
-    createBadgeAward(_badgeDefinition(), allocation.indexer, blockNumber);
+    createBadgeAward(_badgeDefinition(), allocation.indexer, eventData);
   }
 }
 

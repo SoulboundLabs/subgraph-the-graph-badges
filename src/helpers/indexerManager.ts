@@ -2,6 +2,7 @@ import { Allocation, Indexer } from "../../generated/schema";
 import {
   createOrLoadEntityStats,
   createOrLoadGraphAccount,
+  EventDataForBadgeAward,
 } from "../helpers/models";
 import {
   AllocationClosed,
@@ -24,30 +25,33 @@ import {
 ////////////////      Public
 
 export function processAllocationCreated(event: AllocationCreated): void {
+  let eventData = new EventDataForBadgeAward(event);
   _processAllocationCreated(
     event.params.allocationID.toHexString(),
     event.params.subgraphDeploymentID.toHexString(),
     event.params.indexer.toHexString(),
     event.params.epoch,
-    event.block.number
+    eventData
   );
 }
 
 export function processAllocationClosed(event: AllocationClosed): void {
+  let eventData = new EventDataForBadgeAward(event);
   _processAllocationClosed(
     event.params.allocationID.toHexString(),
     event.params.subgraphDeploymentID.toHex(),
     event.params.indexer.toHexString(),
     event.params.epoch,
-    event.block.number
+    eventData
   );
 }
 
 export function processStakeSlashed(event: StakeSlashed): void {
+  let eventData = new EventDataForBadgeAward(event);
   _processStakeSlashed(
     event.params.indexer.toHexString(),
     event.params.beneficiary.toHexString(),
-    event.block.number
+    eventData
   );
 }
 
@@ -58,15 +62,15 @@ function _processAllocationCreated(
   subgraphDeploymentId: string,
   indexerId: string,
   epoch: BigInt,
-  blockNumber: BigInt
+  eventData: EventDataForBadgeAward
 ): void {
-  syncAllStreaksForWinner(indexerId, blockNumber);
+  syncAllStreaksForWinner(indexerId, eventData);
   _createAllocation(channelId, subgraphDeploymentId, indexerId, epoch);
   let indexer = createOrLoadIndexer(indexerId);
   indexer.uniqueOpenAllocationCount = indexer.uniqueOpenAllocationCount + 1;
   indexer.save();
 
-  _broadcastAllocationCreated(indexer, blockNumber);
+  _broadcastAllocationCreated(indexer, eventData);
 }
 
 function _processAllocationClosed(
@@ -74,9 +78,9 @@ function _processAllocationClosed(
   subgraphDeploymentID: string,
   indexerId: string,
   epoch: BigInt,
-  blockNumber: BigInt
+  eventData: EventDataForBadgeAward
 ): void {
-  syncAllStreaksForWinner(indexerId, blockNumber);
+  syncAllStreaksForWinner(indexerId, eventData);
 
   let allocation = Allocation.load(channelId) as Allocation;
   let indexer = createOrLoadIndexer(allocation.indexer);
@@ -88,7 +92,7 @@ function _processAllocationClosed(
     _broadcastAllocationClosedOnTime(
       allocation,
       subgraphDeploymentID,
-      blockNumber
+      eventData
     );
   }
 
@@ -98,33 +102,39 @@ function _processAllocationClosed(
 function _processStakeSlashed(
   indexerId: string,
   beneficiaryId: string,
-  blockNumber: BigInt
+  eventData: EventDataForBadgeAward
 ): void {
-  syncAllStreaksForWinners([indexerId, beneficiaryId], blockNumber);
-  _broadcastStakeSlashed(indexerId, blockNumber);
+  syncAllStreaksForWinners([indexerId, beneficiaryId], eventData);
+  _broadcastStakeSlashed(indexerId, eventData);
 }
 
 ////////////////      Broadcasting
 
-function _broadcastAllocationCreated(indexer: Indexer, epoch: BigInt): void {
-  processAllocationCreatedForNeverSlashed(indexer, epoch);
+function _broadcastAllocationCreated(
+  indexer: Indexer,
+  eventData: EventDataForBadgeAward
+): void {
+  processAllocationCreatedForNeverSlashed(indexer, eventData);
 }
 
 function _broadcastAllocationClosedOnTime(
   allocation: Allocation,
   subgraphDeploymentID: string,
-  blockNumber: BigInt
+  eventData: EventDataForBadgeAward
 ): void {
-  processAllocationClosedOnTimeFor28DaysLaterBadge(allocation, blockNumber);
+  processAllocationClosedOnTimeFor28DaysLaterBadge(allocation, eventData);
   processAllocationClosedForFirstToCloseBadge(
     allocation,
     subgraphDeploymentID,
-    blockNumber
+    eventData
   );
 }
 
-function _broadcastStakeSlashed(indexerId: string, blockNumber: BigInt): void {
-  processStakeSlashedForNeverSlashedBadge(indexerId, blockNumber);
+function _broadcastStakeSlashed(
+  indexerId: string,
+  eventData: EventDataForBadgeAward
+): void {
+  processStakeSlashedForNeverSlashedBadge(indexerId, eventData);
 }
 
 ////////////////      Models

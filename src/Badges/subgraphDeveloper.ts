@@ -3,6 +3,7 @@ import { BigInt } from "@graphprotocol/graph-ts/index";
 import {
   createBadgeAward,
   createOrLoadBadgeDefinition,
+  EventDataForBadgeAward,
 } from "../helpers/models";
 import {
   BADGE_NAME_SUBGRAPH_DEVELOPER,
@@ -12,10 +13,10 @@ import {
 
 export function processSubgraphPublishedForSubgraphDeveloperBadge(
   publisher: Publisher,
-  blockNumber: BigInt
+  eventData: EventDataForBadgeAward
 ): void {
   if (publisher.subgraphCount == 1) {
-    createBadgeAward(_badgeDefinition(), publisher.id, blockNumber);
+    createBadgeAward(_badgeDefinition(), publisher.id, eventData);
   }
 }
 

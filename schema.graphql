@@ -197,6 +197,8 @@ type BadgeAward @entity {
   winner: Winner!
   "Block number in which badge was awarded"
   blockAwarded: BigInt!
+  "Hash of the transaction that triggered this award"
+  transactionHash: String!
   "Additional details about the badge"
   definition: BadgeDefinition!
   "Ordered number in which the badge was awarded across all winners"
