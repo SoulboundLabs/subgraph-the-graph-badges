@@ -13,7 +13,6 @@ export class Addresses {
   ensPublicResolver: string;
   blockNumber: string;
   network: string;
-  badgeRegistry: string;
   badgethDAO: string;
   snapshotAdmin1: string;
   snapshotAdmin2: string;
@@ -34,8 +33,7 @@ export let addresses: Addresses = {
   ensPublicResolver: "{{ensPublicResolver}}",
   blockNumber: "{{blockNumber}}",
   network: "{{network}}",
-  badgeRegistry: "{{badgeRegistry}}",
   badgethDAO: "{{badgethDAO}}",
   snapshotAdmin1: "{{snapshotAdmin1}}",
-  snapshotAdmin2: "{{snapshotAdmin2}}"
+  snapshotAdmin2: "{{snapshotAdmin2}}",
 };

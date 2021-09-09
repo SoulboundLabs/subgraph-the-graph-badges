@@ -22,10 +22,9 @@ export let addresses: Addresses = {
   ensPublicResolver: "{{mainnet.IPublicResolver}}",
   blockNumber: "",
   network: "",
-  badgeRegistry: BadgethAddresses.mainnet.BadgeRegistry,
   badgethDAO: BadgethAddresses.mainnet.BadgethDAO,
   snapshotAdmin1: BadgethAddresses.mainnet.SnapshotAdmin1,
-  snapshotAdmin2: BadgethAddresses.mainnet.SnapshotAdmin2
+  snapshotAdmin2: BadgethAddresses.mainnet.SnapshotAdmin2,
 };
 
 const main = (): void => {

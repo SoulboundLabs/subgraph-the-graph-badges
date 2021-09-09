@@ -1,12 +1,10 @@
 {
   "mainnet": {
-    "BadgeRegistry": "0xdCa7EF03e98e0DC2B855bE647C39ABe984fcF21B",
     "BadgethDAO": "0x1406ae6F7902916Fe585357ef1FDd8a412200745",
     "SnapshotAdmin1": "0xBcE0b2edcA1fBE32891Ac6096b8ea7408dd099c2",
     "SnapshotAdmin2": "0x8cABEC8fe71A3604E21e6E2BB55463EC6e26fBf8"
   },
   "rinkeby": {
-    "BadgeRegistry": "0x2BD4B423Ca053c6bC2809E8Af6245a0D5f0C1642",
     "BadgethDAO": "0x1406ae6F7902916Fe585357ef1FDd8a412200745",
     "SnapshotAdmin1": "0xBcE0b2edcA1fBE32891Ac6096b8ea7408dd099c2",
     "SnapshotAdmin2": "0x8cABEC8fe71A3604E21e6E2BB55463EC6e26fBf8"
