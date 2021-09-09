@@ -18,6 +18,7 @@ export function createOrLoadEntityStats(): EntityStats {
 
   if (entityStats == null) {
     entityStats = new EntityStats("1");
+    entityStats.voterCount = 0;
     entityStats.indexerCount = 0;
     entityStats.delegatorCount = 0;
     entityStats.curatorCount = 0;
@@ -150,10 +151,20 @@ function _updateAccountWithBadgeAward(badgeAward: BadgeAward): void {
   winner.badgeCount = winner.badgeCount + 1;
   graphAccount.badgeCount = graphAccount.badgeCount + 1;
   let badgeDefinition = BadgeDefinition.load(badgeAward.definition);
-  winner.votingPower = badgeDefinition.votingPower.plus(winner.votingPower);
-  graphAccount.votingPower = badgeDefinition.votingPower.plus(
-    graphAccount.votingPower
-  );
+  let badgeVotingPower = badgeDefinition.votingPower;
+  if (badgeVotingPower.gt(zeroBI())) {
+    // winner just earned their first voting power
+    if (winner.votingPower.equals(zeroBI())) {
+      let entityStats = createOrLoadEntityStats();
+      entityStats.voterCount = entityStats.voterCount + 1;
+      entityStats.save();
+    }
+    winner.votingPower = badgeDefinition.votingPower.plus(winner.votingPower);
+    graphAccount.votingPower = badgeDefinition.votingPower.plus(
+      graphAccount.votingPower
+    );
+  }
+
   winner.save();
   graphAccount.save();
 }

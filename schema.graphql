@@ -8,6 +8,8 @@ Singleton entity that tracks numbers and stats
 type EntityStats @entity {
   "ID is set to 1"
   id: ID!
+  "Number of winners with voting power"
+  voterCount: Int!
   "Number of indexers"
   indexerCount: Int!
   "Number of delegators"

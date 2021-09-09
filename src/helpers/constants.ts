@@ -56,9 +56,9 @@ export const BADGE_VOTE_POWER_FIRST_TO_CLOSE = 1;
 
 export const BADGE_NAME_28_EPOCHS_LATER = "28 Epochs Later";
 export const BADGE_DESCRIPTION_28_EPOCHS_LATER =
-  "Awarded to indexers who close their allocations every 28 epochs or fewer";
+  "Awarded to indexers who close an allocation in under 28 epochs 28 times";
 export const BADGE_VOTE_POWER_28_EPOCHS_LATER = 1;
-export const BADGE_STREAK_MIN_CLOSES_28_EPOCHS_LATER = 5;
+export const BADGE_STREAK_MIN_CLOSES_28_EPOCHS_LATER = 28;
 
 export const BADGE_NAME_NEVER_SLASHED = "Never Slashed";
 export const BADGE_DESCRIPTION_NEVER_SLASHED =
