@@ -2,6 +2,7 @@ import { BigInt } from "@graphprotocol/graph-ts/index";
 import { BadgeDefinition, Delegator } from "../../generated/schema";
 import {
   BADGE_DESCRIPTION_DELEGATION_NATION,
+  BADGE_MIN_DAYS_DELEGATION_NATION,
   BADGE_NAME_DELEGATION_NATION,
   BADGE_VOTE_POWER_DELEGATION_NATION,
 } from "../helpers/constants";
@@ -15,8 +16,11 @@ export function processUniqueDelegationForDelegationNationBadge(
   delegator: Delegator,
   eventData: EventDataForBadgeAward
 ): void {
-  let minUniqueDelegations = delegator.uniqueActiveDelegationCount >= 5;
-  let matchesBadgeLevel = delegator.uniqueActiveDelegationCount % 5 == 0;
+  let minUniqueDelegations =
+    delegator.uniqueActiveDelegationCount >= BADGE_MIN_DAYS_DELEGATION_NATION;
+  let matchesBadgeLevel =
+    delegator.uniqueActiveDelegationCount % BADGE_MIN_DAYS_DELEGATION_NATION ==
+    0;
   if (minUniqueDelegations && matchesBadgeLevel) {
     createBadgeAward(_badgeDefinition(), delegator.id, eventData);
   }

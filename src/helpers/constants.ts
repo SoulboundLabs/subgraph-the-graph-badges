@@ -68,12 +68,13 @@ export const BADGE_STREAK_MIN_DAYS_NEVER_SLASHED = 30;
 
 export const BADGE_NAME_DELEGATION_NATION = "Delegation Nation";
 export const BADGE_DESCRIPTION_DELEGATION_NATION =
-  "Awarded to delegators who delegate to 3 or more indexers";
+  "Awarded to delegators who delegate to 5 or more indexers";
 export const BADGE_VOTE_POWER_DELEGATION_NATION = 1;
+export const BADGE_MIN_DAYS_DELEGATION_NATION = 5;
 
 export const BADGE_NAME_DELEGATION_STREAK = "Delegation Streak";
 export const BADGE_DESCRIPTION_DELEGATION_STREAK =
-  "Awarded to delegators who delegate for at least 30 consecutive days";
+  "Awarded to delegators who delegate for at least 90 consecutive days";
 export const BADGE_VOTE_POWER_DELEGATION_STREAK = 1;
 export const BADGE_STREAK_MIN_DAYS_DELEGATION_STREAK = 90;
 
