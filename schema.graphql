@@ -184,7 +184,6 @@ type SubgraphDeployment @entity {
   firstToClose: Indexer
 }
 
-
 ########################
 #### Badge Entities ####
 ########################
@@ -199,6 +198,8 @@ type BadgeAward @entity {
   winner: Winner!
   "Block number in which badge was awarded"
   blockAwarded: BigInt!
+  "Timestamp in which badge was awarded"
+  timestampAwarded: BigInt!
   "Hash of the transaction that triggered this award"
   transactionHash: String!
   "Additional details about the badge"

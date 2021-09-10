@@ -1,4 +1,4 @@
-import { BigInt, ethereum, log } from "@graphprotocol/graph-ts/index";
+import { BigInt, ethereum } from "@graphprotocol/graph-ts/index";
 import {
   BadgeAward,
   BadgeAwardCount,
@@ -9,7 +9,7 @@ import {
   Protocol,
   Winner,
 } from "../../generated/schema";
-import { negOneBI, PROTOCOL_NAME_THE_GRAPH, zeroBI } from "./constants";
+import { PROTOCOL_NAME_THE_GRAPH, zeroBI } from "./constants";
 import { createOrLoadBadgeStreakDefinition } from "./streakManager";
 import { toBigInt } from "./typeConverter";
 
@@ -35,9 +35,11 @@ export function createOrLoadEntityStats(): EntityStats {
 export class EventDataForBadgeAward {
   readonly blockNumber: BigInt;
   readonly transactionHash: string;
+  readonly timestamp: BigInt;
   constructor(event: ethereum.Event) {
     this.blockNumber = event.block.number;
     this.transactionHash = event.transaction.hash.toHexString();
+    this.timestamp = event.block.timestamp;
   }
 }
 
@@ -137,6 +139,7 @@ export function createBadgeAward(
     badgeAward.definition = badgeDefinition.id;
     badgeAward.blockAwarded = eventData.blockNumber;
     badgeAward.transactionHash = eventData.transactionHash;
+    badgeAward.timestampAwarded = eventData.timestamp;
     badgeAward.globalBadgeNumber = badgeDefinition.badgeCount;
     badgeAward.winnerBadgeNumber = badgeAwardCount.badgeCount;
     badgeAward.save();
