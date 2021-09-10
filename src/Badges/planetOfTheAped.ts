@@ -4,13 +4,13 @@ import {
   BADGE_DESCRIPTION_PLANET_OF_THE_APED,
   BADGE_NAME_PLANET_OF_THE_APED,
   BADGE_VOTE_POWER_PLANET_OF_THE_APED,
+  PROTOCOL_ROLE_CURATOR,
 } from "../helpers/constants";
 import {
   createBadgeAward,
   createOrLoadBadgeDefinition,
   EventDataForBadgeAward,
 } from "../helpers/models";
-import { daysToBlocks } from "../helpers/typeConverter";
 
 // Called every time a curator signals on a subgraph they haven't signalled on before.
 export function processUniqueSignalForPlanetOfTheAped(
@@ -34,6 +34,7 @@ function _badgeDefinition(): BadgeDefinition {
     BADGE_DESCRIPTION_PLANET_OF_THE_APED,
     BigInt.fromI32(BADGE_VOTE_POWER_PLANET_OF_THE_APED),
     "TBD",
-    "TBD"
+    "TBD",
+    PROTOCOL_ROLE_CURATOR
   );
 }

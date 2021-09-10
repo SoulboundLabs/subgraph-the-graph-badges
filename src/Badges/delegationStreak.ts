@@ -3,9 +3,10 @@ import { BadgeDefinition, Winner } from "../../generated/schema";
 import {
   BADGE_DESCRIPTION_DELEGATION_STREAK,
   BADGE_NAME_DELEGATION_STREAK,
-  BADGE_VOTE_POWER_DELEGATION_STREAK,
   BADGE_STREAK_MIN_DAYS_DELEGATION_STREAK,
+  BADGE_VOTE_POWER_DELEGATION_STREAK,
   negOneBI,
+  PROTOCOL_ROLE_DELEGATOR,
 } from "../helpers/constants";
 import {
   createOrLoadDelegatedStake,
@@ -20,8 +21,7 @@ import {
   createOrLoadOngoingBadgeStreak,
   endBadgeStreak,
 } from "../helpers/streakManager";
-import { daysToBlocks } from "../helpers/typeConverter";
-import { toBigInt } from "../helpers/typeConverter";
+import { daysToBlocks, toBigInt } from "../helpers/typeConverter";
 
 export function processStakeDelegatedForDelegationStreakBadge(
   delegatorId: string,
@@ -118,6 +118,7 @@ function _badgeDefinition(): BadgeDefinition {
     BigInt.fromI32(BADGE_VOTE_POWER_DELEGATION_STREAK),
     "TBD",
     "TBD",
-    daysToBlocks(BigInt.fromI32(BADGE_STREAK_MIN_DAYS_DELEGATION_STREAK))
+    daysToBlocks(BigInt.fromI32(BADGE_STREAK_MIN_DAYS_DELEGATION_STREAK)),
+    PROTOCOL_ROLE_DELEGATOR
   ) as BadgeDefinition;
 }

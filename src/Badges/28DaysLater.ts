@@ -5,6 +5,7 @@ import {
   BADGE_NAME_28_EPOCHS_LATER,
   BADGE_STREAK_MIN_CLOSES_28_EPOCHS_LATER,
   BADGE_VOTE_POWER_28_EPOCHS_LATER,
+  PROTOCOL_ROLE_INDEXER,
 } from "../helpers/constants";
 import { createOrLoadIndexer } from "../helpers/indexerManager";
 import {
@@ -33,6 +34,7 @@ function _badgeDefinition(): BadgeDefinition {
     BigInt.fromI32(BADGE_VOTE_POWER_28_EPOCHS_LATER),
     "TBD",
     "TBD",
-    BigInt.fromI32(BADGE_STREAK_MIN_CLOSES_28_EPOCHS_LATER)
+    BigInt.fromI32(BADGE_STREAK_MIN_CLOSES_28_EPOCHS_LATER),
+    PROTOCOL_ROLE_INDEXER
   );
 }

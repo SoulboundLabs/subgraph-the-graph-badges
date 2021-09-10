@@ -1,15 +1,16 @@
-import { BadgeDefinition, Publisher } from "../../generated/schema";
 import { BigInt } from "@graphprotocol/graph-ts/index";
+import { BadgeDefinition, Publisher } from "../../generated/schema";
+import {
+  BADGE_DESCRIPTION_SUBGRAPH_DEVELOPER,
+  BADGE_NAME_SUBGRAPH_DEVELOPER,
+  BADGE_VOTE_POWER_SUBGRAPH_DEVELOPER,
+  PROTOCOL_ROLE_SUBGRAPH_DEVELOPER,
+} from "../helpers/constants";
 import {
   createBadgeAward,
   createOrLoadBadgeDefinition,
   EventDataForBadgeAward,
 } from "../helpers/models";
-import {
-  BADGE_NAME_SUBGRAPH_DEVELOPER,
-  BADGE_DESCRIPTION_SUBGRAPH_DEVELOPER,
-  BADGE_VOTE_POWER_SUBGRAPH_DEVELOPER,
-} from "../helpers/constants";
 
 export function processSubgraphPublishedForSubgraphDeveloperBadge(
   publisher: Publisher,
@@ -26,6 +27,7 @@ function _badgeDefinition(): BadgeDefinition {
     BADGE_DESCRIPTION_SUBGRAPH_DEVELOPER,
     BigInt.fromI32(BADGE_VOTE_POWER_SUBGRAPH_DEVELOPER),
     "TBD",
-    "TBD"
+    "TBD",
+    PROTOCOL_ROLE_SUBGRAPH_DEVELOPER
   );
 }

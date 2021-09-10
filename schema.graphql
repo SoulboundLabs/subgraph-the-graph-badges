@@ -257,6 +257,8 @@ type BadgeDefinition @entity {
   image: String!
   "Name of the artist responsible for NFT badge"
   artist: String!
+  "Protocol role or user type of the winner"
+  protocolRole: String
   "Optional link to the artist's portfolio"
   artistWebsite: String
   "Voting power for governance voting"

@@ -2,14 +2,15 @@
 
 import { BigInt } from "@graphprotocol/graph-ts/index";
 import {
-  BadgeDefinition,
   Allocation,
+  BadgeDefinition,
   SubgraphDeployment,
 } from "../../generated/schema";
 import {
   BADGE_DESCRIPTION_FIRST_TO_CLOSE,
   BADGE_NAME_FIRST_TO_CLOSE,
   BADGE_VOTE_POWER_FIRST_TO_CLOSE,
+  PROTOCOL_ROLE_INDEXER,
 } from "../helpers/constants";
 import {
   createBadgeAward,
@@ -37,6 +38,7 @@ function _badgeDefinition(): BadgeDefinition {
     BADGE_DESCRIPTION_FIRST_TO_CLOSE,
     BigInt.fromI32(BADGE_VOTE_POWER_FIRST_TO_CLOSE),
     "TBD",
-    "TBD"
+    "TBD",
+    PROTOCOL_ROLE_INDEXER
   );
 }

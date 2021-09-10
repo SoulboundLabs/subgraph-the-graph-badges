@@ -6,10 +6,11 @@ import {
   BADGE_STREAK_MIN_DAYS_NEVER_SLASHED,
   BADGE_VOTE_POWER_NEVER_SLASHED,
   negOneBI,
+  PROTOCOL_ROLE_INDEXER,
 } from "../helpers/constants";
 import {
-  createOrLoadBadgeDefinitionWithStreak,
   createBadgeAward,
+  createOrLoadBadgeDefinitionWithStreak,
   EventDataForBadgeAward,
 } from "../helpers/models";
 import {
@@ -88,6 +89,7 @@ function _badgeDefinition(): BadgeDefinition {
     BigInt.fromI32(BADGE_VOTE_POWER_NEVER_SLASHED),
     "TBD",
     "TBD",
-    daysToBlocks(BigInt.fromI32(BADGE_STREAK_MIN_DAYS_NEVER_SLASHED))
+    daysToBlocks(BigInt.fromI32(BADGE_STREAK_MIN_DAYS_NEVER_SLASHED)),
+    PROTOCOL_ROLE_INDEXER
   );
 }

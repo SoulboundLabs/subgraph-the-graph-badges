@@ -177,7 +177,8 @@ export function createOrLoadBadgeDefinition(
   description: string,
   voteWeight: BigInt,
   image: string,
-  artist: string
+  artist: string,
+  protocolRole: string
 ): BadgeDefinition {
   let badgeDefinition = BadgeDefinition.load(name);
 
@@ -189,6 +190,7 @@ export function createOrLoadBadgeDefinition(
     badgeDefinition.description = description;
     badgeDefinition.image = image;
     badgeDefinition.artist = artist;
+    badgeDefinition.protocolRole = protocolRole;
     badgeDefinition.votingPower = voteWeight;
     badgeDefinition.badgeCount = 0;
 
@@ -204,7 +206,8 @@ export function createOrLoadBadgeDefinitionWithStreak(
   voteWeight: BigInt,
   image: string,
   artist: string,
-  minimumStreak: BigInt
+  minimumStreak: BigInt,
+  protocolRole: string
 ): BadgeDefinition {
   let badgeDefinition = BadgeDefinition.load(name);
 
@@ -214,7 +217,8 @@ export function createOrLoadBadgeDefinitionWithStreak(
       description,
       voteWeight,
       image,
-      artist
+      artist,
+      protocolRole
     );
 
     createOrLoadBadgeStreakDefinition(name, minimumStreak);

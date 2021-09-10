@@ -1,9 +1,10 @@
-import { Curator, BadgeDefinition } from "../../generated/schema";
 import { BigDecimal, BigInt } from "@graphprotocol/graph-ts/index";
+import { BadgeDefinition, Curator } from "../../generated/schema";
 import {
   BADGE_DESCRIPTION_SUBGRAPH_SHARK,
   BADGE_NAME_SUBGRAPH_SHARK,
   BADGE_VOTE_POWER_SUBGRAPH_SHARK,
+  PROTOCOL_ROLE_CURATOR,
 } from "../helpers/constants";
 import {
   createBadgeAward,
@@ -28,6 +29,7 @@ function _badgeDefinition(): BadgeDefinition {
     BADGE_DESCRIPTION_SUBGRAPH_SHARK,
     BigInt.fromI32(BADGE_VOTE_POWER_SUBGRAPH_SHARK),
     "TBD",
-    "TBD"
+    "TBD",
+    PROTOCOL_ROLE_CURATOR
   );
 }

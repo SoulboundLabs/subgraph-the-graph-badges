@@ -1,15 +1,16 @@
+import { BigInt } from "@graphprotocol/graph-ts/index";
 import { BadgeDefinition } from "../../generated/schema";
+import {
+  BADGE_DESCRIPTION_DELEGATION_TRIBE,
+  BADGE_NAME_DELEGATION_TRIBE,
+  BADGE_VOTE_POWER_DELEGATION_TRIBE,
+  PROTOCOL_ROLE_DELEGATOR,
+} from "../helpers/constants";
 import {
   createBadgeAward,
   createOrLoadBadgeDefinition,
   EventDataForBadgeAward,
 } from "../helpers/models";
-import {
-  BADGE_NAME_DELEGATION_TRIBE,
-  BADGE_DESCRIPTION_DELEGATION_TRIBE,
-  BADGE_VOTE_POWER_DELEGATION_TRIBE,
-} from "../helpers/constants";
-import { BigInt } from "@graphprotocol/graph-ts/index";
 
 export function processNewDelegatorForDelegatorTribeBadge(
   delegatorId: string,
@@ -24,6 +25,7 @@ function _badgeDefinition(): BadgeDefinition {
     BADGE_DESCRIPTION_DELEGATION_TRIBE,
     BigInt.fromI32(BADGE_VOTE_POWER_DELEGATION_TRIBE),
     "TBD",
-    "TBD"
+    "TBD",
+    PROTOCOL_ROLE_DELEGATOR
   );
 }

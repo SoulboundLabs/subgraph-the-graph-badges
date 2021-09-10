@@ -5,6 +5,7 @@ import {
   BADGE_MIN_DAYS_DELEGATION_NATION,
   BADGE_NAME_DELEGATION_NATION,
   BADGE_VOTE_POWER_DELEGATION_NATION,
+  PROTOCOL_ROLE_DELEGATOR,
 } from "../helpers/constants";
 import {
   createBadgeAward,
@@ -32,6 +33,7 @@ function _badgeDefinition(): BadgeDefinition {
     BADGE_DESCRIPTION_DELEGATION_NATION,
     BigInt.fromI32(BADGE_VOTE_POWER_DELEGATION_NATION),
     "TBD",
-    "TBD"
+    "TBD",
+    PROTOCOL_ROLE_DELEGATOR
   );
 }

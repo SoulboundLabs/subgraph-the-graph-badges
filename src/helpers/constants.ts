@@ -44,6 +44,11 @@ export function minimumDelegationStreak(): BigInt {
   return BigInt.fromI32(100000); // measured in blocks
 }
 
+export const PROTOCOL_ROLE_INDEXER = "Indexer";
+export const PROTOCOL_ROLE_DELEGATOR = "Delegator";
+export const PROTOCOL_ROLE_CURATOR = "Curator";
+export const PROTOCOL_ROLE_SUBGRAPH_DEVELOPER = "Subgraph Developer";
+
 export const AWARDED_AT_TYPE_BLOCK = "Block";
 export const AWARDED_AT_TYPE_ERA = "Era";
 
