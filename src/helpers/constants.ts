@@ -106,3 +106,8 @@ export const BADGE_NAME_DELEGATION_TRIBE = "Delegation Tribe";
 export const BADGE_DESCRIPTION_DELEGATION_TRIBE =
   "Awarded to first-time delegators";
 export const BADGE_VOTE_POWER_DELEGATION_TRIBE = 1;
+
+export const BADGE_NAME_INDEXER_TRIBE = "Indexer Tribe";
+export const BADGE_DESCRIPTION_INDEXER_TRIBE =
+  "Awarded to first-time indexters";
+export const BADGE_VOTE_POWER_INDEXER_TRIBE = 1;

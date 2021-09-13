@@ -18,7 +18,7 @@ export function processAllocationClosedOnTimeFor28DaysLaterBadge(
   allocation: Allocation,
   eventData: EventDataForBadgeAward
 ): void {
-  let indexer = createOrLoadIndexer(allocation.indexer);
+  let indexer = createOrLoadIndexer(allocation.indexer, eventData);
   if (
     indexer.allocationsClosedOnTime % BADGE_STREAK_MIN_CLOSES_28_EPOCHS_LATER ==
     0

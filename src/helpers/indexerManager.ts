@@ -21,6 +21,7 @@ import {
   syncAllStreaksForWinner,
   syncAllStreaksForWinners,
 } from "./streakManager";
+import { processNewIndexerForIndexerTribeBadge } from "../Badges/indexerTribe";
 
 ////////////////      Public
 
@@ -66,7 +67,7 @@ function _processAllocationCreated(
 ): void {
   syncAllStreaksForWinner(indexerId, eventData);
   _createAllocation(channelId, subgraphDeploymentId, indexerId, epoch);
-  let indexer = createOrLoadIndexer(indexerId);
+  let indexer = createOrLoadIndexer(indexerId, eventData);
   indexer.uniqueOpenAllocationCount = indexer.uniqueOpenAllocationCount + 1;
   indexer.save();
 
@@ -83,7 +84,7 @@ function _processAllocationClosed(
   syncAllStreaksForWinner(indexerId, eventData);
 
   let allocation = Allocation.load(channelId) as Allocation;
-  let indexer = createOrLoadIndexer(allocation.indexer);
+  let indexer = createOrLoadIndexer(allocation.indexer, eventData);
 
   indexer.uniqueOpenAllocationCount = indexer.uniqueOpenAllocationCount - 1;
 
@@ -137,9 +138,19 @@ function _broadcastStakeSlashed(
   processStakeSlashedForNeverSlashedBadge(indexerId, eventData);
 }
 
+function _broadcastUniqueIndexerCreated(
+  indexerId: string,
+  eventData: EventDataForBadgeAward
+): void {
+  processNewIndexerForIndexerTribeBadge(indexerId, eventData);
+}
+
 ////////////////      Models
 
-export function createOrLoadIndexer(id: string): Indexer {
+export function createOrLoadIndexer(
+  id: string,
+  eventData: EventDataForBadgeAward
+): Indexer {
   log.debug("Loading indexer with id: {}", [id]);
 
   let indexer = Indexer.load(id);
@@ -155,6 +166,8 @@ export function createOrLoadIndexer(id: string): Indexer {
     let entityStats = createOrLoadEntityStats();
     entityStats.indexerCount = entityStats.indexerCount + 1;
     entityStats.save();
+
+    _broadcastUniqueIndexerCreated(id, eventData);
   }
 
   return indexer as Indexer;
