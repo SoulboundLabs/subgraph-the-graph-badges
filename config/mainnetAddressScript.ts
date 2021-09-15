@@ -25,6 +25,8 @@ export let addresses: Addresses = {
   badgethDAO: BadgethAddresses.mainnet.BadgethDAO,
   snapshotAdmin1: BadgethAddresses.mainnet.SnapshotAdmin1,
   snapshotAdmin2: BadgethAddresses.mainnet.SnapshotAdmin2,
+  graphTokenLockWalletManager1: "0xfcf78ac094288d7200cfdb367a8cd07108dfa128",
+  graphTokenLockWalletManager2: "0x6284042d4da0931cbc64c5aab2d6184403095883",
 };
 
 const main = (): void => {

@@ -58,6 +58,13 @@ type GraphAccount @entity {
   publisher: Publisher @derivedFrom(field: "account")
 }
 
+type TokenLockWallet @entity {
+  "Contract address"
+  id: ID!
+  "Beneficiary of this TokenLockWallet"
+  beneficiary: String!
+}
+
 """
 Metadata for the Indexer along with parameters and staking data
 """

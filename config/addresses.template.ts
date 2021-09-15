@@ -16,6 +16,8 @@ export class Addresses {
   badgethDAO: string;
   snapshotAdmin1: string;
   snapshotAdmin2: string;
+  graphTokenLockWalletManager1: string;
+  graphTokenLockWalletManager2: string;
 }
 
 // AS compiler does not like const
@@ -36,4 +38,6 @@ export let addresses: Addresses = {
   badgethDAO: "{{badgethDAO}}",
   snapshotAdmin1: "{{snapshotAdmin1}}",
   snapshotAdmin2: "{{snapshotAdmin2}}",
+  graphTokenLockWalletManager1: "{{graphTokenLockWalletManager1}}",
+  graphTokenLockWalletManager2: "{{graphTokenLockWalletManager2}}",
 };

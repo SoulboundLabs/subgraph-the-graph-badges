@@ -69,3 +69,43 @@ dataSources:
           handler: handleNSignalMinted
         - event: NSignalBurned(indexed address,indexed uint256,indexed address,uint256,uint256,uint256)
           handler: handleNSignalBurned
+  - kind: ethereum/contract
+    name: GraphTokenLockWalletManager1
+    network: "{{network}}"
+    source:
+      address: "{{graphTokenLockWalletManager1}}"
+      abi: GraphTokenLockWalletManager
+      startBlock: {{blockNumber}}
+    mapping:
+      kind: ethereum/events
+      file: ./src/mappings/graphTokenLockWallet.ts
+      apiVersion: 0.0.4
+      language: wasm/assemblyscript
+      entities:
+        - GraphTokenLockWallet
+      abis:
+        - name: GraphTokenLockWalletManager
+          file: ./abis/GraphTokenLockWalletManager.json
+      eventHandlers:
+        - event: TokenLockCreated(indexed address,indexed bytes32,indexed address,address,uint256,uint256,uint256,uint256,uint256,uint256,uint8)
+          handler: handleTokenLockCreated
+  - kind: ethereum/contract
+    name: GraphTokenLockWalletManager2
+    network: "{{network}}"
+    source:
+      address: "{{graphTokenLockWalletManager2}}"
+      abi: GraphTokenLockWalletManager
+      startBlock: {{blockNumber}}
+    mapping:
+      kind: ethereum/events
+      file: ./src/mappings/graphTokenLockWallet.ts
+      apiVersion: 0.0.4
+      language: wasm/assemblyscript
+      entities:
+        - GraphTokenLockWallet
+      abis:
+        - name: GraphTokenLockWalletManager
+          file: ./abis/GraphTokenLockWalletManager.json
+      eventHandlers:
+        - event: TokenLockCreated(indexed address,indexed bytes32,indexed address,address,uint256,uint256,uint256,uint256,uint256,uint256,uint8)
+          handler: handleTokenLockCreated

@@ -7,8 +7,10 @@ import {
   EntityStats,
   GraphAccount,
   Protocol,
+  TokenLockWallet,
   Winner,
 } from "../../generated/schema";
+import { isTokenLockWallet } from "../mappings/graphTokenLockWallet";
 import { PROTOCOL_NAME_THE_GRAPH, zeroBI } from "./constants";
 import { createOrLoadBadgeStreakDefinition } from "./streakManager";
 import { toBigInt } from "./typeConverter";
@@ -135,7 +137,7 @@ export function createBadgeAward(
   let badgeAwardCount = createOrLoadBadgeAwardCount(badgeDefinition, winnerId);
   if (badgeAward == null) {
     badgeAward = new BadgeAward(badgeId);
-    badgeAward.winner = winnerId;
+    badgeAward.winner = _modifiedWinnerAddressIfNeeded(winnerId);
     badgeAward.definition = badgeDefinition.id;
     badgeAward.blockAwarded = eventData.blockNumber;
     badgeAward.transactionHash = eventData.transactionHash;
@@ -146,6 +148,15 @@ export function createBadgeAward(
   }
 
   _updateAccountWithBadgeAward(badgeAward as BadgeAward);
+}
+
+// if the winner was a GRT vesting contract, award badge to beneficiary
+function _modifiedWinnerAddressIfNeeded(address: string): string {
+  let adr = address;
+  if (isTokenLockWallet(address)) {
+    adr = TokenLockWallet.load(address).beneficiary;
+  }
+  return adr;
 }
 
 function _updateAccountWithBadgeAward(badgeAward: BadgeAward): void {
