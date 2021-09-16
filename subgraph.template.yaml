@@ -70,7 +70,7 @@ dataSources:
         - event: NSignalBurned(indexed address,indexed uint256,indexed address,uint256,uint256,uint256)
           handler: handleNSignalBurned
   - kind: ethereum/contract
-    name: GraphTokenLockWalletManager1
+    name: GraphTokenLockWalletManager
     network: "{{network}}"
     source:
       address: "{{graphTokenLockWalletManager1}}"
