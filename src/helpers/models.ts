@@ -124,6 +124,7 @@ export function createBadgeAward(
   winnerId: string,
   eventData: EventDataForBadgeAward
 ): void {
+  let winnerAddress = _modifiedWinnerAddressIfNeeded(winnerId);
   // increment badgeCount
   badgeDefinition.badgeCount = badgeDefinition.badgeCount + 1;
   badgeDefinition.save();
@@ -134,10 +135,13 @@ export function createBadgeAward(
   let badgeId = badgeDefinition.id.concat("-").concat(badgeNumberString);
   let badgeAward = BadgeAward.load(badgeId);
 
-  let badgeAwardCount = createOrLoadBadgeAwardCount(badgeDefinition, winnerId);
+  let badgeAwardCount = createOrLoadBadgeAwardCount(
+    badgeDefinition,
+    winnerAddress
+  );
   if (badgeAward == null) {
     badgeAward = new BadgeAward(badgeId);
-    badgeAward.winner = _modifiedWinnerAddressIfNeeded(winnerId);
+    badgeAward.winner = winnerAddress;
     badgeAward.definition = badgeDefinition.id;
     badgeAward.blockAwarded = eventData.blockNumber;
     badgeAward.transactionHash = eventData.transactionHash;
