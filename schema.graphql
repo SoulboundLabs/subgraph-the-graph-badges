@@ -56,13 +56,15 @@ type GraphAccount @entity {
   curator: Curator @derivedFrom(field: "account")
   "Developer fields for this Graph Account. Null if never published subgraphs"
   publisher: Publisher @derivedFrom(field: "account")
+  "Token Lock Wallet for this Graph Account. Null if no token lock wallet"
+  tokenLockWallet: [TokenLockWallet] @derivedFrom(field: "beneficiary")
 }
 
 type TokenLockWallet @entity {
   "Contract address"
   id: ID!
   "Beneficiary of this TokenLockWallet"
-  beneficiary: String!
+  beneficiary: GraphAccount!
 }
 
 """
