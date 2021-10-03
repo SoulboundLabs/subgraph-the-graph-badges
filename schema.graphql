@@ -57,7 +57,7 @@ type GraphAccount @entity {
   "Developer fields for this Graph Account. Null if never published subgraphs"
   publisher: Publisher @derivedFrom(field: "account")
   "Token Lock Wallet for this Graph Account. Null if no token lock wallet"
-  tokenLockWallet: [TokenLockWallet!] @derivedFrom(field: "beneficiary")
+  tokenLockWallets: [TokenLockWallet!] @derivedFrom(field: "beneficiary")
 }
 
 type TokenLockWallet @entity {
