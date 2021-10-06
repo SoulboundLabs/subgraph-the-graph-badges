@@ -7,6 +7,7 @@ import {
   SubgraphDeployment,
 } from "../../generated/schema";
 import {
+  BADGE_ARTIST_FIRST_TO_CLOSE,
   BADGE_DESCRIPTION_FIRST_TO_CLOSE,
   BADGE_NAME_FIRST_TO_CLOSE,
   BADGE_VOTE_POWER_FIRST_TO_CLOSE,
@@ -37,7 +38,7 @@ function _badgeDefinition(): BadgeDefinition {
     BADGE_NAME_FIRST_TO_CLOSE,
     BADGE_DESCRIPTION_FIRST_TO_CLOSE,
     BigInt.fromI32(BADGE_VOTE_POWER_FIRST_TO_CLOSE),
-    "TBD",
+    BADGE_ARTIST_FIRST_TO_CLOSE,
     "TBD",
     PROTOCOL_ROLE_INDEXER
   );

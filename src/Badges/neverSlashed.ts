@@ -1,6 +1,7 @@
 import { BigInt, log } from "@graphprotocol/graph-ts";
 import { BadgeDefinition, Indexer, Winner } from "../../generated/schema";
 import {
+  BADGE_ARTIST_NEVER_SLASHED,
   BADGE_DESCRIPTION_NEVER_SLASHED,
   BADGE_NAME_NEVER_SLASHED,
   BADGE_STREAK_MIN_DAYS_NEVER_SLASHED,
@@ -87,7 +88,7 @@ function _badgeDefinition(): BadgeDefinition {
     BADGE_NAME_NEVER_SLASHED,
     BADGE_DESCRIPTION_NEVER_SLASHED,
     BigInt.fromI32(BADGE_VOTE_POWER_NEVER_SLASHED),
-    "TBD",
+    BADGE_ARTIST_NEVER_SLASHED,
     "TBD",
     daysToBlocks(BigInt.fromI32(BADGE_STREAK_MIN_DAYS_NEVER_SLASHED)),
     PROTOCOL_ROLE_INDEXER

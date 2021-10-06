@@ -1,6 +1,7 @@
 import { BigInt } from "@graphprotocol/graph-ts/index";
 import { BadgeDefinition, Curator, Subgraph } from "../../generated/schema";
 import {
+  BADGE_ARTIST_PLANET_OF_THE_APED,
   BADGE_DESCRIPTION_PLANET_OF_THE_APED,
   BADGE_NAME_PLANET_OF_THE_APED,
   BADGE_VOTE_POWER_PLANET_OF_THE_APED,
@@ -33,7 +34,7 @@ function _badgeDefinition(): BadgeDefinition {
     BADGE_NAME_PLANET_OF_THE_APED,
     BADGE_DESCRIPTION_PLANET_OF_THE_APED,
     BigInt.fromI32(BADGE_VOTE_POWER_PLANET_OF_THE_APED),
-    "TBD",
+    BADGE_ARTIST_PLANET_OF_THE_APED,
     "TBD",
     PROTOCOL_ROLE_CURATOR
   );

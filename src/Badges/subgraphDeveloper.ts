@@ -1,6 +1,7 @@
 import { BigInt } from "@graphprotocol/graph-ts/index";
 import { BadgeDefinition, Publisher } from "../../generated/schema";
 import {
+  BADGE_ARTIST_SUBGRAPH_DEVELOPER,
   BADGE_DESCRIPTION_SUBGRAPH_DEVELOPER,
   BADGE_NAME_SUBGRAPH_DEVELOPER,
   BADGE_VOTE_POWER_SUBGRAPH_DEVELOPER,
@@ -26,7 +27,7 @@ function _badgeDefinition(): BadgeDefinition {
     BADGE_NAME_SUBGRAPH_DEVELOPER,
     BADGE_DESCRIPTION_SUBGRAPH_DEVELOPER,
     BigInt.fromI32(BADGE_VOTE_POWER_SUBGRAPH_DEVELOPER),
-    "TBD",
+    BADGE_ARTIST_SUBGRAPH_DEVELOPER,
     "TBD",
     PROTOCOL_ROLE_SUBGRAPH_DEVELOPER
   );
