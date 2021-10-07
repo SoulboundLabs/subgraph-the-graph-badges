@@ -231,8 +231,8 @@ export function createOrLoadBadgeDefinitionWithStreak(
       name,
       description,
       voteWeight,
-      image,
       artist,
+      image,
       protocolRole
     );
 
