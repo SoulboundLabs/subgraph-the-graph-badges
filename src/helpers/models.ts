@@ -191,8 +191,8 @@ export function createOrLoadBadgeDefinition(
   name: string,
   description: string,
   voteWeight: BigInt,
-  image: string,
   artist: string,
+  image: string,
   protocolRole: string
 ): BadgeDefinition {
   let badgeDefinition = BadgeDefinition.load(name);
@@ -219,8 +219,8 @@ export function createOrLoadBadgeDefinitionWithStreak(
   name: string,
   description: string,
   voteWeight: BigInt,
-  image: string,
   artist: string,
+  image: string,
   minimumStreak: BigInt,
   protocolRole: string
 ): BadgeDefinition {

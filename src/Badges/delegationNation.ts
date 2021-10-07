@@ -1,6 +1,7 @@
 import { BigInt } from "@graphprotocol/graph-ts/index";
 import { BadgeDefinition, Delegator } from "../../generated/schema";
 import {
+  BADGE_ARTIST_DELEGATION_NATION,
   BADGE_DESCRIPTION_DELEGATION_NATION,
   BADGE_MIN_DAYS_DELEGATION_NATION,
   BADGE_NAME_DELEGATION_NATION,
@@ -32,7 +33,7 @@ function _badgeDefinition(): BadgeDefinition {
     BADGE_NAME_DELEGATION_NATION,
     BADGE_DESCRIPTION_DELEGATION_NATION,
     BigInt.fromI32(BADGE_VOTE_POWER_DELEGATION_NATION),
-    "TBD",
+    BADGE_ARTIST_DELEGATION_NATION,
     "TBD",
     PROTOCOL_ROLE_DELEGATOR
   );

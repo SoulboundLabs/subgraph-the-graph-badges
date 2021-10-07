@@ -1,6 +1,7 @@
 import { BigInt, log } from "@graphprotocol/graph-ts";
 import { BadgeDefinition, Winner } from "../../generated/schema";
 import {
+  BADGE_ARTIST_DELEGATION_STREAK,
   BADGE_DESCRIPTION_DELEGATION_STREAK,
   BADGE_NAME_DELEGATION_STREAK,
   BADGE_STREAK_MIN_DAYS_DELEGATION_STREAK,
@@ -116,7 +117,7 @@ function _badgeDefinition(): BadgeDefinition {
     BADGE_NAME_DELEGATION_STREAK,
     BADGE_DESCRIPTION_DELEGATION_STREAK,
     BigInt.fromI32(BADGE_VOTE_POWER_DELEGATION_STREAK),
-    "TBD",
+    BADGE_ARTIST_DELEGATION_STREAK,
     "TBD",
     daysToBlocks(BigInt.fromI32(BADGE_STREAK_MIN_DAYS_DELEGATION_STREAK)),
     PROTOCOL_ROLE_DELEGATOR

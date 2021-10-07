@@ -1,6 +1,7 @@
 import { BigInt } from "@graphprotocol/graph-ts/index";
 import { BadgeDefinition } from "../../generated/schema";
 import {
+  BADGE_ARTIST_CURATOR_TRIBE,
   BADGE_DESCRIPTION_CURATOR_TRIBE,
   BADGE_NAME_CURATOR_TRIBE,
   BADGE_VOTE_POWER_CURATOR_TRIBE,
@@ -24,7 +25,7 @@ function _badgeDefinition(): BadgeDefinition {
     BADGE_NAME_CURATOR_TRIBE,
     BADGE_DESCRIPTION_CURATOR_TRIBE,
     BigInt.fromI32(BADGE_VOTE_POWER_CURATOR_TRIBE),
-    "TBD",
+    BADGE_ARTIST_CURATOR_TRIBE,
     "TBD",
     PROTOCOL_ROLE_CURATOR
   );
