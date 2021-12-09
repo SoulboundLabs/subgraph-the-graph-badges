@@ -5,7 +5,7 @@ import {
 } from "../../generated/schema";
 import { log, BigInt } from "@graphprotocol/graph-ts";
 import { SubgraphPublished } from "../../generated/GNS/GNS";
-import { createOrLoadGraphAccount, EventDataForBadgeAward } from "./models";
+import { createOrLoadGraphAccount, EventDataForBadgeAward, createOrLoadEntityStats } from "./models";
 import { processSubgraphPublishedForSubgraphDeveloperBadge } from "../Badges/subgraphDeveloper";
 import { zeroBI } from "./constants";
 
@@ -92,6 +92,10 @@ function _createOrLoadPublisher(publisherId: string): Publisher {
     publisher.subgraphCount = 0;
     publisher.currentCurationTokens = zeroBI();
     publisher.save();
+
+    let entityStats = createOrLoadEntityStats();
+    entityStats.publisherCount = entityStats.publisherCount + 1;
+    entityStats.save();
   }
 
   return publisher as Publisher;
