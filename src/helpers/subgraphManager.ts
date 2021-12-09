@@ -7,6 +7,7 @@ import { log, BigInt } from "@graphprotocol/graph-ts";
 import { SubgraphPublished } from "../../generated/GNS/GNS";
 import { createOrLoadGraphAccount, EventDataForBadgeAward } from "./models";
 import { processSubgraphPublishedForSubgraphDeveloperBadge } from "../Badges/subgraphDeveloper";
+import { zeroBI } from "./constants";
 
 ////////////////      Public
 
@@ -42,7 +43,7 @@ function _broadcastSubgraphPublished(
   eventData: EventDataForBadgeAward
 ): void {
   log.debug("broadcasting SubgraphPublished", []);
-  processSubgraphPublishedForSubgraphDeveloperBadge(publisher, eventData);
+  // processSubgraphPublishedForSubgraphDeveloperBadge(publisher, eventData);
 }
 
 ////////////////      Models
@@ -89,6 +90,7 @@ function _createOrLoadPublisher(publisherId: string): Publisher {
     publisher = new Publisher(publisherId);
     publisher.account = publisherId;
     publisher.subgraphCount = 0;
+    publisher.currentCurationTokens = zeroBI();
     publisher.save();
   }
 

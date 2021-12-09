@@ -8,12 +8,14 @@ import {
   AllocationCreated,
   StakeDelegated,
   StakeDelegatedLocked,
-  StakeSlashed,
+  RebateClaimed,
+  DelegationParametersUpdated
 } from "../../generated/Staking/Staking";
 import {
   processAllocationClosed,
   processAllocationCreated,
-  processStakeSlashed,
+  processRebateClaimed,
+  processDelegationParametersUpdated
 } from "../helpers/indexerManager";
 import {
   processStakeDelegated,
@@ -58,7 +60,7 @@ export function handleAllocationCreated(event: AllocationCreated): void {
  */
 export function handleAllocationClosed(event: AllocationClosed): void {
   log.debug("AllocationClosed event found", []);
-  processAllocationClosed(event);
+  // processAllocationClosed(event);
 }
 
 /**
@@ -91,15 +93,20 @@ export function handleStakeDelegatedLocked(event: StakeDelegatedLocked): void {
 }
 
 /**
- * @dev Emitted when `indexer` was slashed for a total of `tokens` amount.
- * Tracks `reward` amount of tokens given to `beneficiary`.
- * Parameters:
- *   address indexer
- *   uint256 tokens
- *   uint256 reward,
- *   address beneficiary
+ * @dev Emitted when `indexer` claimed a rebate on `subgraphDeploymentID` during `epoch`
+ * related to the `forEpoch` rebate pool.
+ * The rebate is for `tokens` amount and `unclaimedAllocationsCount` are left for claim
+ * in the rebate pool. `delegationFees` collected and sent to delegation pool.
  */
-export function handleStakeSlashed(event: StakeSlashed): void {
-  log.debug("StakeSlashed event found", []);
-  processStakeSlashed(event);
+export function handleRebateClaimed(event: RebateClaimed): void {
+  log.debug("RebateClaimed event found", []);
+  processRebateClaimed(event);
+}
+
+/**
+ * @dev Emitted when `indexer` update the delegation parameters for its delegation pool.
+ */
+export function handleDelegationParametersUpdated(event: DelegationParametersUpdated): void {
+  log.debug("DelegationParametersUpdated event found", []);
+  processDelegationParametersUpdated(event);
 }

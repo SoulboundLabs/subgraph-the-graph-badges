@@ -122,3 +122,98 @@ export const BADGE_NAME_INDEXER_TRIBE = "Indexer Tribe";
 export const BADGE_DESCRIPTION_INDEXER_TRIBE =
   "Awarded to first-time indexters";
 export const BADGE_VOTE_POWER_INDEXER_TRIBE = 1;
+
+
+export const BADGE_TRACK_INDEXING = "Indexing";
+const BADGE_TRACK_INDEXING_ROLE = PROTOCOL_ROLE_INDEXER;
+const BADGE_TRACK_INDEXING_THRESHOLDS = ["1","5","15","50"] as string[];
+const BADGE_TRACK_INDEXING_DESCRIPTIONS = ["description1", "description2", "description3", "description4"] as string[];
+
+
+export const BADGE_TRACK_YIELD = "Yield";
+const BADGE_TRACK_YIELD_ROLE = PROTOCOL_ROLE_INDEXER;
+const BADGE_TRACK_YIELD_THRESHOLDS = ["10000","100000","1000000","10000000"] as string[];
+const BADGE_TRACK_YIELD_DESCRIPTIONS = ["description1", "description2", "description3", "description4"] as string[];
+
+export const BADGE_TRACK_DELEGATING = "Delegating";
+const BADGE_TRACK_DELEGATING_ROLE = PROTOCOL_ROLE_DELEGATOR;
+const BADGE_TRACK_DELEGATING_THRESHOLDS = ["1", "3", "10", "25"] as string[];
+const BADGE_TRACK_DELEGATING_DESCRIPTIONS = ["description1", "description2", "description3", "description4"] as string[];
+
+export const BADGE_TRACK_CURATING = "Curating";
+const BADGE_TRACK_CURATING_ROLE = PROTOCOL_ROLE_CURATOR;
+const BADGE_TRACK_CURATING_THRESHOLDS = ["1", "5", "15", "50"] as string[];
+const BADGE_TRACK_CURATING_DESCRIPTIONS = ["description1", "description2", "description3", "description4"] as string[];
+
+export const BADGE_TRACK_DEVELOPER = "Signal";
+const BADGE_TRACK_DEVELOPER_ROLE = PROTOCOL_ROLE_SUBGRAPH_DEVELOPER;
+const BADGE_TRACK_DEVELOPER_THRESHOLDS = ["10000", "50000", "150000", "500000"] as string[];
+const BADGE_TRACK_DEVELOPER_DESCRIPTIONS = ["description1", "description2", "description3", "description4"] as string[];
+
+export const BADGE_TRACK_LEVEL_NAMES = ["Journeyman", "Adept", "Expert", "Legend"] as string[];
+
+
+export class BadgeTrackConfig {
+  name: string;
+  role: string;
+  thresholds: string[];
+  descriptions: string[];
+
+  constructor(name: string, role: string, thresholds: string[], descriptions: string[]) {
+    this.name = name;
+    this.role = role;
+    this.thresholds = thresholds;
+    this.descriptions = descriptions;
+  }
+}
+
+let badgeTracks = new Map<string, BadgeTrackConfig>();
+badgeTracks.set(
+  BADGE_TRACK_INDEXING, 
+  new BadgeTrackConfig(
+    BADGE_TRACK_INDEXING, 
+    BADGE_TRACK_INDEXING_ROLE, 
+    BADGE_TRACK_INDEXING_THRESHOLDS, 
+    BADGE_TRACK_INDEXING_DESCRIPTIONS
+  )
+);
+badgeTracks.set(
+  BADGE_TRACK_YIELD,
+  new BadgeTrackConfig(
+    BADGE_TRACK_YIELD, 
+    BADGE_TRACK_YIELD_ROLE, 
+    BADGE_TRACK_YIELD_THRESHOLDS, 
+    BADGE_TRACK_YIELD_DESCRIPTIONS
+  )
+);
+badgeTracks.set(
+  BADGE_TRACK_DELEGATING,
+  new BadgeTrackConfig(
+    BADGE_TRACK_DELEGATING,
+    BADGE_TRACK_DELEGATING_ROLE,
+    BADGE_TRACK_DELEGATING_THRESHOLDS,
+    BADGE_TRACK_DELEGATING_DESCRIPTIONS
+  )
+);
+badgeTracks.set(
+  BADGE_TRACK_CURATING,
+  new BadgeTrackConfig(
+    BADGE_TRACK_CURATING,
+    BADGE_TRACK_CURATING_ROLE,
+    BADGE_TRACK_CURATING_THRESHOLDS,
+    BADGE_TRACK_CURATING_DESCRIPTIONS
+  )
+);
+badgeTracks.set(
+  BADGE_TRACK_DEVELOPER,
+  new BadgeTrackConfig(
+    BADGE_TRACK_DEVELOPER,
+    BADGE_TRACK_DEVELOPER_ROLE,
+    BADGE_TRACK_DEVELOPER_THRESHOLDS,
+    BADGE_TRACK_DEVELOPER_DESCRIPTIONS
+  )
+);
+
+export function getBadgeTrackConfig(name: string): BadgeTrackConfig {
+  return badgeTracks.get(name);
+}

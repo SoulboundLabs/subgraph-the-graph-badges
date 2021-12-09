@@ -3,7 +3,7 @@ import {
   BadgeAward,
   BadgeAwardCount,
   BadgeDefinition,
-  BadgeStreakProperties,
+  BadgeTrack,
   EntityStats,
   GraphAccount,
   Protocol,
@@ -12,7 +12,6 @@ import {
 } from "../../generated/schema";
 import { isTokenLockWallet } from "../mappings/graphTokenLockWallet";
 import { PROTOCOL_NAME_THE_GRAPH, zeroBI } from "./constants";
-import { createOrLoadBadgeStreakDefinition } from "./streakManager";
 import { toBigInt } from "./typeConverter";
 
 export function createOrLoadEntityStats(): EntityStats {
@@ -25,7 +24,6 @@ export function createOrLoadEntityStats(): EntityStats {
     entityStats.delegatorCount = 0;
     entityStats.curatorCount = 0;
     entityStats.publisherCount = 0;
-    entityStats.lastEraProcessed = toBigInt(0);
     entityStats.save();
 
     // _createTestBadgeAwards();     // awards badges to DAO and dev addresses
@@ -54,7 +52,6 @@ export function createOrLoadWinner(address: string): Winner {
     winner = new Winner(address);
     winner.badgeCount = 0;
     winner.mintedBadgeCount = 0;
-    winner.lastSyncBlockNumber = zeroBI();
     winner.votingPower = zeroBI();
 
     winner.save();
@@ -79,23 +76,6 @@ export function createOrLoadGraphAccount(address: string): GraphAccount {
   }
 
   return graphAccount as GraphAccount;
-}
-
-export function createOrLoadStreakProperties(
-  delegator: string,
-  startBlockNumber: BigInt,
-  badgeAward: BadgeAward
-): BadgeStreakProperties {
-  let id = delegator.concat("-").concat(startBlockNumber.toString());
-
-  let streakProps = BadgeStreakProperties.load(id);
-  if (streakProps == null) {
-    streakProps = new BadgeStreakProperties(id);
-    streakProps.badgeAward = badgeAward.id;
-    streakProps.streakStartBlock = startBlockNumber;
-    streakProps.save();
-  }
-  return streakProps as BadgeStreakProperties;
 }
 
 export function createOrLoadBadgeAwardCount(
@@ -190,53 +170,22 @@ function _updateAccountWithBadgeAward(badgeAward: BadgeAward): void {
 export function createOrLoadBadgeDefinition(
   name: string,
   description: string,
+  badgeTrack: string,
   voteWeight: BigInt,
-  artist: string,
   image: string,
-  protocolRole: string
 ): BadgeDefinition {
   let badgeDefinition = BadgeDefinition.load(name);
 
   if (badgeDefinition == null) {
-    let protocol = createOrLoadTheGraphProtocol();
 
     badgeDefinition = new BadgeDefinition(name);
-    badgeDefinition.protocol = protocol.id;
     badgeDefinition.description = description;
+    badgeDefinition.badgeTrack = badgeTrack;
     badgeDefinition.image = image;
-    badgeDefinition.artist = artist;
-    badgeDefinition.protocolRole = protocolRole;
     badgeDefinition.votingPower = voteWeight;
     badgeDefinition.badgeCount = 0;
 
     badgeDefinition.save();
-  }
-
-  return badgeDefinition as BadgeDefinition;
-}
-
-export function createOrLoadBadgeDefinitionWithStreak(
-  name: string,
-  description: string,
-  voteWeight: BigInt,
-  artist: string,
-  image: string,
-  minimumStreak: BigInt,
-  protocolRole: string
-): BadgeDefinition {
-  let badgeDefinition = BadgeDefinition.load(name);
-
-  if (badgeDefinition == null) {
-    badgeDefinition = createOrLoadBadgeDefinition(
-      name,
-      description,
-      voteWeight,
-      artist,
-      image,
-      protocolRole
-    );
-
-    createOrLoadBadgeStreakDefinition(name, minimumStreak);
   }
 
   return badgeDefinition as BadgeDefinition;
@@ -259,4 +208,20 @@ export function createOrLoadTheGraphProtocol(): Protocol {
   }
 
   return protocol as Protocol;
+}
+
+export function createOrLoadBadgeTrack(
+  trackName: string,
+  protocolRole: string,
+  protocol: string
+): BadgeTrack {
+  let badgeTrack = BadgeTrack.load(trackName);
+
+  if (badgeTrack == null) {
+    badgeTrack = new BadgeTrack(trackName);
+    badgeTrack.protocolRole = protocolRole;
+    badgeTrack.protocol = protocol;
+    badgeTrack.save();
+  }
+  return badgeTrack as BadgeTrack;
 }

@@ -1,7 +1,7 @@
-/**
- * This mapping handles the events from the Curation contract
- * https://github.com/graphprotocol/contracts/blob/master/contracts/curation/Curation.sol
- */
+// /**
+//  * This mapping handles the events from the Curation contract
+//  * https://github.com/graphprotocol/contracts/blob/master/contracts/curation/Curation.sol
+//  */
 
 import {
   SubgraphPublished,

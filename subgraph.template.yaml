@@ -34,6 +34,29 @@ dataSources:
           handler: handleStakeDelegated
         - event: StakeDelegatedLocked(indexed address,indexed address,uint256,uint256,uint256)
           handler: handleStakeDelegatedLocked
+        - event: RebateClaimed(indexed address,indexed bytes32,indexed address,uint256,uint256,uint256,uint256,uint256)
+          handler: handleRebateClaimed
+  - kind: ethereum/contract
+    name: RewardsManager
+    network: {{network}}
+    source:
+      address: '{{rewardsManager}}'
+      abi: RewardsManager
+      startBlock: {{blockNumber}}
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.4
+      language: wasm/assemblyscript
+      file: ./src/mappings/rewardsManager.ts
+      entities:
+        - Indexer
+        - Allocation
+      abis:
+        - name: RewardsManager
+          file: ./node_modules/@graphprotocol/contracts/dist/abis/RewardsManager.json
+      eventHandlers:
+        - event: RewardsAssigned(indexed address,indexed address,uint256,uint256)
+          handler: handleRewardsAssigned
   - kind: ethereum/contract
     name: GNS
     network: "{{network}}"

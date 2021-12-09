@@ -1,12 +1,12 @@
 import { NSignalMinted, NSignalBurned } from "../../generated/GNS/GNS";
 import { processUniqueSignalForPlanetOfTheAped } from "../Badges/planetOfTheAped";
 import { BigDecimal, BigInt } from "@graphprotocol/graph-ts/index";
-import { Curator, NameSignal } from "../../generated/schema";
+import { Curator, NameSignal, Subgraph, Publisher } from "../../generated/schema";
 import { createOrLoadEntityStats, EventDataForBadgeAward } from "./models";
-import { processCurationBurnForSubgraphShark } from "../Badges/subgraphShark";
-import { zeroBD } from "./constants";
+// import { processCurationBurnForSubgraphShark } from "../Badges/subgraphShark";
+import { zeroBD, BADGE_TRACK_CURATING, BADGE_TRACK_DEVELOPER } from "./constants";
+import { incrementProgressForTrack, updateProgressForTrack } from "../Badges/standardTrackBadges";
 import { log } from "@graphprotocol/graph-ts";
-import { syncAllStreaksForWinners } from "./streakManager";
 import { processNewCuratorForCuratorTribeBadge } from "../Badges/curatorTribe";
 
 ////////////////      Public
@@ -60,8 +60,6 @@ function _processCurationSignal(
   tokensDeposited: BigInt,
   eventData: EventDataForBadgeAward
 ): void {
-  syncAllStreaksForWinners([subgraphOwner, curatorId], eventData);
-
   let subgraphId = subgraphOwner.concat("-").concat(subgraphNumber);
   let curator = _createOrLoadCurator(curatorId, eventData);
   let nameSignal = createOrLoadNameSignal(curatorId, subgraphId);
@@ -69,7 +67,7 @@ function _processCurationSignal(
   let isNameSignalBecomingActive =
     nameSignal.nameSignal.isZero() && !nSignal.isZero();
   if (isNameSignalBecomingActive) {
-    _broadcastUniqueCurationSignal(curator, subgraphId, eventData);
+    incrementProgressForTrack(BADGE_TRACK_CURATING, curatorId, eventData);
   }
 
   nameSignal.nameSignal = nameSignal.nameSignal.plus(nSignal);
@@ -99,6 +97,11 @@ function _processCurationSignal(
       nameSignal.signalAverageCostBasis.div(nameSignal.signal).truncate(18);
   }
   nameSignal.save();
+
+  let publisher = Publisher.load(subgraphOwner);
+  publisher.currentCurationTokens = publisher.currentCurationTokens.plus(tokensDeposited);
+  publisher.save();
+  updateProgressForTrack(BADGE_TRACK_DEVELOPER, subgraphOwner, publisher.currentCurationTokens, eventData);
 }
 
 function _processCurationBurn(
@@ -110,8 +113,6 @@ function _processCurationBurn(
   tokensReceived: BigInt,
   eventData: EventDataForBadgeAward
 ): void {
-  syncAllStreaksForWinners([subgraphOwner, curatorId], eventData);
-
   let subgraphId = subgraphOwner.concat("-").concat(subgraphNumber);
   let curator = _createOrLoadCurator(curatorId, eventData);
 
@@ -141,6 +142,11 @@ function _processCurationBurn(
     nameSignal.nameSignalAverageCostBasisPerSignal = BigDecimal.fromString("0");
   }
   nameSignal.save();
+
+  let publisher = Publisher.load(subgraphOwner);
+  publisher.currentCurationTokens = publisher.currentCurationTokens.minus(tokensReceived);
+  publisher.save();
+  updateProgressForTrack(BADGE_TRACK_DEVELOPER, subgraphOwner, publisher.currentCurationTokens, eventData);
 }
 
 ////////////////      Broadcasting
@@ -149,7 +155,7 @@ function _broadcastFirstTimeCurator(
   curatorId: string,
   eventData: EventDataForBadgeAward
 ): void {
-  processNewCuratorForCuratorTribeBadge(curatorId, eventData);
+  // processNewCuratorForCuratorTribeBadge(curatorId, eventData);
 }
 
 function _broadcastUniqueCurationSignal(
@@ -176,7 +182,7 @@ function _broadcastCurationBurn(
     [oldACB.toString(), currentACB.toString(), curator.id]
   );
 
-  processCurationBurnForSubgraphShark(curator, oldACB, currentACB, eventData);
+  // processCurationBurnForSubgraphShark(curator, oldACB, currentACB, eventData);
 }
 
 ////////////////      Models

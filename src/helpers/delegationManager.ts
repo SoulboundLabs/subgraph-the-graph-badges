@@ -8,32 +8,29 @@ import {
   createOrLoadGraphAccount,
   EventDataForBadgeAward,
 } from "../helpers/models";
-import { toBigInt } from "../helpers/typeConverter";
 import { processUniqueDelegationForDelegationNationBadge } from "../Badges/delegationNation";
 import { BigInt } from "@graphprotocol/graph-ts";
-import {
-  processStakeDelegatedForDelegationStreakBadge,
-  processStakeDelegatedLockedForDelegationStreakBadge,
-} from "../Badges/delegationStreak";
-import { syncAllStreaksForWinners } from "./streakManager";
 import { processNewDelegatorForDelegatorTribeBadge } from "../Badges/delegationTribe";
+import { createOrLoadIndexer } from "./indexerManager";
+import { BADGE_TRACK_DELEGATING, zeroBI } from "./constants";
+import { incrementProgressForTrack, updateProgressForTrack } from "../Badges/standardTrackBadges";
 
 ////////////////      Public
 
 export function processStakeDelegated(event: StakeDelegated): void {
   let delegatorId = event.params.delegator.toHexString();
   let indexerId = event.params.indexer.toHexString();
-  let shares = event.params.shares;
+  let tokens = event.params.tokens;
   let eventData = new EventDataForBadgeAward(event);
-  _processStakeDelegated(delegatorId, indexerId, shares, eventData);
+  _processStakeDelegated(delegatorId, indexerId, tokens, eventData);
 }
 
 export function processStakeDelegatedLocked(event: StakeDelegatedLocked): void {
   let delegatorId = event.params.delegator.toHexString();
   let indexerId = event.params.indexer.toHexString();
-  let shares = event.params.shares;
+  let tokens = event.params.tokens;
   let eventData = new EventDataForBadgeAward(event);
-  _processStakeDelegatedLocked(delegatorId, indexerId, shares, eventData);
+  _processStakeDelegatedLocked(delegatorId, indexerId, tokens, eventData);
 }
 
 ////////////////      Event Processing
@@ -41,31 +38,32 @@ export function processStakeDelegatedLocked(event: StakeDelegatedLocked): void {
 function _processStakeDelegated(
   delegatorId: string,
   indexerId: string,
-  shares: BigInt,
+  tokens: BigInt,
   eventData: EventDataForBadgeAward
 ): void {
-  syncAllStreaksForWinners([delegatorId, indexerId], eventData);
+  let indexer = createOrLoadIndexer(indexerId, eventData);
+  indexer.delegatedTokens = indexer.delegatedTokens.plus(tokens);
+  indexer.save();
 
-  if (_delegatedStakeExists(delegatorId, indexerId) == false) {
-    createOrLoadDelegatedStake(delegatorId, indexerId);
-    let delegator = createOrLoadDelegator(delegatorId, eventData);
-    delegator.uniqueActiveDelegationCount =
-      delegator.uniqueActiveDelegationCount + 1;
-    delegator.save();
-    _broadcastUniqueDelegation(delegator, eventData);
+  let delegatedStake = createOrLoadDelegatedStake(delegatorId, indexerId);
+  let oldDelegatedTokes = delegatedStake.tokens;
+  delegatedStake.tokens = delegatedStake.tokens.plus(tokens);
+  delegatedStake.save();
+  if (oldDelegatedTokes.lt(BigInt.fromI32(1000)) 
+  && delegatedStake.tokens.ge(BigInt.fromI32(1000))) {
+    incrementProgressForTrack(BADGE_TRACK_DELEGATING, delegatorId, eventData);
   }
-  _broadcastStakeDelegated(delegatorId, indexerId, shares, eventData);
 }
 
 function _processStakeDelegatedLocked(
   delegatorId: string,
   indexerId: string,
-  shares: BigInt,
+  tokens: BigInt,
   eventData: EventDataForBadgeAward
 ): void {
-  syncAllStreaksForWinners([delegatorId, indexerId], eventData);
-
-  _broadcastStakeDelegatedLocked(delegatorId, indexerId, shares, eventData);
+  let indexer = createOrLoadIndexer(indexerId, eventData);
+  indexer.delegatedTokens = indexer.delegatedTokens.minus(tokens)
+  indexer.save();
 }
 
 ////////////////      Broadcasting
@@ -75,34 +73,6 @@ function _broadcastUniqueDelegation(
   eventData: EventDataForBadgeAward
 ): void {
   processUniqueDelegationForDelegationNationBadge(delegator, eventData);
-}
-
-function _broadcastStakeDelegated(
-  delegatorId: string,
-  indexerId: string,
-  shares: BigInt,
-  eventData: EventDataForBadgeAward
-): void {
-  processStakeDelegatedForDelegationStreakBadge(
-    delegatorId,
-    indexerId,
-    shares,
-    eventData
-  );
-}
-
-function _broadcastStakeDelegatedLocked(
-  delegatorId: string,
-  indexerId: string,
-  shares: BigInt,
-  eventData: EventDataForBadgeAward
-): void {
-  processStakeDelegatedLockedForDelegationStreakBadge(
-    delegatorId,
-    indexerId,
-    shares,
-    eventData
-  );
 }
 
 ////////////////      Models
@@ -142,7 +112,7 @@ export function createOrLoadDelegatedStake(
     delegatedStake = new DelegatedStake(id);
     delegatedStake.delegator = delegatorId;
     delegatedStake.indexer = indexerId;
-    delegatedStake.shares = toBigInt(0);
+    delegatedStake.tokens = zeroBI();
     delegatedStake.save();
   }
 
