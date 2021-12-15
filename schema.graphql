@@ -125,7 +125,7 @@ type Delegator @entity {
   id: ID!
   "Graph Account associated with this delegator"
   account: GraphAccount!
-  "Number of active delegations with unique indexers"
+  "Number of active delegations with at least 10k GRT"
   uniqueActiveDelegationCount: Int!
 }
 
@@ -141,6 +141,8 @@ type DelegatedStake @entity {
   indexer: Indexer!
   "cumulative tokens delegated (does not account for undelegating)"
   tokens: BigInt!
+  "true if tokens has ever been >= 1000"
+  crossed1000: Boolean!
 }
 
 """

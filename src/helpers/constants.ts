@@ -132,7 +132,7 @@ const BADGE_TRACK_INDEXING_DESCRIPTIONS = ["description1", "description2", "desc
 
 export const BADGE_TRACK_YIELD = "Yield";
 const BADGE_TRACK_YIELD_ROLE = PROTOCOL_ROLE_INDEXER;
-const BADGE_TRACK_YIELD_THRESHOLDS = ["10000","100000","1000000","10000000"] as string[];
+const BADGE_TRACK_YIELD_THRESHOLDS = ["10000000000000000000000","100000000000000000000000","1000000000000000000000000","10000000000000000000000000"] as string[];
 const BADGE_TRACK_YIELD_DESCRIPTIONS = ["description1", "description2", "description3", "description4"] as string[];
 
 export const BADGE_TRACK_DELEGATING = "Delegating";
@@ -147,7 +147,7 @@ const BADGE_TRACK_CURATING_DESCRIPTIONS = ["description1", "description2", "desc
 
 export const BADGE_TRACK_DEVELOPER = "Signal";
 const BADGE_TRACK_DEVELOPER_ROLE = PROTOCOL_ROLE_SUBGRAPH_DEVELOPER;
-const BADGE_TRACK_DEVELOPER_THRESHOLDS = ["10000", "50000", "150000", "500000"] as string[];
+const BADGE_TRACK_DEVELOPER_THRESHOLDS = ["10000000000000000000000", "50000000000000000000000", "150000000000000000000000", "500000000000000000000000"] as string[];
 const BADGE_TRACK_DEVELOPER_DESCRIPTIONS = ["description1", "description2", "description3", "description4"] as string[];
 
 export const BADGE_TRACK_LEVEL_NAMES = ["Journeyman", "Adept", "Expert", "Legend"] as string[];

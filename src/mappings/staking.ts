@@ -60,7 +60,7 @@ export function handleAllocationCreated(event: AllocationCreated): void {
  */
 export function handleAllocationClosed(event: AllocationClosed): void {
   log.debug("AllocationClosed event found", []);
-  // processAllocationClosed(event);
+  processAllocationClosed(event);
 }
 
 /**

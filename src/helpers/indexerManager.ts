@@ -99,19 +99,11 @@ function _processAllocationClosed(
   eventData: EventDataForBadgeAward
 ): void {
   let allocation = Allocation.load(channelId) as Allocation;
+  allocation.closedAtEpoch = epoch;
+  allocation.save();
+  
   let indexer = createOrLoadIndexer(allocation.indexer, eventData);
-
   indexer.uniqueOpenAllocationCount = indexer.uniqueOpenAllocationCount - 1;
-
-  if (epoch.minus(allocation.createdAtEpoch).le(BigInt.fromI32(28))) {
-    indexer.allocationsClosedOnTime = indexer.allocationsClosedOnTime + 1;
-    _broadcastAllocationClosedOnTime(
-      allocation,
-      subgraphDeploymentID,
-      eventData
-    );
-  }
-
   indexer.save();
 }
 
