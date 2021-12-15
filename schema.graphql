@@ -265,7 +265,7 @@ type BadgeTrack @entity {
   "Protocol"
   protocol: Protocol!
   "Badge Definitions included in this track"
-  badgesDefinitions: [BadgeDefinition!]! @derivedFrom(field: "badgeTrack")
+  badgeDefinitions: [BadgeDefinition!]! @derivedFrom(field: "badgeTrack")
 }
 
 """
