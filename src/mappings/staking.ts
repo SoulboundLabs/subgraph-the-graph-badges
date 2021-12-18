@@ -6,6 +6,7 @@
 import {
   AllocationClosed,
   AllocationCreated,
+  AllocationCollected,
   StakeDelegated,
   StakeDelegatedLocked,
   RebateClaimed,
@@ -61,6 +62,19 @@ export function handleAllocationCreated(event: AllocationCreated): void {
 export function handleAllocationClosed(event: AllocationClosed): void {
   log.debug("AllocationClosed event found", []);
   processAllocationClosed(event);
+}
+
+// Transfers tokens from a state channel to the staking contract
+// Burns fees if protocolPercentage > 0
+// Collects curationFees to go to curator rewards
+// calls collect() on curation, which is handled in curation.ts
+// adds to the allocations collected fees
+// if closed, it will add fees to the rebate pool
+// Note - the name event.param.rebateFees is confusing. Rebate fees are better described
+// as query Fees. rebate is from cobbs douglas, which we get from claim()
+export function handleAllocationCollected(event: AllocationCollected): void {
+  log.debug("AllocationCollected event found", []);
+  
 }
 
 /**

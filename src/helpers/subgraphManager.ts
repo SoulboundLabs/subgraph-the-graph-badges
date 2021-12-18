@@ -6,8 +6,8 @@ import {
 import { log, BigInt } from "@graphprotocol/graph-ts";
 import { SubgraphPublished } from "../../generated/GNS/GNS";
 import { createOrLoadGraphAccount, EventDataForBadgeAward, createOrLoadEntityStats } from "./models";
-import { processSubgraphPublishedForSubgraphDeveloperBadge } from "../Badges/subgraphDeveloper";
-import { zeroBI } from "./constants";
+import { zeroBI, BADGE_TRACK_DEVELOPER_SUBGRAPHS } from "./constants";
+import { incrementProgressForTrack } from "../Badges/standardTrackBadges";
 
 ////////////////      Public
 
@@ -31,19 +31,8 @@ function _processSubgraphPublished(
 ): void {
   let subgraphId = publisherId.concat("-").concat(subgraphNumber.toString());
   _createOrLoadSubgraph(subgraphId, publisherId, eventData.blockNumber);
-  let publisher = _createOrLoadPublisher(publisherId);
   _createOrLoadSubgraphDeployment(subgraphDeploymentId, eventData.blockNumber);
-  _broadcastSubgraphPublished(publisher, eventData);
-}
-
-////////////////      Broadcasting
-
-function _broadcastSubgraphPublished(
-  publisher: Publisher,
-  eventData: EventDataForBadgeAward
-): void {
-  log.debug("broadcasting SubgraphPublished", []);
-  // processSubgraphPublishedForSubgraphDeveloperBadge(publisher, eventData);
+  incrementProgressForTrack(BADGE_TRACK_DEVELOPER_SUBGRAPHS, publisherId, eventData);
 }
 
 ////////////////      Models

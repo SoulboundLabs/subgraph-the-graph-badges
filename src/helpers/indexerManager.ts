@@ -8,14 +8,20 @@ import {
   AllocationClosed,
   AllocationCreated,
   RebateClaimed,
-  DelegationParametersUpdated
+  DelegationParametersUpdated, 
+  AllocationCollected
 } from "../../generated/Staking/Staking";
 import { RewardsAssigned } from "../../generated/RewardsManager/RewardsManager";
 import { BigInt } from "@graphprotocol/graph-ts/index";
 import { log } from "@graphprotocol/graph-ts";
-import { processAllocationClosedForFirstToCloseBadge } from "../Badges/firstToClose";
 import { incrementProgressForTrack, updateProgressForTrack } from "../Badges/standardTrackBadges";
-import { BADGE_TRACK_INDEXING, BADGE_TRACK_YIELD, zeroBI } from "./constants";
+import { 
+  BADGE_TRACK_INDEXER_SUBGRAPHS, 
+  BADGE_TRACK_INDEXER_DISTRIBUTING, 
+  BADGE_TRACK_INDEXER_QUERY_FEE, 
+  BADGE_TRACK_INDEXER_ALLOCATIONS_OPENED,
+  zeroBI 
+} from "./constants";
 
 ////////////////      Public
 
@@ -36,6 +42,15 @@ export function processAllocationClosed(event: AllocationClosed): void {
     event.params.allocationID.toHexString(),
     event.params.subgraphDeploymentID.toHex(),
     event.params.epoch,
+    eventData
+  );
+}
+
+export function processAllocationCollected(event: AllocationCollected): void {
+  let eventData = new EventDataForBadgeAward(event);
+  _processAllocationCollected(
+    event.params.indexer.toHexString(),
+    event.params.rebateFees,
     eventData
   );
 }
@@ -80,7 +95,7 @@ function _processAllocationCreated(
   if (subgraphAllocation == null) {
     // first time indexer has allocated on this subgraph
     _createSubgraphAllocation(indexerId, subgraphDeploymentId)
-    incrementProgressForTrack(BADGE_TRACK_INDEXING, indexerId, eventData);
+    incrementProgressForTrack(BADGE_TRACK_INDEXER_SUBGRAPHS, indexerId, eventData);
   }
 
   // keep track of unique allocation
@@ -89,7 +104,7 @@ function _processAllocationCreated(
   indexer.uniqueOpenAllocationCount = indexer.uniqueOpenAllocationCount + 1;
   indexer.save();
 
-  _broadcastAllocationCreated(indexer, eventData);
+  incrementProgressForTrack(BADGE_TRACK_INDEXER_ALLOCATIONS_OPENED, indexerId, eventData);
 }
 
 function _processAllocationClosed(
@@ -105,6 +120,23 @@ function _processAllocationClosed(
   let indexer = createOrLoadIndexer(allocation.indexer, eventData);
   indexer.uniqueOpenAllocationCount = indexer.uniqueOpenAllocationCount - 1;
   indexer.save();
+}
+
+function _processAllocationCollected(
+  indexerId: string,
+  rebateFees: BigInt,
+  eventData: EventDataForBadgeAward
+): void {
+  let indexer = createOrLoadIndexer(indexerId, eventData);
+  indexer.queryFeesCollected = indexer.queryFeesCollected.plus(rebateFees);
+  indexer.save();
+
+  updateProgressForTrack(
+    BADGE_TRACK_INDEXER_QUERY_FEE,
+    indexerId,
+    indexer.queryFeesCollected,
+    eventData
+  );
 }
 
 function _processDelegationParametersUpdated(
@@ -143,35 +175,9 @@ function _processRewardsAssigned(
 
   let delegatorIndexingRewards = amount.minus(indexerIndexingRewards);
   indexer.delegatorIndexingRewards = indexer.delegatorIndexingRewards.plus(delegatorIndexingRewards);
-  updateProgressForTrack(BADGE_TRACK_YIELD, indexerId, indexer.delegatorIndexingRewards, eventData);
+  updateProgressForTrack(BADGE_TRACK_INDEXER_DISTRIBUTING, indexerId, indexer.delegatorIndexingRewards, eventData);
   indexer.delegatedTokens = indexer.delegatedTokens.plus(delegatorIndexingRewards);
   indexer.save();
-}
-
-////////////////      Broadcasting
-
-function _broadcastAllocationCreated(
-  indexer: Indexer,
-  eventData: EventDataForBadgeAward
-): void {
-}
-
-function _broadcastAllocationClosedOnTime(
-  allocation: Allocation,
-  subgraphDeploymentID: string,
-  eventData: EventDataForBadgeAward
-): void {
-  processAllocationClosedForFirstToCloseBadge(
-    allocation,
-    subgraphDeploymentID,
-    eventData
-  );
-}
-
-function _broadcastUniqueIndexerCreated(
-  indexerId: string,
-  eventData: EventDataForBadgeAward
-): void {
 }
 
 ////////////////      Models
@@ -193,13 +199,12 @@ export function createOrLoadIndexer(
     indexer.delegatedTokens = zeroBI();
     indexer.delegatorIndexingRewards = zeroBI();
     indexer.indexingRewardCut = 0;
+    indexer.queryFeesCollected = zeroBI();
     indexer.save();
 
     let entityStats = createOrLoadEntityStats();
     entityStats.indexerCount = entityStats.indexerCount + 1;
     entityStats.save();
-
-    _broadcastUniqueIndexerCreated(id, eventData);
   }
 
   return indexer as Indexer;

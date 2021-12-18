@@ -12,7 +12,7 @@ import {
 import { BigInt } from "@graphprotocol/graph-ts";
 // import { processNewDelegatorForDelegatorTribeBadge } from "../Badges/delegationTribe";
 import { createOrLoadIndexer } from "./indexerManager";
-import { BADGE_TRACK_DELEGATING, zeroBI } from "./constants";
+import { BADGE_TRACK_DELEGATOR_INDEXERS, BADGE_TRACK_INDEXER_DELEGATOR_COUNT, zeroBI } from "./constants";
 import { incrementProgressForTrack, updateProgressForTrack } from "../Badges/standardTrackBadges";
 
 ////////////////      Public
@@ -41,12 +41,12 @@ function _processStakeDelegated(
   tokens: BigInt,
   eventData: EventDataForBadgeAward
 ): void {
-  createOrLoadDelegator(delegatorId, eventData);
+  createOrLoadDelegator(delegatorId);
   let indexer = createOrLoadIndexer(indexerId, eventData);
   indexer.delegatedTokens = indexer.delegatedTokens.plus(tokens);
   indexer.save();
 
-  let delegatedStake = createOrLoadDelegatedStake(delegatorId, indexerId);
+  let delegatedStake = createOrLoadDelegatedStake(delegatorId, indexerId, eventData);
   let oldDelegatedTokens = delegatedStake.tokens;
   delegatedStake.tokens = delegatedStake.tokens.plus(tokens);
   delegatedStake.save();
@@ -55,7 +55,7 @@ function _processStakeDelegated(
   && !delegatedStake.crossed1000) {
     delegatedStake.crossed1000 = true;
     delegatedStake.save();
-    incrementProgressForTrack(BADGE_TRACK_DELEGATING, delegatorId, eventData);
+    incrementProgressForTrack(BADGE_TRACK_DELEGATOR_INDEXERS, delegatorId, eventData);
   }
 }
 
@@ -69,26 +69,15 @@ function _processStakeDelegatedLocked(
   indexer.delegatedTokens = indexer.delegatedTokens.minus(tokens)
   indexer.save();
 
-  let delegatedStake = createOrLoadDelegatedStake(delegatorId, indexerId);
+  let delegatedStake = createOrLoadDelegatedStake(delegatorId, indexerId, eventData);
   delegatedStake.tokens = delegatedStake.tokens.minus(tokens);
   delegatedStake.save();
 }
 
-////////////////      Broadcasting
-
-function _broadcastUniqueDelegation(
-  delegator: Delegator,
-  eventData: EventDataForBadgeAward
-): void {
-  // processUniqueDelegationForDelegationNationBadge(delegator, eventData);
-}
 
 ////////////////      Models
 
-export function createOrLoadDelegator(
-  id: string,
-  eventData: EventDataForBadgeAward
-): Delegator {
+export function createOrLoadDelegator(id: string): Delegator {
   let delegator = Delegator.load(id);
 
   if (delegator == null) {
@@ -102,8 +91,6 @@ export function createOrLoadDelegator(
     let delegatorCount = entityStats.delegatorCount + 1;
     entityStats.delegatorCount = delegatorCount;
     entityStats.save();
-
-    // processNewDelegatorForDelegatorTribeBadge(id, eventData);
   }
 
   return delegator as Delegator;
@@ -111,7 +98,8 @@ export function createOrLoadDelegator(
 
 export function createOrLoadDelegatedStake(
   delegatorId: string,
-  indexerId: string
+  indexerId: string,
+  eventData: EventDataForBadgeAward
 ): DelegatedStake {
   let id = delegatorId.concat("-").concat(indexerId);
   let delegatedStake = DelegatedStake.load(id);
@@ -123,6 +111,8 @@ export function createOrLoadDelegatedStake(
     delegatedStake.tokens = zeroBI();
     delegatedStake.crossed1000 = false;
     delegatedStake.save();
+
+    incrementProgressForTrack(BADGE_TRACK_INDEXER_DELEGATOR_COUNT, indexerId, eventData);
   }
 
   return delegatedStake as DelegatedStake;

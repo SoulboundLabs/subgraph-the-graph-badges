@@ -1,13 +1,10 @@
 import { NSignalMinted, NSignalBurned } from "../../generated/GNS/GNS";
-import { processUniqueSignalForPlanetOfTheAped } from "../Badges/planetOfTheAped";
 import { BigDecimal, BigInt } from "@graphprotocol/graph-ts/index";
 import { Curator, NameSignal, Subgraph, Publisher } from "../../generated/schema";
 import { createOrLoadEntityStats, EventDataForBadgeAward } from "./models";
-// import { processCurationBurnForSubgraphShark } from "../Badges/subgraphShark";
-import { zeroBD, BADGE_TRACK_CURATING, BADGE_TRACK_DEVELOPER } from "./constants";
+import { zeroBD, BADGE_TRACK_CURATOR_SUBGRAPHS, BADGE_TRACK_DEVELOPER_SIGNAL, BADGE_TRACK_CURATOR_HOUSE_ODDS, BADGE_TRACK_CURATOR_PLANET_OF_THE_APED } from "./constants";
 import { incrementProgressForTrack, updateProgressForTrack } from "../Badges/standardTrackBadges";
 import { log } from "@graphprotocol/graph-ts";
-import { processNewCuratorForCuratorTribeBadge } from "../Badges/curatorTribe";
 
 ////////////////      Public
 
@@ -61,13 +58,23 @@ function _processCurationSignal(
   eventData: EventDataForBadgeAward
 ): void {
   let subgraphId = subgraphOwner.concat("-").concat(subgraphNumber);
-  let curator = _createOrLoadCurator(curatorId, eventData);
-  let nameSignal = createOrLoadNameSignal(curatorId, subgraphId);
+  let nameSignal = createOrLoadNameSignal(curatorId, subgraphId, eventData);
 
   let isNameSignalBecomingActive =
     nameSignal.nameSignal.isZero() && !nSignal.isZero();
   if (isNameSignalBecomingActive) {
-    incrementProgressForTrack(BADGE_TRACK_CURATING, curatorId, eventData);
+    incrementProgressForTrack(BADGE_TRACK_CURATOR_SUBGRAPHS, curatorId, eventData);
+    let subgraph = Subgraph.load(subgraphId) as Subgraph;
+    let curatorIsSubgraphOwner = subgraphOwner == curatorId;
+    
+    if (eventData.blockNumber.minus(subgraph.blockPublished).le(BigInt.fromI32(100))
+    && !curatorIsSubgraphOwner) {
+      incrementProgressForTrack(BADGE_TRACK_CURATOR_PLANET_OF_THE_APED, curatorId, eventData);
+    }
+
+    if (curatorIsSubgraphOwner) {
+      incrementProgressForTrack(BADGE_TRACK_CURATOR_HOUSE_ODDS, curatorId, eventData);
+    }
   }
 
   nameSignal.nameSignal = nameSignal.nameSignal.plus(nSignal);
@@ -101,7 +108,7 @@ function _processCurationSignal(
   let publisher = Publisher.load(subgraphOwner);
   publisher.currentCurationTokens = publisher.currentCurationTokens.plus(tokensDeposited);
   publisher.save();
-  updateProgressForTrack(BADGE_TRACK_DEVELOPER, subgraphOwner, publisher.currentCurationTokens, eventData);
+  updateProgressForTrack(BADGE_TRACK_DEVELOPER_SIGNAL, subgraphOwner, publisher.currentCurationTokens, eventData);
 }
 
 function _processCurationBurn(
@@ -114,9 +121,7 @@ function _processCurationBurn(
   eventData: EventDataForBadgeAward
 ): void {
   let subgraphId = subgraphOwner.concat("-").concat(subgraphNumber);
-  let curator = _createOrLoadCurator(curatorId, eventData);
-
-  let nameSignal = createOrLoadNameSignal(curatorId, subgraphId);
+  let nameSignal = createOrLoadNameSignal(curatorId, subgraphId, eventData);
 
   nameSignal.nameSignal = nameSignal.nameSignal.minus(nSignalBurnt);
   nameSignal.signal = nameSignal.signal.minus(vSignalBurnt);
@@ -125,18 +130,10 @@ function _processCurationBurn(
 
   // nSignal ACB
   // update acb to reflect new name signal balance
-  let previousACBNameSignal = nameSignal.nameSignalAverageCostBasis;
   nameSignal.nameSignalAverageCostBasis = nameSignal.nameSignal
     .toBigDecimal()
     .times(nameSignal.nameSignalAverageCostBasisPerSignal)
     .truncate(18);
-
-  _broadcastCurationBurn(
-    curator,
-    previousACBNameSignal,
-    nameSignal.nameSignalAverageCostBasis,
-    eventData
-  );
 
   if (nameSignal.nameSignalAverageCostBasis == BigDecimal.fromString("0")) {
     nameSignal.nameSignalAverageCostBasisPerSignal = BigDecimal.fromString("0");
@@ -146,43 +143,8 @@ function _processCurationBurn(
   let publisher = Publisher.load(subgraphOwner);
   publisher.currentCurationTokens = publisher.currentCurationTokens.minus(tokensReceived);
   publisher.save();
-  updateProgressForTrack(BADGE_TRACK_DEVELOPER, subgraphOwner, publisher.currentCurationTokens, eventData);
-}
 
-////////////////      Broadcasting
-
-function _broadcastFirstTimeCurator(
-  curatorId: string,
-  eventData: EventDataForBadgeAward
-): void {
-  // processNewCuratorForCuratorTribeBadge(curatorId, eventData);
-}
-
-function _broadcastUniqueCurationSignal(
-  curator: Curator,
-  subgraphId: string,
-  eventData: EventDataForBadgeAward
-): void {
-  log.debug(
-    "broadcasting unique curation signal---\ncurator: {}\nsubgraphId: {}\n",
-    [curator.id, subgraphId]
-  );
-
-  processUniqueSignalForPlanetOfTheAped(curator, subgraphId, eventData);
-}
-
-function _broadcastCurationBurn(
-  curator: Curator,
-  oldACB: BigDecimal,
-  currentACB: BigDecimal,
-  eventData: EventDataForBadgeAward
-): void {
-  log.debug(
-    "broadcasting curation burn---\noldACB: {}\ncurrentACB: {}\ncurator: {}\n",
-    [oldACB.toString(), currentACB.toString(), curator.id]
-  );
-
-  // processCurationBurnForSubgraphShark(curator, oldACB, currentACB, eventData);
+  updateProgressForTrack(BADGE_TRACK_DEVELOPER_SIGNAL, subgraphOwner, publisher.currentCurationTokens, eventData);
 }
 
 ////////////////      Models
@@ -203,8 +165,6 @@ function _createOrLoadCurator(
     let curatorCount = entityStats.curatorCount + 1;
     entityStats.curatorCount = curatorCount;
     entityStats.save();
-
-    _broadcastFirstTimeCurator(id, eventData);
   }
 
   return curator as Curator;
@@ -212,14 +172,15 @@ function _createOrLoadCurator(
 
 export function createOrLoadNameSignal(
   curatorId: string,
-  subgraphId: string
+  subgraphId: string,
+  eventData: EventDataForBadgeAward
 ): NameSignal {
   let nameSignalID = curatorId.concat("-").concat(subgraphId);
   let nameSignal = NameSignal.load(nameSignalID);
   if (nameSignal == null) {
     nameSignal = new NameSignal(nameSignalID);
-    let curator = Curator.load(curatorId);
-    nameSignal.curator = curator.id;
+    let curator = _createOrLoadCurator(curatorId, eventData);
+    nameSignal.curator = curatorId;
     nameSignal.subgraphId = subgraphId;
     nameSignal.signalledTokens = BigInt.fromI32(0);
     nameSignal.unsignalledTokens = BigInt.fromI32(0);
