@@ -221,6 +221,11 @@ export function createOrLoadBadgeTrack(
     badgeTrack = new BadgeTrack(trackName);
     badgeTrack.protocolRole = protocolRole;
     badgeTrack.protocol = protocol;
+
+    if (protocol == PROTOCOL_NAME_THE_GRAPH) {
+      createOrLoadTheGraphProtocol();
+    }
+    
     badgeTrack.save();
   }
   return badgeTrack as BadgeTrack;
