@@ -1,7 +1,8 @@
-import { Winner, Indexer, BadgeTrackProgress, BadgeTrack, BadgeDefinition } from "../../generated/schema";
+import { Winner, TokenLockWallet, Indexer, BadgeTrackProgress, BadgeTrack, BadgeDefinition } from "../../generated/schema";
 import { getBadgeTrackConfig, BADGE_TRACK_LEVEL_NAMES, zeroBI, oneBI, BadgeTrackConfig, PROTOCOL_NAME_THE_GRAPH } from "../helpers/constants";
 import { log, BigInt } from "@graphprotocol/graph-ts";
 import { createBadgeAward, createOrLoadBadgeDefinition, createOrLoadBadgeTrack, EventDataForBadgeAward } from "../helpers/models";
+import { isTokenLockWallet } from "../mappings/graphTokenLockWallet";
 
 
 export function updateProgressForTrack(
@@ -33,18 +34,36 @@ function updateProgress(
   updatedProgress: BigInt,
   eventData: EventDataForBadgeAward
 ): void {
+  let isLockWallet = isTokenLockWallet(badgeTrackProgress.winner);
   let i = badgeTrackProgress.level;
   for (i; i < thresholds.length; i++) {
     if (updatedProgress.lt(BigInt.fromString(thresholds[i]))) {
       break;
     }
     else {
-      _awardBadgeForTrackProgress(badgeTrackProgress, i, eventData);
+      if (!isLockWallet) {
+        _awardBadgeForTrackProgress(badgeTrackProgress, i, eventData);
+      }
     }
+  }
+  if (i == thresholds.length) {
+    i = thresholds.length - 1;
   }
   badgeTrackProgress.level = i;
   badgeTrackProgress.progress = updatedProgress;
   badgeTrackProgress.save();
+
+  if (isLockWallet) {
+    let beneficiary = (TokenLockWallet.load(badgeTrackProgress.winner) as TokenLockWallet).beneficiary;
+    let badgeTrackConfig = getBadgeTrackConfig(badgeTrackProgress.badgeTrack);
+    let beneficiaryTrackProgress = createOrLoadBadgeTrackProgress(badgeTrackConfig, beneficiary);
+    
+    if (beneficiaryTrackProgress.level < badgeTrackProgress.level) {
+      beneficiaryTrackProgress.level = badgeTrackProgress.level;
+      beneficiaryTrackProgress.save();
+      _awardBadgeForTrackProgress(beneficiaryTrackProgress, beneficiaryTrackProgress.level, eventData);
+    }
+  }
 }
 
 function createOrLoadBadgeTrackProgress(
@@ -61,6 +80,11 @@ function createOrLoadBadgeTrackProgress(
     badgeTrackProgress.badgeTrack = track.name;
     badgeTrackProgress.level = 0;
     badgeTrackProgress.save();
+
+    if (isTokenLockWallet(winner)) {
+      let lockWalletBeneficiary = (TokenLockWallet.load(winner) as TokenLockWallet).beneficiary;
+      createOrLoadBadgeTrackProgress(track, lockWalletBeneficiary);
+    }
   }
   return badgeTrackProgress as BadgeTrackProgress;
 }
@@ -68,7 +92,7 @@ function createOrLoadBadgeTrackProgress(
 function _awardBadgeForTrackProgress(
   badgeTrackProgress: BadgeTrackProgress, 
   level: number,
-  eventData: EventDataForBadgeAward
+  eventData: EventDataForBadgeAward,
 ): void {
   let badgeTrackConfig = getBadgeTrackConfig(badgeTrackProgress.badgeTrack);
   let badgeDefinition = _createOrLoadBadgeDefinitionFromTrackConst(badgeTrackConfig, level as i32);

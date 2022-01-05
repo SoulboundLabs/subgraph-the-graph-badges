@@ -17,7 +17,6 @@ import { log } from "@graphprotocol/graph-ts";
 import { incrementProgressForTrack, updateProgressForTrack } from "../Badges/standardTrackBadges";
 import { 
   BADGE_TRACK_INDEXER_SUBGRAPHS, 
-  BADGE_TRACK_INDEXER_DISTRIBUTING, 
   BADGE_TRACK_INDEXER_QUERY_FEE, 
   BADGE_TRACK_INDEXER_ALLOCATIONS_OPENED,
   zeroBI 
@@ -175,7 +174,7 @@ function _processRewardsAssigned(
 
   let delegatorIndexingRewards = amount.minus(indexerIndexingRewards);
   indexer.delegatorIndexingRewards = indexer.delegatorIndexingRewards.plus(delegatorIndexingRewards);
-  updateProgressForTrack(BADGE_TRACK_INDEXER_DISTRIBUTING, indexerId, indexer.delegatorIndexingRewards, eventData);
+  // updateProgressForTrack(BADGE_TRACK_INDEXER_DISTRIBUTING, indexerId, indexer.delegatorIndexingRewards, eventData);
   indexer.delegatedTokens = indexer.delegatedTokens.plus(delegatorIndexingRewards);
   indexer.save();
 }
