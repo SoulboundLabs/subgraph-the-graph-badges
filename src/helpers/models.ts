@@ -1,7 +1,6 @@
 import { BigInt, ethereum } from "@graphprotocol/graph-ts/index";
 import {
   BadgeAward,
-  BadgeAwardCount,
   BadgeDefinition,
   BadgeTrack,
   EntityStats,
@@ -12,7 +11,6 @@ import {
 } from "../../generated/schema";
 import { isTokenLockWallet } from "../mappings/graphTokenLockWallet";
 import { PROTOCOL_NAME_THE_GRAPH, zeroBI } from "./constants";
-import { toBigInt } from "./typeConverter";
 
 export function createOrLoadEntityStats(): EntityStats {
   let entityStats = EntityStats.load("1");
@@ -24,6 +22,7 @@ export function createOrLoadEntityStats(): EntityStats {
     entityStats.delegatorCount = 0;
     entityStats.curatorCount = 0;
     entityStats.publisherCount = 0;
+    entityStats.awardCount = 0;
     entityStats.save();
 
     // _createTestBadgeAwards();     // awards badges to DAO and dev addresses
@@ -50,8 +49,8 @@ export function createOrLoadWinner(address: string): Winner {
 
   if (winner == null) {
     winner = new Winner(address);
-    winner.badgeCount = 0;
-    winner.mintedBadgeCount = 0;
+    winner.awardCount = 0;
+    winner.mintedAwardCount = 0;
     winner.votingPower = zeroBI();
 
     winner.save();
@@ -69,7 +68,7 @@ export function createOrLoadGraphAccount(address: string): GraphAccount {
     createOrLoadWinner(address);
     graphAccount = new GraphAccount(address);
     graphAccount.winner = address;
-    graphAccount.badgeCount = 0;
+    graphAccount.awardCount = 0;
     graphAccount.votingPower = zeroBI();
 
     graphAccount.save();
@@ -78,56 +77,37 @@ export function createOrLoadGraphAccount(address: string): GraphAccount {
   return graphAccount as GraphAccount;
 }
 
-export function createOrLoadBadgeAwardCount(
-  badgeDefinition: BadgeDefinition,
-  winnerId: string
-): BadgeAwardCount {
-  let id = badgeDefinition.id.concat("-").concat(winnerId);
-
-  let badgeAwardCount = BadgeAwardCount.load(id);
-
-  if (badgeAwardCount == null) {
-    badgeAwardCount = new BadgeAwardCount(id);
-    badgeAwardCount.winner = winnerId;
-    badgeAwardCount.definition = badgeDefinition.id;
-    badgeAwardCount.badgeCount = 0;
-  }
-
-  badgeAwardCount.badgeCount = badgeAwardCount.badgeCount + 1;
-  badgeAwardCount.save();
-
-  return badgeAwardCount as BadgeAwardCount;
-}
-
 export function createBadgeAward(
   badgeDefinition: BadgeDefinition,
   winnerId: string,
   eventData: EventDataForBadgeAward
 ): void {
   let winnerAddress = _modifiedWinnerAddressIfNeeded(winnerId);
-  // increment badgeCount
-  badgeDefinition.badgeCount = badgeDefinition.badgeCount + 1;
-  badgeDefinition.save();
 
-  let badgeNumberString = BigInt.fromI32(badgeDefinition.badgeCount).toString();
+  let badgeNumberString = BigInt.fromI32(badgeDefinition.awardCount).toString();
 
   // award badge
   let badgeId = badgeDefinition.id.concat("-").concat(badgeNumberString);
   let badgeAward = BadgeAward.load(badgeId);
 
-  let badgeAwardCount = createOrLoadBadgeAwardCount(
-    badgeDefinition,
-    winnerAddress
-  );
   if (badgeAward == null) {
+    // increment global awardCount
+    let entityStats = createOrLoadEntityStats();
+    entityStats.awardCount = entityStats.awardCount + 1;
+    entityStats.save();
+
+    // increment badgeDefinition awardCount
+    badgeDefinition.awardCount = badgeDefinition.awardCount + 1;
+    badgeDefinition.save();
+
     badgeAward = new BadgeAward(badgeId);
     badgeAward.winner = winnerAddress;
     badgeAward.definition = badgeDefinition.id;
     badgeAward.blockAwarded = eventData.blockNumber;
     badgeAward.transactionHash = eventData.transactionHash;
     badgeAward.timestampAwarded = eventData.timestamp;
-    badgeAward.globalBadgeNumber = badgeDefinition.badgeCount;
-    badgeAward.winnerBadgeNumber = badgeAwardCount.badgeCount;
+    badgeAward.globalAwardNumber = entityStats.awardCount;
+    badgeAward.awardNumber = badgeDefinition.awardCount;
     badgeAward.save();
   }
 
@@ -146,8 +126,8 @@ function _modifiedWinnerAddressIfNeeded(address: string): string {
 function _updateAccountWithBadgeAward(badgeAward: BadgeAward): void {
   let winner = createOrLoadWinner(badgeAward.winner);
   let graphAccount = createOrLoadGraphAccount(badgeAward.winner);
-  winner.badgeCount = winner.badgeCount + 1;
-  graphAccount.badgeCount = graphAccount.badgeCount + 1;
+  winner.awardCount = winner.awardCount + 1;
+  graphAccount.awardCount = graphAccount.awardCount + 1;
   let badgeDefinition = BadgeDefinition.load(badgeAward.definition);
   let badgeVotingPower = badgeDefinition.votingPower;
   if (badgeVotingPower.gt(zeroBI())) {
@@ -172,29 +152,20 @@ export function createOrLoadBadgeDefinition(
   description: string,
   badgeTrack: string,
   voteWeight: BigInt,
-  image: string,
+  image: string
 ): BadgeDefinition {
   let badgeDefinition = BadgeDefinition.load(name);
 
   if (badgeDefinition == null) {
-
     badgeDefinition = new BadgeDefinition(name);
     badgeDefinition.description = description;
     badgeDefinition.badgeTrack = badgeTrack;
     badgeDefinition.image = image;
     badgeDefinition.votingPower = voteWeight;
-    badgeDefinition.badgeCount = 0;
+    badgeDefinition.awardCount = 0;
 
     badgeDefinition.save();
   }
-
-  return badgeDefinition as BadgeDefinition;
-}
-
-export function incrementBadgeCount(badgeName: string): BadgeDefinition {
-  let badgeDefinition = BadgeDefinition.load(badgeName);
-  badgeDefinition.badgeCount = badgeDefinition.badgeCount + 1;
-  badgeDefinition.save();
 
   return badgeDefinition as BadgeDefinition;
 }
@@ -225,7 +196,7 @@ export function createOrLoadBadgeTrack(
     if (protocol == PROTOCOL_NAME_THE_GRAPH) {
       createOrLoadTheGraphProtocol();
     }
-    
+
     badgeTrack.save();
   }
   return badgeTrack as BadgeTrack;
