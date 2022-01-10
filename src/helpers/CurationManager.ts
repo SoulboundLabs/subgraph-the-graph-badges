@@ -1,7 +1,7 @@
 import { NSignalMinted, NSignalBurned } from "../../generated/GNS/GNS";
 import { BigDecimal, BigInt } from "@graphprotocol/graph-ts/index";
 import { Curator, NameSignal, Subgraph, Publisher } from "../../generated/schema";
-import { createOrLoadEntityStats, EventDataForBadgeAward } from "./models";
+import { createOrLoadEntityStats, BadgeAwardEventData } from "./models";
 import { zeroBD, BADGE_TRACK_CURATOR_SUBGRAPHS, BADGE_TRACK_DEVELOPER_SIGNAL, BADGE_TRACK_CURATOR_HOUSE_ODDS, BADGE_TRACK_CURATOR_PLANET_OF_THE_APED } from "./constants";
 import { incrementProgressForTrack, updateProgressForTrack } from "../Badges/standardTrackBadges";
 import { log } from "@graphprotocol/graph-ts";
@@ -16,7 +16,7 @@ export function processCurationSignal(event: NSignalMinted): void {
   let nSignal = event.params.nSignalCreated;
   let vSignal = event.params.vSignalCreated.toBigDecimal();
   let tokensDeposited = event.params.tokensDeposited;
-  let eventData = new EventDataForBadgeAward(event);
+  let eventData = new BadgeAwardEventData(event, null);
   _processCurationSignal(
     subgraphOwner,
     subgraphNumber,
@@ -35,7 +35,7 @@ export function processCurationBurn(event: NSignalBurned): void {
   let nSignalBurnt = event.params.nSignalBurnt;
   let vSignalBurnt = event.params.vSignalBurnt.toBigDecimal();
   let tokensReceived = event.params.tokensReceived;
-  let eventData = new EventDataForBadgeAward(event);
+  let eventData = new BadgeAwardEventData(event, null);
   _processCurationBurn(
     subgraphOwner,
     subgraphNumber,
@@ -56,7 +56,7 @@ function _processCurationSignal(
   nSignal: BigInt,
   vSignal: BigDecimal,
   tokensDeposited: BigInt,
-  eventData: EventDataForBadgeAward
+  eventData: BadgeAwardEventData
 ): void {
   let subgraphId = subgraphOwner.concat("-").concat(subgraphNumber);
   let nameSignal = createOrLoadNameSignal(curatorId, subgraphId, eventData);
@@ -119,7 +119,7 @@ function _processCurationBurn(
   nSignalBurnt: BigInt,
   vSignalBurnt: BigDecimal,
   tokensReceived: BigInt,
-  eventData: EventDataForBadgeAward
+  eventData: BadgeAwardEventData
 ): void {
   let subgraphId = subgraphOwner.concat("-").concat(subgraphNumber);
   let nameSignal = createOrLoadNameSignal(curatorId, subgraphId, eventData);
@@ -152,7 +152,7 @@ function _processCurationBurn(
 
 function _createOrLoadCurator(
   id: string,
-  eventData: EventDataForBadgeAward
+  eventData: BadgeAwardEventData
 ): Curator {
   let curator = Curator.load(id);
 
@@ -174,7 +174,7 @@ function _createOrLoadCurator(
 export function createOrLoadNameSignal(
   curatorId: string,
   subgraphId: string,
-  eventData: EventDataForBadgeAward
+  eventData: BadgeAwardEventData
 ): NameSignal {
   let nameSignalID = curatorId.concat("-").concat(subgraphId);
   let nameSignal = NameSignal.load(nameSignalID);

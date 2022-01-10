@@ -2,7 +2,7 @@ import { Allocation, Indexer, SubgraphAllocation, TokenLockWallet } from "../../
 import {
   createOrLoadEntityStats,
   createOrLoadGraphAccount,
-  EventDataForBadgeAward,
+  BadgeAwardEventData,
 } from "../helpers/models";
 import {
   AllocationClosed,
@@ -26,7 +26,7 @@ import { beneficiaryIfLockWallet } from "../mappings/graphTokenLockWallet";
 ////////////////      Public
 
 export function processAllocationCreated(event: AllocationCreated): void {
-  let eventData = new EventDataForBadgeAward(event);
+  let eventData = new BadgeAwardEventData(event, null);
   let indexerId = beneficiaryIfLockWallet(event.params.indexer.toHexString());
   _processAllocationCreated(
     event.params.allocationID.toHexString(),
@@ -38,7 +38,7 @@ export function processAllocationCreated(event: AllocationCreated): void {
 }
 
 export function processAllocationClosed(event: AllocationClosed): void {
-  let eventData = new EventDataForBadgeAward(event);
+  let eventData = new BadgeAwardEventData(event, null);
   _processAllocationClosed(
     event.params.allocationID.toHexString(),
     event.params.subgraphDeploymentID.toHex(),
@@ -48,7 +48,7 @@ export function processAllocationClosed(event: AllocationClosed): void {
 }
 
 export function processAllocationCollected(event: AllocationCollected): void {
-  let eventData = new EventDataForBadgeAward(event);
+  let eventData = new BadgeAwardEventData(event, null);
   let indexerId = beneficiaryIfLockWallet(event.params.indexer.toHexString());
   _processAllocationCollected(
     indexerId,
@@ -67,7 +67,7 @@ export function processRebateClaimed(event: RebateClaimed): void {
 
 export function processDelegationParametersUpdated(event: DelegationParametersUpdated): void {
   let indexerId = beneficiaryIfLockWallet(event.params.indexer.toHexString());
-  let eventData = new EventDataForBadgeAward(event);
+  let eventData = new BadgeAwardEventData(event, null);
   _processDelegationParametersUpdated(
     indexerId, 
     event.params.indexingRewardCut.toI32(), 
@@ -78,7 +78,7 @@ export function processDelegationParametersUpdated(event: DelegationParametersUp
 export function processRewardsAssigned(event: RewardsAssigned): void {
   let indexerId = beneficiaryIfLockWallet(event.params.indexer.toHexString());
   let amount = event.params.amount;
-  let eventData = new EventDataForBadgeAward(event);
+  let eventData = new BadgeAwardEventData(event, null);
   _processRewardsAssigned(
     indexerId,
     amount,
@@ -93,7 +93,7 @@ function _processAllocationCreated(
   subgraphDeploymentId: string,
   indexerId: string,
   epoch: BigInt,
-  eventData: EventDataForBadgeAward
+  eventData: BadgeAwardEventData
 ): void {
   // check if this is the first time the indexer has allocated on this subgraph
   let subgraphAllocationId = indexerId.concat("-").concat(subgraphDeploymentId);
@@ -117,7 +117,7 @@ function _processAllocationClosed(
   channelId: string,
   subgraphDeploymentID: string,
   epoch: BigInt,
-  eventData: EventDataForBadgeAward
+  eventData: BadgeAwardEventData
 ): void {
   let allocation = Allocation.load(channelId) as Allocation;
   allocation.closedAtEpoch = epoch;
@@ -131,7 +131,7 @@ function _processAllocationClosed(
 function _processAllocationCollected(
   indexerId: string,
   rebateFees: BigInt,
-  eventData: EventDataForBadgeAward
+  eventData: BadgeAwardEventData
 ): void {
   let indexer = createOrLoadIndexer(indexerId, eventData);
   indexer.queryFeesCollected = indexer.queryFeesCollected.plus(rebateFees);
@@ -148,7 +148,7 @@ function _processAllocationCollected(
 function _processDelegationParametersUpdated(
   indexerId: string,
   indexingRewardCut: number,
-  eventData: EventDataForBadgeAward
+  eventData: BadgeAwardEventData
 ): void {
   let indexer = createOrLoadIndexer(indexerId, eventData);
   indexer.indexingRewardCut = indexingRewardCut as i32;
@@ -167,7 +167,7 @@ function _processRebateClaimed(
 function _processRewardsAssigned(
   indexerId: string,
   amount: BigInt,
-  eventData: EventDataForBadgeAward
+  eventData: BadgeAwardEventData
 ): void {
   let indexer = createOrLoadIndexer(indexerId, eventData);
 
@@ -189,7 +189,7 @@ function _processRewardsAssigned(
 ////////////////      Models
 export function createOrLoadIndexer(
   id: string,
-  eventData: EventDataForBadgeAward
+  eventData: BadgeAwardEventData
 ): Indexer {
   log.debug("Loading indexer with id: {}", [id]);
 

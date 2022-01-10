@@ -52,6 +52,15 @@ export const PROTOCOL_ROLE_CURATOR = "Curator";
 export const PROTOCOL_ROLE_SUBGRAPH_DEVELOPER = "Subgraph Developer";
 
 
+/////////// BADGEAWARD METADATA //////////////
+
+export const BADGE_AWARD_METADATA_NAME_INDEXER = "INDEXER";
+export const BADGE_AWARD_METADATA_NAME_DELEGATOR = "DELEGATOR";
+export const BADGE_AWARD_METADATA_NAME_CURATOR = "CURATOR";
+export const BADGE_AWARD_METADATA_NAME_DEVELOPER = "DEVELOPER";
+export const BADGE_AWARD_METADATA_NAME_SUBGRAPH = "SUBGRAPH";
+
+
 /////////// INDEXER BADGE TRACKS //////////////
 
 export const BADGE_TRACK_INDEXER_SUBGRAPHS = "Subgraph Alchemist";
@@ -155,7 +164,6 @@ const BADGE_TRACK_DEVELOPER_SUBGRAPHS_DESCRIPTIONS = [
 
 
 export const BADGE_TRACK_LEVEL_NAMES = ["I", "II", "III", "IV", "V"] as string[];
-
 
 export class BadgeTrackConfig {
   name: string;

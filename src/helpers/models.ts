@@ -1,15 +1,14 @@
 import { BigInt, ethereum } from "@graphprotocol/graph-ts/index";
 import {
   BadgeAward,
+  BadgeAwardMetadata,
   BadgeDefinition,
   BadgeTrack,
   EntityStats,
   GraphAccount,
   Protocol,
-  TokenLockWallet,
   Winner,
 } from "../../generated/schema";
-import { isTokenLockWallet } from "../mappings/graphTokenLockWallet";
 import { PROTOCOL_NAME_THE_GRAPH, zeroBI } from "./constants";
 
 export function createOrLoadEntityStats(): EntityStats {
@@ -31,14 +30,26 @@ export function createOrLoadEntityStats(): EntityStats {
   return entityStats as EntityStats;
 }
 
-export class EventDataForBadgeAward {
+export class BadgeAwardEventMetadata {
+  readonly name: string;
+  readonly value: string;
+
+  constructor(name: string, value: string) {
+    this.name = name;
+    this.value = value;
+  }
+}
+
+export class BadgeAwardEventData {
   readonly blockNumber: BigInt;
   readonly transactionHash: string;
   readonly timestamp: BigInt;
-  constructor(event: ethereum.Event) {
+  readonly metadata: Array<BadgeAwardEventMetadata>;
+  constructor(event: ethereum.Event, metadata: Array<BadgeAwardEventMetadata>) {
     this.blockNumber = event.block.number;
     this.transactionHash = event.transaction.hash.toHexString();
     this.timestamp = event.block.timestamp;
+    this.metadata = metadata;
   }
 }
 
@@ -80,7 +91,7 @@ export function createOrLoadGraphAccount(address: string): GraphAccount {
 export function createBadgeAward(
   badgeDefinition: BadgeDefinition,
   winnerId: string,
-  eventData: EventDataForBadgeAward
+  eventData: BadgeAwardEventData
 ): void {
   // award badge
   let badgeId = badgeDefinition.id.concat("-").concat(winnerId);
@@ -105,9 +116,30 @@ export function createBadgeAward(
     badgeAward.globalAwardNumber = entityStats.awardCount;
     badgeAward.awardNumber = badgeDefinition.awardCount;
     badgeAward.save();
+
+    for (let i = 0; i < eventData.metadata.length; i++) {
+      let metadata = eventData.metadata[i] as BadgeAwardEventMetadata;
+      _createOrLoadBadgeAwardMetaData(badgeId, metadata.name, metadata.value);
+    }
   }
 
   _updateAccountWithBadgeAward(badgeAward as BadgeAward);
+}
+
+function _createOrLoadBadgeAwardMetaData(
+  badgeAwardId: string,
+  name: string,
+  value: string
+): void {
+  let metadataId = badgeAwardId.concat("-").concat(name);
+  let metadata = BadgeAwardMetadata.load(metadataId);
+  if (metadata == null) {
+    metadata = new BadgeAwardMetadata(metadataId);
+    metadata.badgeAward = badgeAwardId;
+    metadata.name = name;
+    metadata.value = value;
+    metadata.save();
+  }
 }
 
 function _updateAccountWithBadgeAward(badgeAward: BadgeAward): void {

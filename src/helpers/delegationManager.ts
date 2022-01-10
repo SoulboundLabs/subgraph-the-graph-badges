@@ -6,7 +6,7 @@ import {
 import {
   createOrLoadEntityStats,
   createOrLoadGraphAccount,
-  EventDataForBadgeAward,
+  BadgeAwardEventData,
 } from "../helpers/models";
 // import { processUniqueDelegationForDelegationNationBadge } from "../Badges/delegationNation";
 import { BigInt } from "@graphprotocol/graph-ts";
@@ -22,7 +22,7 @@ export function processStakeDelegated(event: StakeDelegated): void {
   let delegatorId = beneficiaryIfLockWallet(event.params.delegator.toHexString());
   let indexerId = beneficiaryIfLockWallet(event.params.indexer.toHexString());
   let tokens = event.params.tokens;
-  let eventData = new EventDataForBadgeAward(event);
+  let eventData = new BadgeAwardEventData(event, null);
   _processStakeDelegated(delegatorId, indexerId, tokens, eventData);
 }
 
@@ -30,7 +30,7 @@ export function processStakeDelegatedLocked(event: StakeDelegatedLocked): void {
   let delegatorId = beneficiaryIfLockWallet(event.params.delegator.toHexString());
   let indexerId = beneficiaryIfLockWallet(event.params.indexer.toHexString());
   let tokens = event.params.tokens;
-  let eventData = new EventDataForBadgeAward(event);
+  let eventData = new BadgeAwardEventData(event, null);
   _processStakeDelegatedLocked(delegatorId, indexerId, tokens, eventData);
 }
 
@@ -40,7 +40,7 @@ function _processStakeDelegated(
   delegatorId: string,
   indexerId: string,
   tokens: BigInt,
-  eventData: EventDataForBadgeAward
+  eventData: BadgeAwardEventData
 ): void {
   createOrLoadDelegator(delegatorId);
   let indexer = createOrLoadIndexer(indexerId, eventData);
@@ -64,7 +64,7 @@ function _processStakeDelegatedLocked(
   delegatorId: string,
   indexerId: string,
   tokens: BigInt,
-  eventData: EventDataForBadgeAward
+  eventData: BadgeAwardEventData
 ): void {
   let indexer = createOrLoadIndexer(indexerId, eventData);
   indexer.delegatedTokens = indexer.delegatedTokens.minus(tokens)
@@ -100,7 +100,7 @@ export function createOrLoadDelegator(id: string): Delegator {
 export function createOrLoadDelegatedStake(
   delegatorId: string,
   indexerId: string,
-  eventData: EventDataForBadgeAward
+  eventData: BadgeAwardEventData
 ): DelegatedStake {
   let id = delegatorId.concat("-").concat(indexerId);
   let delegatedStake = DelegatedStake.load(id);

@@ -245,6 +245,30 @@ type BadgeAward @entity {
   awardNumber: Int!
   "Ordered number in which the badge was awarded across all badges"
   globalAwardNumber: Int!
+  "Data specific to this badgeAwards of a given BadgeDefinition"
+  metadata: [BadgeAwardMetadata!]! @derivedFrom(field: "badgeAward")
+}
+
+enum BadgeAwardMetadataName {
+  INDEXER,
+  DELEGATOR,
+  CURATOR,
+  DEVELOPER,
+  SUBGRAPH
+}
+
+"""
+BadgeAward metadata specific to the given BadgeDefinition
+"""
+type BadgeAwardMetadata @entity {
+  "{BadgeAward}-{metricName}"
+  id: ID!
+  "Name of metric"
+  name: BadgeAwardMetadataName!
+  "Value"
+  value: String!
+  "BadgeAward the metadata refers to"
+  badgeAward: BadgeAward!
 }
 
 type BadgeTrack @entity {

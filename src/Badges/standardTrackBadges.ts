@@ -1,14 +1,14 @@
 import { Winner, TokenLockWallet, Indexer, BadgeTrackProgress, BadgeTrack, BadgeDefinition } from "../../generated/schema";
 import { getBadgeTrackConfig, BADGE_TRACK_LEVEL_NAMES, zeroBI, oneBI, BadgeTrackConfig, PROTOCOL_NAME_THE_GRAPH } from "../helpers/constants";
 import { log, BigInt } from "@graphprotocol/graph-ts";
-import { createBadgeAward, createOrLoadBadgeDefinition, createOrLoadBadgeTrack, EventDataForBadgeAward } from "../helpers/models";
+import { createBadgeAward, createOrLoadBadgeDefinition, createOrLoadBadgeTrack, BadgeAwardEventData } from "../helpers/models";
 
 
 export function updateProgressForTrack(
   track: string, 
   winner: string, 
   updatedProgress: BigInt,
-  eventData: EventDataForBadgeAward
+  eventData: BadgeAwardEventData
 ): void {
   let badgeTrackConst = getBadgeTrackConfig(track);
 
@@ -19,7 +19,7 @@ export function updateProgressForTrack(
 export function incrementProgressForTrack(
   track: string, 
   winner: string,
-  eventData: EventDataForBadgeAward
+  eventData: BadgeAwardEventData
 ): void {
   let badgeTrackConst = getBadgeTrackConfig(track);
   let badgeTrackProgress = createOrLoadBadgeTrackProgress(badgeTrackConst, winner);
@@ -31,7 +31,7 @@ function updateProgress(
   badgeTrackProgress: BadgeTrackProgress, 
   thresholds: string[], 
   updatedProgress: BigInt,
-  eventData: EventDataForBadgeAward
+  eventData: BadgeAwardEventData
 ): void {
   let i = badgeTrackProgress.level;
 
@@ -71,7 +71,7 @@ function createOrLoadBadgeTrackProgress(
 function _awardBadgeForTrackProgress(
   badgeTrackProgress: BadgeTrackProgress, 
   level: number,
-  eventData: EventDataForBadgeAward,
+  eventData: BadgeAwardEventData,
 ): void {
   let badgeTrackConfig = getBadgeTrackConfig(badgeTrackProgress.badgeTrack);
   let badgeDefinition = _createOrLoadBadgeDefinitionFromTrackConst(badgeTrackConfig, level as i32);

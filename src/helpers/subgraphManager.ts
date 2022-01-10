@@ -2,25 +2,23 @@ import {
   Subgraph,
   Publisher,
   SubgraphDeployment,
-  TokenLockWallet
 } from "../../generated/schema";
 import { log, BigInt } from "@graphprotocol/graph-ts";
 import { SubgraphPublished } from "../../generated/GNS/GNS";
-import { createOrLoadGraphAccount, EventDataForBadgeAward, createOrLoadEntityStats } from "./models";
-import { zeroBI, BADGE_TRACK_DEVELOPER_SUBGRAPHS } from "./constants";
+import { createOrLoadGraphAccount, BadgeAwardEventData, createOrLoadEntityStats, BadgeAwardEventMetadata } from "./models";
+import { zeroBI, BADGE_TRACK_DEVELOPER_SUBGRAPHS, BADGE_AWARD_METADATA_NAME_SUBGRAPH } from "./constants";
 import { incrementProgressForTrack } from "../Badges/standardTrackBadges";
 import { beneficiaryIfLockWallet } from "../mappings/graphTokenLockWallet";
 
 ////////////////      Public
 
 export function processSubgraphPublished(event: SubgraphPublished): void {
-  let eventData = new EventDataForBadgeAward(event);
   let publisherId = beneficiaryIfLockWallet(event.params.graphAccount.toHexString());
   _processSubgraphPublished(
     publisherId,
     event.params.subgraphNumber,
     event.params.subgraphDeploymentID.toHexString(),
-    eventData
+    event
   );
 }
 
@@ -30,9 +28,12 @@ function _processSubgraphPublished(
   publisherId: string,
   subgraphNumber: BigInt,
   subgraphDeploymentId: string,
-  eventData: EventDataForBadgeAward
+  event: SubgraphPublished
 ): void {
   let subgraphId = publisherId.concat("-").concat(subgraphNumber.toString());
+  let metadata = new BadgeAwardEventMetadata(BADGE_AWARD_METADATA_NAME_SUBGRAPH, subgraphId);
+  let eventData = new BadgeAwardEventData(event, [metadata]);
+
   _createOrLoadSubgraph(subgraphId, publisherId, eventData.blockNumber);
   _createOrLoadSubgraphDeployment(subgraphDeploymentId, eventData.blockNumber);
   incrementProgressForTrack(BADGE_TRACK_DEVELOPER_SUBGRAPHS, publisherId, eventData);
