@@ -15,3 +15,13 @@ export function isTokenLockWallet(address: string): boolean {
   let isLockWallet = TokenLockWallet.load(address);
   return isLockWallet != null;
 }
+
+export function beneficiaryIfLockWallet(lockWalletId: string): string {
+  let lockWallet = TokenLockWallet.load(lockWalletId);
+  if (lockWallet != null) {
+    return lockWallet.beneficiary;
+  }
+  else {
+    return lockWalletId;
+  }
+}

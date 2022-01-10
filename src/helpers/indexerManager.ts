@@ -1,4 +1,4 @@
-import { Allocation, Indexer, SubgraphAllocation } from "../../generated/schema";
+import { Allocation, Indexer, SubgraphAllocation, TokenLockWallet } from "../../generated/schema";
 import {
   createOrLoadEntityStats,
   createOrLoadGraphAccount,
@@ -21,15 +21,17 @@ import {
   BADGE_TRACK_INDEXER_ALLOCATIONS_OPENED,
   zeroBI 
 } from "./constants";
+import { beneficiaryIfLockWallet } from "../mappings/graphTokenLockWallet";
 
 ////////////////      Public
 
 export function processAllocationCreated(event: AllocationCreated): void {
   let eventData = new EventDataForBadgeAward(event);
+  let indexerId = beneficiaryIfLockWallet(event.params.indexer.toHexString());
   _processAllocationCreated(
     event.params.allocationID.toHexString(),
     event.params.subgraphDeploymentID.toHexString(),
-    event.params.indexer.toHexString(),
+    indexerId,
     event.params.epoch,
     eventData
   );
@@ -47,29 +49,34 @@ export function processAllocationClosed(event: AllocationClosed): void {
 
 export function processAllocationCollected(event: AllocationCollected): void {
   let eventData = new EventDataForBadgeAward(event);
+  let indexerId = beneficiaryIfLockWallet(event.params.indexer.toHexString());
   _processAllocationCollected(
-    event.params.indexer.toHexString(),
+    indexerId,
     event.params.rebateFees,
     eventData
   );
 }
 
 export function processRebateClaimed(event: RebateClaimed): void {
+  let indexerId = beneficiaryIfLockWallet(event.params.indexer.toHexString());
   _processRebateClaimed(
-    event.params.indexer.toHexString(),
+    indexerId,
     event.params.delegationFees
   );
 }
 
 export function processDelegationParametersUpdated(event: DelegationParametersUpdated): void {
-  let indexerId = event.params.indexer.toHexString();
-  let rewardCut = event.params.indexingRewardCut.toI32();
+  let indexerId = beneficiaryIfLockWallet(event.params.indexer.toHexString());
   let eventData = new EventDataForBadgeAward(event);
-  _processDelegationParametersUpdated(indexerId, rewardCut, eventData);
+  _processDelegationParametersUpdated(
+    indexerId, 
+    event.params.indexingRewardCut.toI32(), 
+    eventData
+  );
 }
 
 export function processRewardsAssigned(event: RewardsAssigned): void {
-  let indexerId = event.params.indexer.toHexString();
+  let indexerId = beneficiaryIfLockWallet(event.params.indexer.toHexString());
   let amount = event.params.amount;
   let eventData = new EventDataForBadgeAward(event);
   _processRewardsAssigned(

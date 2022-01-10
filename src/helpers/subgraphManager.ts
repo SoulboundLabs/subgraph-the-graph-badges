@@ -2,19 +2,22 @@ import {
   Subgraph,
   Publisher,
   SubgraphDeployment,
+  TokenLockWallet
 } from "../../generated/schema";
 import { log, BigInt } from "@graphprotocol/graph-ts";
 import { SubgraphPublished } from "../../generated/GNS/GNS";
 import { createOrLoadGraphAccount, EventDataForBadgeAward, createOrLoadEntityStats } from "./models";
 import { zeroBI, BADGE_TRACK_DEVELOPER_SUBGRAPHS } from "./constants";
 import { incrementProgressForTrack } from "../Badges/standardTrackBadges";
+import { beneficiaryIfLockWallet } from "../mappings/graphTokenLockWallet";
 
 ////////////////      Public
 
 export function processSubgraphPublished(event: SubgraphPublished): void {
   let eventData = new EventDataForBadgeAward(event);
+  let publisherId = beneficiaryIfLockWallet(event.params.graphAccount.toHexString());
   _processSubgraphPublished(
-    event.params.graphAccount.toHexString(),
+    publisherId,
     event.params.subgraphNumber,
     event.params.subgraphDeploymentID.toHexString(),
     eventData

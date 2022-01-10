@@ -14,20 +14,21 @@ import { BigInt } from "@graphprotocol/graph-ts";
 import { createOrLoadIndexer } from "./indexerManager";
 import { BADGE_TRACK_DELEGATOR_INDEXERS, BADGE_TRACK_INDEXER_DELEGATOR_COUNT, zeroBI } from "./constants";
 import { incrementProgressForTrack, updateProgressForTrack } from "../Badges/standardTrackBadges";
+import { beneficiaryIfLockWallet } from "../mappings/graphTokenLockWallet";
 
 ////////////////      Public
 
 export function processStakeDelegated(event: StakeDelegated): void {
-  let delegatorId = event.params.delegator.toHexString();
-  let indexerId = event.params.indexer.toHexString();
+  let delegatorId = beneficiaryIfLockWallet(event.params.delegator.toHexString());
+  let indexerId = beneficiaryIfLockWallet(event.params.indexer.toHexString());
   let tokens = event.params.tokens;
   let eventData = new EventDataForBadgeAward(event);
   _processStakeDelegated(delegatorId, indexerId, tokens, eventData);
 }
 
 export function processStakeDelegatedLocked(event: StakeDelegatedLocked): void {
-  let delegatorId = event.params.delegator.toHexString();
-  let indexerId = event.params.indexer.toHexString();
+  let delegatorId = beneficiaryIfLockWallet(event.params.delegator.toHexString());
+  let indexerId = beneficiaryIfLockWallet(event.params.indexer.toHexString());
   let tokens = event.params.tokens;
   let eventData = new EventDataForBadgeAward(event);
   _processStakeDelegatedLocked(delegatorId, indexerId, tokens, eventData);
