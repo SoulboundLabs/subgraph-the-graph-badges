@@ -104,24 +104,21 @@ export function createBadgeAward(
   winnerId: string,
   eventData: EventDataForBadgeAward
 ): void {
-  let winnerAddress = _modifiedWinnerAddressIfNeeded(winnerId);
   // increment badgeCount
   badgeDefinition.badgeCount = badgeDefinition.badgeCount + 1;
   badgeDefinition.save();
 
-  let badgeNumberString = BigInt.fromI32(badgeDefinition.badgeCount).toString();
-
   // award badge
-  let badgeId = badgeDefinition.id.concat("-").concat(badgeNumberString);
+  let badgeId = badgeDefinition.id.concat("-").concat(winnerId);
   let badgeAward = BadgeAward.load(badgeId);
 
   let badgeAwardCount = createOrLoadBadgeAwardCount(
     badgeDefinition,
-    winnerAddress
+    winnerId
   );
   if (badgeAward == null) {
     badgeAward = new BadgeAward(badgeId);
-    badgeAward.winner = winnerAddress;
+    badgeAward.winner = winnerId;
     badgeAward.definition = badgeDefinition.id;
     badgeAward.blockAwarded = eventData.blockNumber;
     badgeAward.transactionHash = eventData.transactionHash;
@@ -132,15 +129,6 @@ export function createBadgeAward(
   }
 
   _updateAccountWithBadgeAward(badgeAward as BadgeAward);
-}
-
-// if the winner was a GRT vesting contract, award badge to beneficiary
-function _modifiedWinnerAddressIfNeeded(address: string): string {
-  let adr = address;
-  if (isTokenLockWallet(address)) {
-    adr = TokenLockWallet.load(address).beneficiary;
-  }
-  return adr;
 }
 
 function _updateAccountWithBadgeAward(badgeAward: BadgeAward): void {

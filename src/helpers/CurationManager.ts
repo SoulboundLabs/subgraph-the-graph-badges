@@ -5,13 +5,14 @@ import { createOrLoadEntityStats, EventDataForBadgeAward } from "./models";
 import { zeroBD, BADGE_TRACK_CURATOR_SUBGRAPHS, BADGE_TRACK_DEVELOPER_SIGNAL, BADGE_TRACK_CURATOR_HOUSE_ODDS, BADGE_TRACK_CURATOR_PLANET_OF_THE_APED } from "./constants";
 import { incrementProgressForTrack, updateProgressForTrack } from "../Badges/standardTrackBadges";
 import { log } from "@graphprotocol/graph-ts";
+import { beneficiaryIfLockWallet } from "../mappings/graphTokenLockWallet";
 
 ////////////////      Public
 
 export function processCurationSignal(event: NSignalMinted): void {
-  let subgraphOwner = event.params.graphAccount.toHexString();
+  let subgraphOwner = beneficiaryIfLockWallet(event.params.graphAccount.toHexString());
   let subgraphNumber = event.params.subgraphNumber.toString();
-  let curatorId = event.params.nameCurator.toHexString();
+  let curatorId = beneficiaryIfLockWallet(event.params.nameCurator.toHexString());
   let nSignal = event.params.nSignalCreated;
   let vSignal = event.params.vSignalCreated.toBigDecimal();
   let tokensDeposited = event.params.tokensDeposited;
@@ -28,9 +29,9 @@ export function processCurationSignal(event: NSignalMinted): void {
 }
 
 export function processCurationBurn(event: NSignalBurned): void {
-  let subgraphOwner = event.params.graphAccount.toHexString();
+  let subgraphOwner = beneficiaryIfLockWallet(event.params.graphAccount.toHexString());
   let subgraphNumber = event.params.subgraphNumber.toString();
-  let curatorId = event.params.nameCurator.toHexString();
+  let curatorId = beneficiaryIfLockWallet(event.params.nameCurator.toHexString());
   let nSignalBurnt = event.params.nSignalBurnt;
   let vSignalBurnt = event.params.vSignalBurnt.toBigDecimal();
   let tokensReceived = event.params.tokensReceived;
