@@ -18,15 +18,17 @@ type EntityStats @entity {
   curatorCount: Int!
   "Number of publishers"
   publisherCount: Int!
+  "Number of badge awarded"
+  awardCount: Int!
 }
 
 type Winner @entity {
   "ETH address of the winner"
   id: ID!
-  "Number of badges won"
-  badgeCount: Int!
-  "Number of badges minted"
-  mintedBadgeCount: Int!
+  "Number of badge awards won"
+  awardCount: Int!
+  "Number of badge awards minted"
+  mintedAwardCount: Int!
   "Voting power accumulated from all badges"
   votingPower: BigInt!
   "Badges awarded to address"
@@ -43,7 +45,7 @@ type GraphAccount @entity {
   "Winner associated with this Graph Account"
   winner: Winner!
   "Number of Graph badges awarded to this account"
-  badgeCount: Int!
+  awardCount: Int!
   "Voting power accumulated from graph badges"
   votingPower: BigInt!
   "Indexer fields for this Graph Account. Null if never indexed"
@@ -227,7 +229,7 @@ type SubgraphDeployment @entity {
 The badge that is awarded to winner
 """
 type BadgeAward @entity {
-  "{badgeName}-{badgeCount}"
+  "{badgeName}-{awardCount}"
   id: ID!
   "Address of the winner"
   winner: Winner!
@@ -239,24 +241,10 @@ type BadgeAward @entity {
   transactionHash: String!
   "Additional details about the badge"
   definition: BadgeDefinition!
-  "Ordered number in which the badge was awarded across all winners"
-  globalBadgeNumber: Int!
-  "Ordered number in which the badge was awarded for this winner"
-  winnerBadgeNumber: Int!
-}
-
-"""
-Tracks the number of badge awards on a per-winner/per-badge basis
-"""
-type BadgeAwardCount @entity {
-  "{badgeName}-{winner}"
-  id: ID!
-  "Address of the winner"
-  winner: Winner!
-  "Additional details about the badge"
-  definition: BadgeDefinition!
-  "Current Count of the "
-  badgeCount: Int!
+  "Ordered number in which the badge was awarded for the associated definition"
+  awardNumber: Int!
+  "Ordered number in which the badge was awarded across all badges"
+  globalAwardNumber: Int!
 }
 
 type BadgeTrack @entity {
@@ -282,8 +270,8 @@ type BadgeDefinition @entity {
   image: String!
   "Name of the artist responsible for NFT badge"
   votingPower: BigInt!
-  "Total count of badges"
-  badgeCount: Int!
+  "Total count of awards"
+  awardCount: Int!
   "Track this badge definition belongs to"
   badgeTrack: BadgeTrack!
   "Badges awarded with this definition"
