@@ -94,6 +94,8 @@ dataSources:
           handler: handleNSignalMinted
         - event: NSignalBurned(indexed address,indexed uint256,indexed address,uint256,uint256,uint256)
           handler: handleNSignalBurned
+        - event: SubgraphMetadataUpdated(indexed address,indexed uint256,bytes32)
+          handler: handleSubgraphMetadataUpdated
   - kind: ethereum/contract
     name: GraphTokenLockWalletManager
     network: "{{network}}"

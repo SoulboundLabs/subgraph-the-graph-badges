@@ -2,41 +2,52 @@ import {
   Subgraph,
   Publisher,
   SubgraphDeployment,
+  SubgraphVersion
 } from "../../generated/schema";
-import { log, BigInt } from "@graphprotocol/graph-ts";
-import { SubgraphPublished } from "../../generated/GNS/GNS";
+import { log, BigInt, Bytes } from "@graphprotocol/graph-ts";
+import { SubgraphMetadataUpdated, SubgraphPublished } from "../../generated/GNS/GNS";
 import { createOrLoadGraphAccount, BadgeAwardEventData, createOrLoadEntityStats, BadgeAwardEventMetadata } from "./models";
 import { zeroBI, BADGE_TRACK_DEVELOPER_SUBGRAPHS, BADGE_AWARD_METADATA_NAME_SUBGRAPH } from "./constants";
 import { incrementProgressForTrack } from "../Badges/standardTrackBadges";
 import { beneficiaryIfLockWallet } from "../mappings/graphTokenLockWallet";
 
+
 ////////////////      Public
 
 export function processSubgraphPublished(event: SubgraphPublished): void {
   let publisherId = beneficiaryIfLockWallet(event.params.graphAccount.toHexString());
-  _processSubgraphPublished(
-    publisherId,
-    event.params.subgraphNumber,
-    event.params.subgraphDeploymentID.toHexString(),
-    event
-  );
-}
-
-////////////////      Event Processing
-
-function _processSubgraphPublished(
-  publisherId: string,
-  subgraphNumber: BigInt,
-  subgraphDeploymentId: string,
-  event: SubgraphPublished
-): void {
-  let subgraphId = publisherId.concat("-").concat(subgraphNumber.toString());
+  let subgraphId = publisherId.concat("-").concat(event.params.subgraphNumber.toString());
   let metadata = new BadgeAwardEventMetadata(BADGE_AWARD_METADATA_NAME_SUBGRAPH, subgraphId);
   let eventData = new BadgeAwardEventData(event, [metadata]);
 
-  _createOrLoadSubgraph(subgraphId, publisherId, eventData.blockNumber);
-  _createOrLoadSubgraphDeployment(subgraphDeploymentId, eventData.blockNumber);
+  let subgraph = _createOrLoadSubgraph(subgraphId, publisherId, eventData.blockNumber);
+  let versionId = subgraphId.concat("-").concat(subgraph.versionCount.toString());
+  let versionNumber = subgraph.versionCount as i32;
+  subgraph.versionCount = subgraph.versionCount.plus(BigInt.fromI32(1));
+  subgraph.currentVersion = versionId;
+  subgraph.save();
+
+  let deployment = _createOrLoadSubgraphDeployment(event.params.subgraphDeploymentID.toHexString(), eventData.blockNumber);
+
+  // Create Subgraph Version
+  let subgraphVersion = new SubgraphVersion(versionId);
+  subgraphVersion.subgraph = subgraphId;
+  subgraphVersion.subgraphDeployment = deployment.id;
+  subgraphVersion.version = versionNumber;
+  subgraphVersion.metadataHash = event.params.versionMetadata;
+  subgraphVersion.save();
+
   incrementProgressForTrack(BADGE_TRACK_DEVELOPER_SUBGRAPHS, publisherId, eventData);
+}
+
+export function processSubgraphMetadataUpdated(event: SubgraphMetadataUpdated): void {
+  let publisherId = event.params.graphAccount.toHexString();
+  let subgraphNumber = event.params.subgraphNumber.toString();
+  let subgraphId = publisherId.concat("-").concat(subgraphNumber.toString());
+  let subgraph = _createOrLoadSubgraph(subgraphId, publisherId, event.block.timestamp);
+
+  subgraph.metadataHash = event.params.subgraphMetadata;
+  subgraph.save();
 }
 
 ////////////////      Models
@@ -55,6 +66,8 @@ function _createOrLoadSubgraph(
     subgraph = new Subgraph(subgraphId);
     subgraph.owner = publisherId;
     subgraph.blockPublished = blockPublished;
+    subgraph.metadataHash = changetype<Bytes>(Bytes.fromI32(0));
+    subgraph.versionCount = zeroBI();
     subgraph.save();
   }
 

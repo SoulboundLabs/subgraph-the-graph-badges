@@ -1,8 +1,9 @@
-import { Allocation, Indexer, SubgraphAllocation, TokenLockWallet } from "../../generated/schema";
+import { Allocation, BadgeAward, Indexer, SubgraphAllocation, TokenLockWallet } from "../../generated/schema";
 import {
   createOrLoadEntityStats,
   createOrLoadGraphAccount,
   BadgeAwardEventData,
+  BadgeAwardEventMetadata
 } from "../helpers/models";
 import {
   AllocationClosed,
@@ -19,21 +20,23 @@ import {
   BADGE_TRACK_INDEXER_SUBGRAPHS, 
   BADGE_TRACK_INDEXER_QUERY_FEE, 
   BADGE_TRACK_INDEXER_ALLOCATIONS_OPENED,
-  zeroBI 
+  zeroBI, 
+  BADGE_AWARD_METADATA_NAME_TOKENS, 
+  BADGE_AWARD_METADATA_NAME_SUBGRAPH_DEPLOYMENT 
 } from "./constants";
 import { beneficiaryIfLockWallet } from "../mappings/graphTokenLockWallet";
 
 ////////////////      Public
 
 export function processAllocationCreated(event: AllocationCreated): void {
-  let eventData = new BadgeAwardEventData(event, null);
   let indexerId = beneficiaryIfLockWallet(event.params.indexer.toHexString());
   _processAllocationCreated(
     event.params.allocationID.toHexString(),
     event.params.subgraphDeploymentID.toHexString(),
     indexerId,
+    event.params.tokens,
     event.params.epoch,
-    eventData
+    event
   );
 }
 
@@ -92,11 +95,18 @@ function _processAllocationCreated(
   channelId: string,
   subgraphDeploymentId: string,
   indexerId: string,
+  tokens: BigInt,
   epoch: BigInt,
-  eventData: BadgeAwardEventData
+  event: AllocationCreated
 ): void {
   // check if this is the first time the indexer has allocated on this subgraph
   let subgraphAllocationId = indexerId.concat("-").concat(subgraphDeploymentId);
+  let metadata: Array<BadgeAwardEventMetadata> = [
+    new BadgeAwardEventMetadata(BADGE_AWARD_METADATA_NAME_TOKENS, tokens.toString()),
+    new BadgeAwardEventMetadata(BADGE_AWARD_METADATA_NAME_SUBGRAPH_DEPLOYMENT, subgraphDeploymentId)
+  ];
+  let eventData = new BadgeAwardEventData(event, metadata);
+  
   let subgraphAllocation = SubgraphAllocation.load(subgraphAllocationId);
   if (subgraphAllocation == null) {
     // first time indexer has allocated on this subgraph

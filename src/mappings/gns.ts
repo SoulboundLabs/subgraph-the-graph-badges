@@ -5,10 +5,11 @@
 
 import {
   SubgraphPublished,
+  SubgraphMetadataUpdated,
   NSignalMinted,
   NSignalBurned,
 } from "../../generated/GNS/GNS";
-import { processSubgraphPublished } from "../helpers/subgraphManager";
+import { processSubgraphMetadataUpdated, processSubgraphPublished } from "../helpers/subgraphManager";
 import { log } from "@graphprotocol/graph-ts";
 import {
   processCurationBurn,
@@ -18,6 +19,10 @@ import {
 export function handleSubgraphPublished(event: SubgraphPublished): void {
   log.debug("SubgraphPublished event found", []);
   processSubgraphPublished(event);
+}
+export function handleSubgraphMetadataUpdated(event: SubgraphMetadataUpdated): void {
+  log.debug("SubgraphMetadataUpdated event found", []);
+  processSubgraphMetadataUpdated(event);
 }
 
 export function handleNSignalMinted(event: NSignalMinted): void {

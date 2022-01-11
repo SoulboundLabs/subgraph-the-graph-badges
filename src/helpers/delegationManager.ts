@@ -7,13 +7,12 @@ import {
   createOrLoadEntityStats,
   createOrLoadGraphAccount,
   BadgeAwardEventData,
+  BadgeAwardEventMetadata
 } from "../helpers/models";
-// import { processUniqueDelegationForDelegationNationBadge } from "../Badges/delegationNation";
 import { BigInt } from "@graphprotocol/graph-ts";
-// import { processNewDelegatorForDelegatorTribeBadge } from "../Badges/delegationTribe";
 import { createOrLoadIndexer } from "./indexerManager";
-import { BADGE_TRACK_DELEGATOR_INDEXERS, BADGE_TRACK_INDEXER_DELEGATOR_COUNT, zeroBI } from "./constants";
-import { incrementProgressForTrack, updateProgressForTrack } from "../Badges/standardTrackBadges";
+import { BADGE_TRACK_DELEGATOR_INDEXERS, BADGE_TRACK_INDEXER_DELEGATOR_COUNT, zeroBI, BADGE_AWARD_METADATA_NAME_DELEGATOR, BADGE_AWARD_METADATA_NAME_TOKENS } from "./constants";
+import { incrementProgressForTrack } from "../Badges/standardTrackBadges";
 import { beneficiaryIfLockWallet } from "../mappings/graphTokenLockWallet";
 
 ////////////////      Public
@@ -22,7 +21,11 @@ export function processStakeDelegated(event: StakeDelegated): void {
   let delegatorId = beneficiaryIfLockWallet(event.params.delegator.toHexString());
   let indexerId = beneficiaryIfLockWallet(event.params.indexer.toHexString());
   let tokens = event.params.tokens;
-  let eventData = new BadgeAwardEventData(event, null);
+  let metadata: Array<BadgeAwardEventMetadata> = [
+    new BadgeAwardEventMetadata(BADGE_AWARD_METADATA_NAME_DELEGATOR, delegatorId),
+    new BadgeAwardEventMetadata(BADGE_AWARD_METADATA_NAME_TOKENS, tokens.toString())
+  ];
+  let eventData = new BadgeAwardEventData(event, metadata);
   _processStakeDelegated(delegatorId, indexerId, tokens, eventData);
 }
 
