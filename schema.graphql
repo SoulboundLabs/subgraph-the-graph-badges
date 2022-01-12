@@ -145,8 +145,8 @@ type DelegatedStake @entity {
   indexer: Indexer!
   "cumulative tokens delegated (does not account for undelegating)"
   tokens: BigInt!
-  "true if tokens has ever been >= 1000"
-  crossed1000: Boolean!
+  "true if tokens has ever been >= 100"
+  crossed100: Boolean!
 }
 
 """
@@ -289,12 +289,12 @@ type BadgeAward @entity {
 }
 
 enum BadgeAwardMetadataName {
-  INDEXER,
-  DELEGATOR,
-  CURATOR,
-  DEVELOPER,
-  SUBGRAPH,
-  SUBGRAPH_DEPLOYMENT,
+  INDEXER
+  DELEGATOR
+  CURATOR
+  DEVELOPER
+  SUBGRAPH
+  SUBGRAPH_DEPLOYMENT
   TOKENS
 }
 
