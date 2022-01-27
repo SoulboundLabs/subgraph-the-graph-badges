@@ -103,7 +103,7 @@ function _awardBadgeIfNeeded(
 ): void {
   if (
     oldValue.lt(badgeDefinition.threshold) &&
-    updatedValue.gt(badgeDefinition.threshold)
+    updatedValue.ge(badgeDefinition.threshold)
   ) {
     createBadgeAward(badgeDefinition, user, eventData);
   }
