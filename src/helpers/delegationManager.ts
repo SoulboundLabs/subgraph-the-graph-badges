@@ -4,10 +4,12 @@ import {
   StakeDelegated,
   StakeDelegatedLocked,
 } from "../../generated/Staking/Staking";
-import { incrementProgressForTrack } from "../Badges/standardTrackBadges";
 import {
   BadgeAwardEventData,
   BadgeAwardEventMetadata,
+} from "../Emblem/emblemModels";
+import { incrementProgress } from "../Emblem/metricProgress";
+import {
   createOrLoadEntityStats,
   createOrLoadGraphAccount,
 } from "../helpers/models";
@@ -15,8 +17,8 @@ import { beneficiaryIfLockWallet } from "../mappings/graphTokenLockWallet";
 import {
   BADGE_AWARD_METADATA_NAME_DELEGATOR,
   BADGE_AWARD_METADATA_NAME_TOKENS,
-  BADGE_TRACK_DELEGATOR_INDEXERS,
-  BADGE_TRACK_INDEXER_DELEGATOR_COUNT,
+  BADGE_METRIC_DELEGATOR_INDEXERS,
+  BADGE_METRIC_INDEXER_DELEGATOR_COUNT,
   zeroBI,
 } from "./constants";
 import { createOrLoadIndexer } from "./indexerManager";
@@ -81,11 +83,8 @@ function _processStakeDelegated(
   ) {
     delegatedStake.crossed100 = true;
     delegatedStake.save();
-    incrementProgressForTrack(
-      BADGE_TRACK_DELEGATOR_INDEXERS,
-      delegatorId,
-      eventData
-    );
+
+    incrementProgress(delegatorId, BADGE_METRIC_DELEGATOR_INDEXERS, eventData);
   }
 }
 
@@ -145,9 +144,9 @@ export function createOrLoadDelegatedStake(
     delegatedStake.crossed100 = false;
     delegatedStake.save();
 
-    incrementProgressForTrack(
-      BADGE_TRACK_INDEXER_DELEGATOR_COUNT,
+    incrementProgress(
       indexerId,
+      BADGE_METRIC_INDEXER_DELEGATOR_COUNT,
       eventData
     );
   }

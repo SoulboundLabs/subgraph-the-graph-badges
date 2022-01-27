@@ -122,7 +122,7 @@ dataSources:
     source:
       address: "{{graphTokenLockWalletManager2}}"
       abi: GraphTokenLockWalletManager
-      startBlock: {{blockNumber}}
+      startBlock: 12908982
     mapping:
       kind: ethereum/events
       file: ./src/mappings/graphTokenLockWallet.ts

@@ -8,8 +8,8 @@ Singleton entity that tracks numbers and stats
 type EntityStats @entity {
   "ID is set to 1"
   id: ID!
-  "Number of winners with voting power"
-  voterCount: Int!
+  "Number of Users"
+  userCount: Int!
   "Number of indexers"
   indexerCount: Int!
   "Number of delegators"
@@ -18,36 +18,19 @@ type EntityStats @entity {
   curatorCount: Int!
   "Number of publishers"
   publisherCount: Int!
+  "Number of TokenLockWallets"
+  tokenLockWalletCount: Int!
   "Number of badge awarded"
   awardCount: Int!
-}
-
-type Winner @entity {
-  "ETH address of the winner"
-  id: ID!
-  "Number of badge awards won"
-  awardCount: Int!
-  "Number of badge awards minted"
-  mintedAwardCount: Int!
-  "Voting power accumulated from all badges"
-  votingPower: BigInt!
-  "Badges awarded to address"
-  badgesAwarded: [BadgeAward!]! @derivedFrom(field: "winner")
-  "Graph Account associated with this ETH address. Null until activity is detected"
-  graphAccount: GraphAccount @derivedFrom(field: "winner")
-  "Progress this account has made along all badge tracks"
-  allBadgeTrackProgress: BadgeTrackProgress @derivedFrom(field: "winner")
 }
 
 type GraphAccount @entity {
   "ETH address of Graph Account"
   id: ID!
-  "Winner associated with this Graph Account"
-  winner: Winner!
+  "User associated with this Graph Account"
+  user: User!
   "Number of Graph badges awarded to this account"
   awardCount: Int!
-  "Voting power accumulated from graph badges"
-  votingPower: BigInt!
   "Indexer fields for this Graph Account. Null if never indexed"
   indexer: Indexer @derivedFrom(field: "account")
   "Delegator fields for this Graph Account. Null if never delegated"
@@ -198,8 +181,6 @@ type Publisher @entity {
   subgraphs: [Subgraph!]! @derivedFrom(field: "owner")
   "Number of Subgraphs this Publisher has deployed"
   subgraphCount: Int!
-  "Current GRT being curated on subgraphs deployed by this publisher"
-  currentCurationTokens: BigInt!
 }
 
 type Subgraph @entity {
@@ -260,18 +241,48 @@ type SubgraphDeployment @entity {
   versions: [SubgraphVersion!]! @derivedFrom(field: "subgraphDeployment")
 }
 
+"""
+Protocols indexed by this subgraph
+"""
+type Protocol @entity {
+  "Name of the protocol"
+  id: ID!
+}
+
+
+
 ########################
 #### Badge Entities ####
 ########################
 
 """
-The badge that is awarded to winner
+All accounts tracked by Emblem
+"""
+type User @entity {
+  "ETH address of the User"
+  id: ID!
+  "Number of badge awards won"
+  awardCount: Int!
+  "Number of badge awards minted"
+  mintedAwardCount: Int!
+  "Voting power accumulated from all badges"
+  votingPower: BigInt!
+  "Badges awarded to address"
+  badgesAwarded: [BadgeAward!]! @derivedFrom(field: "user")
+  "Graph Account associated with this ETH address. Null until activity is detected"
+  graphAccount: GraphAccount @derivedFrom(field: "user")
+  "Progress this account has made along predefined metrics"
+  progress: [Progress!]! @derivedFrom(field: "user")
+}
+
+"""
+BadgeAwards are awarded to Users for satisfying BadgeDefinition thresholds
 """
 type BadgeAward @entity {
-  "{badgeName}-{awardCount}"
+  "{badgeName}-{User}"
   id: ID!
-  "Address of the winner"
-  winner: Winner!
+  "Address of the User"
+  user: User!
   "Block number in which badge was awarded"
   blockAwarded: BigInt!
   "Timestamp in which badge was awarded"
@@ -312,54 +323,66 @@ type BadgeAwardMetadata @entity {
   badgeAward: BadgeAward!
 }
 
-type BadgeTrack @entity {
-  "Name of Badge Track"
-  id: ID!
-  "Protocol Role enum"
-  protocolRole: String!
-  "Protocol"
-  protocol: Protocol!
-  "Badge Definitions included in this track"
-  badgeDefinitions: [BadgeDefinition!]! @derivedFrom(field: "badgeTrack")
+
+"""
+These metrics are referenced by the BadgeDefinitionFactory smart contract
+"""
+enum BadgeMetric {
+  INDEXER_SUBGRAPHS_INDEXED
+  INDEXER_QUERY_FEES_COLLECTED
+  INDEXER_ALLOCATIONS_OPENED
+  INDEXER_DELEGATOR_COUNT
+  DELEGATOR_INDEXERS
+  CURATOR_SUBGRAPHS_SIGNALLED
+  CURATOR_HOUSE_ODDS    "incremented when a curator is the first to signal on their own subgraph"
+  CURATOR_APE   "incremented with a curator curates on another user's subgraph within 100 blocks"
+  PUBLISHER_SIGNAL_ATTRACTED  "the amount of GRT signalled on a given Publisher's Subgraphs"
+  PUBLISHER_SUBGRAPHS_DEPLOYED
+  USER_BADGES_WON
 }
 
 """
-Additional details related to the badge
+BadgeDefinitions are created by the BadgeDefinitionManager smart contract.
+Subgraphs may have genesis BadgeDefinitions that are baked in for retroactive 
+drops.
 """
 type BadgeDefinition @entity {
-  "Name of the badge"
+  "Name of badge"
   id: ID!
-  "Description of the badge"
+  "Description of badge"
   description: String!
-  "IFTP link to the NFT badge"
-  image: String!
-  "Name of the artist responsible for NFT badge"
+  "Name of metric being tracked"
+  metric: BadgeMetric!
+  "Value that metric must reach in order for a badge to be awarded"
+  threshold: BigInt!
+  "Voting power acrued when badge is awarded"
   votingPower: BigInt!
   "Total count of awards"
   awardCount: Int!
-  "Track this badge definition belongs to"
-  badgeTrack: BadgeTrack!
   "Badges awarded with this definition"
   badgeAwards: [BadgeAward!]! @derivedFrom(field: "definition")
 }
 
-type BadgeTrackProgress @entity {
-  "Winner + badge track ID"
+"""
+BadgeMetric -> BadgeDefinitions tracking that metric
+"""
+type MetricConsumer @entity {
+  "BadgeMetric"
   id: ID!
-  "Winner"
-  winner: Winner!
-  "Maximum level achieved on this track"
-  level: Int!
-  "Progress number representing the metric being tracked"
-  progress: BigInt!
-  "Badge Track this progress refers to"
-  badgeTrack: BadgeTrack!
+  "BadgeDefinitions using this metric"
+  badgeDefinitions: [BadgeDefinition!]!
 }
 
 """
-Protocols indexed by this subgraph
+Saves progress along a metric for a User
 """
-type Protocol @entity {
-  "Name of the protocol"
+type Progress @entity {
+  "{User}-{BadgeMetric}"
   id: ID!
+  "User who has made this progress"
+  user: User!
+  "BadgeMetric being tracked"
+  metric: BadgeMetric!
+  "Current value of metric. Negative progress is not supported. value can only go up"
+  value: BigInt!
 }

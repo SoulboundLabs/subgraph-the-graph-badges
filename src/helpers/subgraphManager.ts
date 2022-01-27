@@ -2,32 +2,58 @@ import {
   Subgraph,
   Publisher,
   SubgraphDeployment,
-  SubgraphVersion
+  SubgraphVersion,
 } from "../../generated/schema";
 import { log, BigInt, Bytes } from "@graphprotocol/graph-ts";
-import { SubgraphMetadataUpdated, SubgraphPublished } from "../../generated/GNS/GNS";
-import { createOrLoadGraphAccount, BadgeAwardEventData, createOrLoadEntityStats, BadgeAwardEventMetadata } from "./models";
-import { zeroBI, BADGE_TRACK_DEVELOPER_SUBGRAPHS, BADGE_AWARD_METADATA_NAME_SUBGRAPH } from "./constants";
-import { incrementProgressForTrack } from "../Badges/standardTrackBadges";
+import {
+  SubgraphMetadataUpdated,
+  SubgraphPublished,
+} from "../../generated/GNS/GNS";
+import { createOrLoadGraphAccount, createOrLoadEntityStats } from "./models";
+import {
+  BADGE_AWARD_METADATA_NAME_SUBGRAPH,
+  BADGE_METRIC_PUBLISHER_SUBGRAPHS_DEPLOYED,
+  zeroBI,
+} from "./constants";
 import { beneficiaryIfLockWallet } from "../mappings/graphTokenLockWallet";
-
+import {
+  BadgeAwardEventData,
+  BadgeAwardEventMetadata,
+} from "../Emblem/emblemModels";
+import { incrementProgress } from "../Emblem/metricProgress";
 
 ////////////////      Public
 
 export function processSubgraphPublished(event: SubgraphPublished): void {
-  let publisherId = beneficiaryIfLockWallet(event.params.graphAccount.toHexString());
-  let subgraphId = publisherId.concat("-").concat(event.params.subgraphNumber.toString());
-  let metadata = new BadgeAwardEventMetadata(BADGE_AWARD_METADATA_NAME_SUBGRAPH, subgraphId);
+  let publisherId = beneficiaryIfLockWallet(
+    event.params.graphAccount.toHexString()
+  );
+  let subgraphId = publisherId
+    .concat("-")
+    .concat(event.params.subgraphNumber.toString());
+  let metadata = new BadgeAwardEventMetadata(
+    BADGE_AWARD_METADATA_NAME_SUBGRAPH,
+    subgraphId
+  );
   let eventData = new BadgeAwardEventData(event, [metadata]);
 
-  let subgraph = _createOrLoadSubgraph(subgraphId, publisherId, eventData.blockNumber);
-  let versionId = subgraphId.concat("-").concat(subgraph.versionCount.toString());
+  let subgraph = _createOrLoadSubgraph(
+    subgraphId,
+    publisherId,
+    eventData.blockNumber
+  );
+  let versionId = subgraphId
+    .concat("-")
+    .concat(subgraph.versionCount.toString());
   let versionNumber = subgraph.versionCount as i32;
   subgraph.versionCount = subgraph.versionCount.plus(BigInt.fromI32(1));
   subgraph.currentVersion = versionId;
   subgraph.save();
 
-  let deployment = _createOrLoadSubgraphDeployment(event.params.subgraphDeploymentID.toHexString(), eventData.blockNumber);
+  let deployment = _createOrLoadSubgraphDeployment(
+    event.params.subgraphDeploymentID.toHexString(),
+    eventData.blockNumber
+  );
 
   // Create Subgraph Version
   let subgraphVersion = new SubgraphVersion(versionId);
@@ -37,14 +63,24 @@ export function processSubgraphPublished(event: SubgraphPublished): void {
   subgraphVersion.metadataHash = event.params.versionMetadata;
   subgraphVersion.save();
 
-  incrementProgressForTrack(BADGE_TRACK_DEVELOPER_SUBGRAPHS, publisherId, eventData);
+  incrementProgress(
+    publisherId,
+    BADGE_METRIC_PUBLISHER_SUBGRAPHS_DEPLOYED,
+    eventData
+  );
 }
 
-export function processSubgraphMetadataUpdated(event: SubgraphMetadataUpdated): void {
+export function processSubgraphMetadataUpdated(
+  event: SubgraphMetadataUpdated
+): void {
   let publisherId = event.params.graphAccount.toHexString();
   let subgraphNumber = event.params.subgraphNumber.toString();
   let subgraphId = publisherId.concat("-").concat(subgraphNumber.toString());
-  let subgraph = _createOrLoadSubgraph(subgraphId, publisherId, event.block.timestamp);
+  let subgraph = _createOrLoadSubgraph(
+    subgraphId,
+    publisherId,
+    event.block.timestamp
+  );
 
   subgraph.metadataHash = event.params.subgraphMetadata;
   subgraph.save();
@@ -96,7 +132,6 @@ function _createOrLoadPublisher(publisherId: string): Publisher {
     publisher = new Publisher(publisherId);
     publisher.account = publisherId;
     publisher.subgraphCount = 0;
-    publisher.currentCurationTokens = zeroBI();
     publisher.save();
 
     let entityStats = createOrLoadEntityStats();
