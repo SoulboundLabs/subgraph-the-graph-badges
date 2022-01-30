@@ -181,21 +181,21 @@ export function generateGenesisBadgeDefinitions(): void {
 
   createOrLoadBadgeDefinition(
     "Beacon I",
-    "Attract 1k GRT of SIgnal from Curators",
+    "Attract 1k GRT of Signal from Curators",
     BADGE_METRIC_PUBLISHER_SIGNAL_ATTRACTED,
     BigInt.fromString("1000000000000000000000"),
     BigInt.fromI32(1)
   );
   createOrLoadBadgeDefinition(
     "Beacon II",
-    "Attract 10k GRT of SIgnal from Curators",
+    "Attract 10k GRT of Signal from Curators",
     BADGE_METRIC_PUBLISHER_SIGNAL_ATTRACTED,
     BigInt.fromString("10000000000000000000000"),
     BigInt.fromI32(2)
   );
   createOrLoadBadgeDefinition(
     "Beacon III",
-    "Attract 30k GRT of SIgnal from Curators",
+    "Attract 30k GRT of Signal from Curators",
     BADGE_METRIC_PUBLISHER_SIGNAL_ATTRACTED,
     BigInt.fromString("30000000000000000000000"),
     BigInt.fromI32(3)
