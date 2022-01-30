@@ -17,7 +17,7 @@ dataSources:
       language: wasm/assemblyscript
       file: ./src/mappings/staking.ts
       entities:
-        - BadgeAward
+        - EarnedBadge
         - Indexer
         - Delegator
       abis:
@@ -79,7 +79,7 @@ dataSources:
         - Winner
         - NameSignal
         - BadgeDefinition
-        - BadgeAward
+        - EarnedBadge
       abis:
         - name: GNS
           file: ./node_modules/@graphprotocol/contracts/dist/abis/GNS.json

@@ -5,8 +5,8 @@ import {
   StakeDelegatedLocked,
 } from "../../generated/Staking/Staking";
 import {
-  BadgeAwardEventData,
-  BadgeAwardEventMetadata,
+  EarnedBadgeEventData,
+  EarnedBadgeEventMetadata,
 } from "../Emblem/emblemModels";
 import { incrementProgress } from "../Emblem/metricProgress";
 import {
@@ -31,17 +31,17 @@ export function processStakeDelegated(event: StakeDelegated): void {
   );
   let indexerId = beneficiaryIfLockWallet(event.params.indexer.toHexString());
   let tokens = event.params.tokens;
-  let metadata: Array<BadgeAwardEventMetadata> = [
-    new BadgeAwardEventMetadata(
+  let metadata: Array<EarnedBadgeEventMetadata> = [
+    new EarnedBadgeEventMetadata(
       BADGE_AWARD_METADATA_NAME_DELEGATOR,
       delegatorId
     ),
-    new BadgeAwardEventMetadata(
+    new EarnedBadgeEventMetadata(
       BADGE_AWARD_METADATA_NAME_TOKENS,
       tokens.toString()
     ),
   ];
-  let eventData = new BadgeAwardEventData(event, metadata);
+  let eventData = new EarnedBadgeEventData(event, metadata);
   _processStakeDelegated(delegatorId, indexerId, tokens, eventData);
 }
 
@@ -51,7 +51,7 @@ export function processStakeDelegatedLocked(event: StakeDelegatedLocked): void {
   );
   let indexerId = beneficiaryIfLockWallet(event.params.indexer.toHexString());
   let tokens = event.params.tokens;
-  let eventData = new BadgeAwardEventData(event, null);
+  let eventData = new EarnedBadgeEventData(event, null);
   _processStakeDelegatedLocked(delegatorId, indexerId, tokens, eventData);
 }
 
@@ -61,7 +61,7 @@ function _processStakeDelegated(
   delegatorId: string,
   indexerId: string,
   tokens: BigInt,
-  eventData: BadgeAwardEventData
+  eventData: EarnedBadgeEventData
 ): void {
   createOrLoadDelegator(delegatorId);
   let indexer = createOrLoadIndexer(indexerId, eventData);
@@ -92,7 +92,7 @@ function _processStakeDelegatedLocked(
   delegatorId: string,
   indexerId: string,
   tokens: BigInt,
-  eventData: BadgeAwardEventData
+  eventData: EarnedBadgeEventData
 ): void {
   let indexer = createOrLoadIndexer(indexerId, eventData);
   indexer.delegatedTokens = indexer.delegatedTokens.minus(tokens);
@@ -131,7 +131,7 @@ export function createOrLoadDelegator(id: string): Delegator {
 export function createOrLoadDelegatedStake(
   delegatorId: string,
   indexerId: string,
-  eventData: BadgeAwardEventData
+  eventData: EarnedBadgeEventData
 ): DelegatedStake {
   let id = delegatorId.concat("-").concat(indexerId);
   let delegatedStake = DelegatedStake.load(id);

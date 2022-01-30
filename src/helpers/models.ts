@@ -1,5 +1,5 @@
 import { EntityStats, GraphAccount, Protocol } from "../../generated/schema";
-import { createOrLoadUser } from "../Emblem/emblemModels";
+import { createOrLoadBadgeUser } from "../Emblem/emblemModels";
 import { PROTOCOL_NAME_THE_GRAPH, zeroBI } from "./constants";
 
 export function createOrLoadEntityStats(): EntityStats {
@@ -7,13 +7,14 @@ export function createOrLoadEntityStats(): EntityStats {
 
   if (entityStats == null) {
     entityStats = new EntityStats("1");
-    entityStats.userCount = 0;
     entityStats.indexerCount = 0;
     entityStats.delegatorCount = 0;
     entityStats.curatorCount = 0;
     entityStats.publisherCount = 0;
-    entityStats.awardCount = 0;
     entityStats.tokenLockWalletCount = 0;
+    entityStats.earnedBadgeCount = 0;
+    entityStats.badgeWinnerCount = 0;
+
     entityStats.save();
   }
 
@@ -26,9 +27,9 @@ export function createOrLoadGraphAccount(address: string): GraphAccount {
   let graphAccount = GraphAccount.load(address);
 
   if (graphAccount == null) {
-    createOrLoadUser(address);
+    createOrLoadBadgeUser(address);
     graphAccount = new GraphAccount(address);
-    graphAccount.user = address;
+    graphAccount.badgeUser = address;
     graphAccount.awardCount = 0;
 
     graphAccount.save();

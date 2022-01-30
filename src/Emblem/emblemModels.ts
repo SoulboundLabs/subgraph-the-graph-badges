@@ -1,27 +1,25 @@
 import {
   BadgeDefinition,
-  User,
-  BadgeAward,
-  BadgeAwardMetadata,
+  BadgeUser,
+  BadgeWinner,
+  EarnedBadge,
+  EarnedBadgeMetadata,
   MetricConsumer,
 } from "../../generated/schema";
 import { zeroBI } from "../helpers/constants";
 import { createOrLoadEntityStats } from "../helpers/models";
 import { BigInt, ethereum } from "@graphprotocol/graph-ts/index";
+import { log } from "@graphprotocol/graph-ts";
 
-export function createOrLoadUser(address: string): User {
-  let user = User.load(address);
+export function createOrLoadBadgeUser(address: string): BadgeUser {
+  let badgeUser = BadgeUser.load(address);
 
-  if (user == null) {
-    user = new User(address);
-    user.awardCount = 0;
-    user.mintedAwardCount = 0;
-    user.votingPower = zeroBI();
-
-    user.save();
+  if (badgeUser == null) {
+    badgeUser = new BadgeUser(address);
+    badgeUser.save();
   }
 
-  return user as User;
+  return badgeUser as BadgeUser;
 }
 
 export function createOrLoadBadgeDefinition(
@@ -29,7 +27,8 @@ export function createOrLoadBadgeDefinition(
   description: string,
   metric: string,
   threshold: BigInt,
-  votingPower: BigInt
+  votingPower: BigInt,
+  ipfsURI: string
 ): BadgeDefinition {
   let badgeDefinition = BadgeDefinition.load(name);
 
@@ -39,7 +38,8 @@ export function createOrLoadBadgeDefinition(
     badgeDefinition.metric = metric;
     badgeDefinition.threshold = threshold;
     badgeDefinition.votingPower = votingPower;
-    badgeDefinition.awardCount = 0;
+    badgeDefinition.ipfsURI = ipfsURI;
+    badgeDefinition.earnedBadgeCount = 0;
 
     badgeDefinition.save();
 
@@ -63,53 +63,75 @@ function createOrLoadMetricConsumer(metric: string): MetricConsumer {
   return metricConsumer as MetricConsumer;
 }
 
-export function createBadgeAward(
+export function createEarnedBadge(
   badgeDefinition: BadgeDefinition,
-  user: User,
-  eventData: BadgeAwardEventData
+  badgeUserId: string,
+  eventData: EarnedBadgeEventData
 ): void {
-  let badgeId = badgeDefinition.id.concat("-").concat(user.id);
-  let badgeAward = BadgeAward.load(badgeId);
+  let badgeId = badgeDefinition.id.concat("-").concat(badgeUserId);
+  let earnedBadge = EarnedBadge.load(badgeId);
 
-  if (badgeAward == null) {
-    // increment global, badgeDefinition, and user awardCounts
+  if (earnedBadge == null) {
+    // increment global, badgeDefinition, and badgeWinner earnedBadgeCounts
     let entityStats = createOrLoadEntityStats();
-    entityStats.awardCount = entityStats.awardCount + 1;
+    entityStats.earnedBadgeCount = entityStats.earnedBadgeCount + 1;
     entityStats.save();
-    badgeDefinition.awardCount = badgeDefinition.awardCount + 1;
+    badgeDefinition.earnedBadgeCount = badgeDefinition.earnedBadgeCount + 1;
     badgeDefinition.save();
-    user.awardCount = user.awardCount + 1;
-    user.votingPower = user.votingPower.plus(badgeDefinition.votingPower);
-    user.save();
 
-    badgeAward = new BadgeAward(badgeId);
-    badgeAward.user = user.id;
-    badgeAward.definition = badgeDefinition.id;
-    badgeAward.blockAwarded = eventData.blockNumber;
-    badgeAward.transactionHash = eventData.transactionHash;
-    badgeAward.timestampAwarded = eventData.timestamp;
-    badgeAward.globalAwardNumber = entityStats.awardCount;
-    badgeAward.awardNumber = badgeDefinition.awardCount;
-    badgeAward.save();
+    let badgeWinner = _createOrLoadBadgeWinner(badgeUserId);
+    badgeWinner.earnedBadgeCount = badgeWinner.earnedBadgeCount + 1;
+    badgeWinner.votingPower = badgeWinner.votingPower.plus(
+      badgeDefinition.votingPower
+    );
+    badgeWinner.save();
+
+    earnedBadge = new EarnedBadge(badgeId);
+    earnedBadge.badgeWinner = badgeWinner.id;
+    earnedBadge.definition = badgeDefinition.id;
+    earnedBadge.blockAwarded = eventData.blockNumber;
+    earnedBadge.transactionHash = eventData.transactionHash;
+    earnedBadge.timestampAwarded = eventData.timestamp;
+    earnedBadge.globalAwardNumber = entityStats.earnedBadgeCount;
+    earnedBadge.awardNumber = badgeDefinition.earnedBadgeCount;
+    earnedBadge.save();
 
     // create metadata entities
     for (let i = 0; i < eventData.metadata.length; i++) {
-      let metadata = eventData.metadata[i] as BadgeAwardEventMetadata;
-      _createOrLoadBadgeAwardMetaData(badgeId, metadata.name, metadata.value);
+      let metadata = eventData.metadata[i] as EarnedBadgeEventMetadata;
+      _createOrLoadEarnedBadgeMetaData(badgeId, metadata.name, metadata.value);
     }
   }
 }
 
-function _createOrLoadBadgeAwardMetaData(
-  badgeAwardId: string,
+function _createOrLoadBadgeWinner(userId: string): BadgeWinner {
+  let winner = BadgeWinner.load(userId);
+
+  if (winner == null) {
+    winner = new BadgeWinner(userId);
+    winner.earnedBadgeCount = 0;
+    winner.mintedAwardCount = 0;
+    winner.votingPower = zeroBI();
+    winner.save();
+
+    let entityStats = createOrLoadEntityStats();
+    entityStats.badgeWinnerCount = entityStats.badgeWinnerCount + 1;
+    entityStats.save();
+  }
+
+  return winner as BadgeWinner;
+}
+
+function _createOrLoadEarnedBadgeMetaData(
+  earnedBadgeId: string,
   name: string,
   value: string
 ): void {
-  let metadataId = badgeAwardId.concat("-").concat(name);
-  let metadata = BadgeAwardMetadata.load(metadataId);
+  let metadataId = earnedBadgeId.concat("-").concat(name);
+  let metadata = EarnedBadgeMetadata.load(metadataId);
   if (metadata == null) {
-    metadata = new BadgeAwardMetadata(metadataId);
-    metadata.badgeAward = badgeAwardId;
+    metadata = new EarnedBadgeMetadata(metadataId);
+    metadata.earnedBadge = earnedBadgeId;
     metadata.name = name;
     metadata.value = value;
     metadata.save();
@@ -117,7 +139,7 @@ function _createOrLoadBadgeAwardMetaData(
 }
 
 // custom metadata from the event
-export class BadgeAwardEventMetadata {
+export class EarnedBadgeEventMetadata {
   readonly name: string;
   readonly value: string;
 
@@ -128,12 +150,15 @@ export class BadgeAwardEventMetadata {
 }
 
 // standard metadata from event/transaction
-export class BadgeAwardEventData {
+export class EarnedBadgeEventData {
   readonly blockNumber: BigInt;
   readonly transactionHash: string;
   readonly timestamp: BigInt;
-  readonly metadata: Array<BadgeAwardEventMetadata>;
-  constructor(event: ethereum.Event, metadata: Array<BadgeAwardEventMetadata>) {
+  readonly metadata: Array<EarnedBadgeEventMetadata>;
+  constructor(
+    event: ethereum.Event,
+    metadata: Array<EarnedBadgeEventMetadata>
+  ) {
     this.blockNumber = event.block.number;
     this.transactionHash = event.transaction.hash.toHexString();
     this.timestamp = event.block.timestamp;

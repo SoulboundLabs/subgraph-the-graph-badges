@@ -1,50 +1,46 @@
 import {
-  User,
+  BadgeUser,
   Progress,
   MetricConsumer,
   BadgeDefinition,
 } from "../../generated/schema";
 import { zeroBI } from "../helpers/constants";
 import { log, BigInt } from "@graphprotocol/graph-ts";
-import {
-  BadgeAwardEventData,
-  createBadgeAward,
-  createOrLoadUser,
-} from "./emblemModels";
+import { EarnedBadgeEventData, createEarnedBadge } from "./emblemModels";
 
 export function incrementProgress(
-  user: string,
+  badgeUser: string,
   metric: string,
-  eventData: BadgeAwardEventData
+  eventData: EarnedBadgeEventData
 ): void {
-  let progress = _createOrLoadProgress(user, metric);
+  let progress = _createOrLoadProgress(badgeUser, metric);
   updateProgress(progress, progress.value.plus(BigInt.fromI32(1)), eventData);
 }
 
 export function addToProgress(
-  user: string,
+  badgeUser: string,
   metric: string,
   value: BigInt,
-  eventData: BadgeAwardEventData
+  eventData: EarnedBadgeEventData
 ): void {
-  let progress = _createOrLoadProgress(user, metric);
+  let progress = _createOrLoadProgress(badgeUser, metric);
   updateProgress(progress, progress.value.plus(value), eventData);
 }
 
 export function subtractFromProgress(
-  user: string,
+  badgeUser: string,
   metric: string,
   value: BigInt,
-  eventData: BadgeAwardEventData
+  eventData: EarnedBadgeEventData
 ): void {
-  let progress = _createOrLoadProgress(user, metric);
+  let progress = _createOrLoadProgress(badgeUser, metric);
   updateProgress(progress, progress.value.minus(value), eventData);
 }
 
 function updateProgress(
   progress: Progress,
   updatedValue: BigInt,
-  eventData: BadgeAwardEventData
+  eventData: EarnedBadgeEventData
 ): void {
   if (updatedValue.gt(progress.value)) {
     // iterate through BadgeDefinitions tracking this metric
@@ -53,13 +49,9 @@ function updateProgress(
       let badgeDefinition = BadgeDefinition.load(
         badgeDefinitions[i]
       ) as BadgeDefinition;
-      _awardBadgeIfNeeded(
-        badgeDefinition,
-        progress.value,
-        updatedValue,
-        createOrLoadUser(progress.user),
-        eventData
-      );
+      if (updatedValue.ge(badgeDefinition.threshold)) {
+        createEarnedBadge(badgeDefinition, progress.badgeUser, eventData);
+      }
     }
 
     progress.value = updatedValue;
@@ -67,14 +59,14 @@ function updateProgress(
   }
 }
 
-function _createOrLoadProgress(user: string, metric: string): Progress {
-  let id = user.concat("-").concat(metric);
+function _createOrLoadProgress(badgeUser: string, metric: string): Progress {
+  let id = badgeUser.concat("-").concat(metric);
   let progress = Progress.load(id);
 
   if (progress == null) {
     progress = new Progress(id);
     progress.metric = metric;
-    progress.user = user;
+    progress.badgeUser = badgeUser;
     progress.value = zeroBI();
     progress.save();
   }
@@ -92,19 +84,4 @@ function _badgeDefinitionsForMetric(metric: string): string[] {
   }
 
   return metricConsumer.badgeDefinitions;
-}
-
-function _awardBadgeIfNeeded(
-  badgeDefinition: BadgeDefinition,
-  oldValue: BigInt,
-  updatedValue: BigInt,
-  user: User,
-  eventData: BadgeAwardEventData
-): void {
-  if (
-    oldValue.lt(badgeDefinition.threshold) &&
-    updatedValue.ge(badgeDefinition.threshold)
-  ) {
-    createBadgeAward(badgeDefinition, user, eventData);
-  }
 }

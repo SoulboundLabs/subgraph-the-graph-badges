@@ -20,8 +20,8 @@ import {
 import { log } from "@graphprotocol/graph-ts";
 import { beneficiaryIfLockWallet } from "../mappings/graphTokenLockWallet";
 import {
-  BadgeAwardEventData,
-  BadgeAwardEventMetadata,
+  EarnedBadgeEventData,
+  EarnedBadgeEventMetadata,
 } from "../Emblem/emblemModels";
 import {
   addToProgress,
@@ -64,7 +64,7 @@ export function processCurationBurn(event: NSignalBurned): void {
   let nSignalBurnt = event.params.nSignalBurnt;
   let vSignalBurnt = event.params.vSignalBurnt.toBigDecimal();
   let tokensReceived = event.params.tokensReceived;
-  let eventData = new BadgeAwardEventData(event, null);
+  let eventData = new EarnedBadgeEventData(event, null);
   _processCurationBurn(
     subgraphOwner,
     subgraphNumber,
@@ -88,18 +88,18 @@ function _processCurationSignal(
   event: NSignalMinted
 ): void {
   let subgraphId = subgraphOwner.concat("-").concat(subgraphNumber);
-  let metadata: Array<BadgeAwardEventMetadata> = [
-    new BadgeAwardEventMetadata(
+  let metadata: Array<EarnedBadgeEventMetadata> = [
+    new EarnedBadgeEventMetadata(
       BADGE_AWARD_METADATA_NAME_TOKENS,
       tokensDeposited.toString()
     ),
-    new BadgeAwardEventMetadata(BADGE_AWARD_METADATA_NAME_CURATOR, curatorId),
-    new BadgeAwardEventMetadata(
+    new EarnedBadgeEventMetadata(BADGE_AWARD_METADATA_NAME_CURATOR, curatorId),
+    new EarnedBadgeEventMetadata(
       BADGE_AWARD_METADATA_NAME_SUBGRAPH,
       subgraphOwner.concat("-").concat(subgraphNumber)
     ),
   ];
-  let eventData = new BadgeAwardEventData(event, metadata);
+  let eventData = new EarnedBadgeEventData(event, metadata);
   let nameSignal = createOrLoadNameSignal(curatorId, subgraphId, eventData);
 
   let isNameSignalBecomingActive =
@@ -171,7 +171,7 @@ function _processCurationBurn(
   nSignalBurnt: BigInt,
   vSignalBurnt: BigDecimal,
   tokensReceived: BigInt,
-  eventData: BadgeAwardEventData
+  eventData: EarnedBadgeEventData
 ): void {
   let subgraphId = subgraphOwner.concat("-").concat(subgraphNumber);
   let nameSignal = createOrLoadNameSignal(curatorId, subgraphId, eventData);
@@ -205,7 +205,7 @@ function _processCurationBurn(
 
 function _createOrLoadCurator(
   id: string,
-  eventData: BadgeAwardEventData
+  eventData: EarnedBadgeEventData
 ): Curator {
   let curator = Curator.load(id);
 
@@ -227,7 +227,7 @@ function _createOrLoadCurator(
 export function createOrLoadNameSignal(
   curatorId: string,
   subgraphId: string,
-  eventData: BadgeAwardEventData
+  eventData: EarnedBadgeEventData
 ): NameSignal {
   let nameSignalID = curatorId.concat("-").concat(subgraphId);
   let nameSignal = NameSignal.load(nameSignalID);

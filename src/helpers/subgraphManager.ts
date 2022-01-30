@@ -17,8 +17,8 @@ import {
 } from "./constants";
 import { beneficiaryIfLockWallet } from "../mappings/graphTokenLockWallet";
 import {
-  BadgeAwardEventData,
-  BadgeAwardEventMetadata,
+  EarnedBadgeEventData,
+  EarnedBadgeEventMetadata,
 } from "../Emblem/emblemModels";
 import { incrementProgress } from "../Emblem/metricProgress";
 
@@ -31,11 +31,11 @@ export function processSubgraphPublished(event: SubgraphPublished): void {
   let subgraphId = publisherId
     .concat("-")
     .concat(event.params.subgraphNumber.toString());
-  let metadata = new BadgeAwardEventMetadata(
+  let metadata = new EarnedBadgeEventMetadata(
     BADGE_AWARD_METADATA_NAME_SUBGRAPH,
     subgraphId
   );
-  let eventData = new BadgeAwardEventData(event, [metadata]);
+  let eventData = new EarnedBadgeEventData(event, [metadata]);
 
   let subgraph = _createOrLoadSubgraph(
     subgraphId,
