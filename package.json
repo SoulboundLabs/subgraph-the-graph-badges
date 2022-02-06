@@ -33,7 +33,7 @@
   },
   "dependencies": {
     "@graphprotocol/contracts": "^1.2.0",
-    "@graphprotocol/graph-ts": "^0.20.0",
+    "@graphprotocol/graph-ts": "^0.22.0",
     "babel-polyfill": "^6.26.0",
     "babel-register": "^6.26.0",
     "mustache": "^4.2.0",
