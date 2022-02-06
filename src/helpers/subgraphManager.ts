@@ -1,26 +1,26 @@
-import {
-  Subgraph,
-  Publisher,
-  SubgraphDeployment,
-  SubgraphVersion,
-} from "../../generated/schema";
-import { log, BigInt, Bytes } from "@graphprotocol/graph-ts";
+import { BigInt, Bytes, log } from "@graphprotocol/graph-ts";
 import {
   SubgraphMetadataUpdated,
   SubgraphPublished,
 } from "../../generated/GNS/GNS";
-import { createOrLoadGraphAccount, createOrLoadEntityStats } from "./models";
 import {
-  BADGE_AWARD_METADATA_NAME_SUBGRAPH,
-  BADGE_METRIC_PUBLISHER_SUBGRAPHS_DEPLOYED,
-  zeroBI,
-} from "./constants";
-import { beneficiaryIfLockWallet } from "../mappings/graphTokenLockWallet";
+  Publisher,
+  Subgraph,
+  SubgraphDeployment,
+  SubgraphVersion,
+} from "../../generated/schema";
 import {
   EarnedBadgeEventData,
   EarnedBadgeEventMetadata,
 } from "../Emblem/emblemModels";
 import { incrementProgress } from "../Emblem/metricProgress";
+import { beneficiaryIfLockWallet } from "../mappings/graphTokenLockWallet";
+import {
+  BADGE_AWARD_METADATA_NAME_SUBGRAPH,
+  BADGE_METRIC_PUBLISHER_SUBGRAPHS_DEPLOYED,
+  zeroBI,
+} from "./constants";
+import { createOrLoadEntityStats, createOrLoadGraphAccount } from "./models";
 
 ////////////////      Public
 
@@ -45,7 +45,7 @@ export function processSubgraphPublished(event: SubgraphPublished): void {
   let versionId = subgraphId
     .concat("-")
     .concat(subgraph.versionCount.toString());
-  let versionNumber = subgraph.versionCount as i32;
+  let versionNumber = subgraph.versionCount;
   subgraph.versionCount = subgraph.versionCount.plus(BigInt.fromI32(1));
   subgraph.currentVersion = versionId;
   subgraph.save();

@@ -1,24 +1,6 @@
-import { NSignalMinted, NSignalBurned } from "../../generated/GNS/GNS";
 import { BigDecimal, BigInt } from "@graphprotocol/graph-ts/index";
-import {
-  Curator,
-  NameSignal,
-  Subgraph,
-  Publisher,
-} from "../../generated/schema";
-import { createOrLoadEntityStats } from "./models";
-import {
-  zeroBD,
-  BADGE_AWARD_METADATA_NAME_CURATOR,
-  BADGE_AWARD_METADATA_NAME_TOKENS,
-  BADGE_AWARD_METADATA_NAME_SUBGRAPH,
-  BADGE_METRIC_CURATOR_SUBGRAPHS_SIGNALLED,
-  BADGE_METRIC_CURATOR_APE,
-  BADGE_METRIC_CURATOR_HOUSE_ODDS,
-  BADGE_METRIC_PUBLISHER_SIGNAL_ATTRACTED,
-} from "./constants";
-import { log } from "@graphprotocol/graph-ts";
-import { beneficiaryIfLockWallet } from "../mappings/graphTokenLockWallet";
+import { NSignalBurned, NSignalMinted } from "../../generated/GNS/GNS";
+import { Curator, NameSignal, Subgraph } from "../../generated/schema";
 import {
   EarnedBadgeEventData,
   EarnedBadgeEventMetadata,
@@ -28,6 +10,18 @@ import {
   incrementProgress,
   subtractFromProgress,
 } from "../Emblem/metricProgress";
+import { beneficiaryIfLockWallet } from "../mappings/graphTokenLockWallet";
+import {
+  BADGE_AWARD_METADATA_NAME_CURATOR,
+  BADGE_AWARD_METADATA_NAME_SUBGRAPH,
+  BADGE_AWARD_METADATA_NAME_TOKENS,
+  BADGE_METRIC_CURATOR_APE,
+  BADGE_METRIC_CURATOR_HOUSE_ODDS,
+  BADGE_METRIC_CURATOR_SUBGRAPHS_SIGNALLED,
+  BADGE_METRIC_PUBLISHER_SIGNAL_ATTRACTED,
+  zeroBD,
+} from "./constants";
+import { createOrLoadEntityStats } from "./models";
 
 ////////////////      Public
 
@@ -64,7 +58,7 @@ export function processCurationBurn(event: NSignalBurned): void {
   let nSignalBurnt = event.params.nSignalBurnt;
   let vSignalBurnt = event.params.vSignalBurnt.toBigDecimal();
   let tokensReceived = event.params.tokensReceived;
-  let eventData = new EarnedBadgeEventData(event, null);
+  let eventData = new EarnedBadgeEventData(event, []);
   _processCurationBurn(
     subgraphOwner,
     subgraphNumber,

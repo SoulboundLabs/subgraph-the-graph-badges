@@ -220,7 +220,7 @@ type SubgraphVersion @entity {
   "Subgraph deployment of this version"
   subgraphDeployment: SubgraphDeployment!
   "Version number"
-  version: Int!
+  version: BigInt!
   "Subgraph version metadata content address"
   metadataHash: Bytes!
 }
@@ -248,8 +248,6 @@ type Protocol @entity {
   "Name of the protocol"
   id: ID!
 }
-
-
 
 ########################
 #### Badge Entities ####
@@ -311,7 +309,6 @@ type EarnedBadge @entity {
   metadata: [EarnedBadgeMetadata!]! @derivedFrom(field: "earnedBadge")
 }
 
-
 """
 These metrics can be referenced by a BadgeDefinitionFactory smart contract
 """
@@ -322,16 +319,19 @@ enum BadgeMetric {
   INDEXER_DELEGATOR_COUNT
   DELEGATOR_INDEXERS
   CURATOR_SUBGRAPHS_SIGNALLED
-  CURATOR_HOUSE_ODDS    "incremented when a curator is the first to signal on their own subgraph"
-  CURATOR_APE   "incremented with a curator curates on another badgeWinner's subgraph within 100 blocks"
-  PUBLISHER_SIGNAL_ATTRACTED  "the amount of GRT signalled on a given Publisher's Subgraphs"
+  CURATOR_HOUSE_ODDS
+  "incremented when a curator is the first to signal on their own subgraph"
+  CURATOR_APE
+  "incremented with a curator curates on another badgeWinner's subgraph within 100 blocks"
+  PUBLISHER_SIGNAL_ATTRACTED
+  "the amount of GRT signalled on a given Publisher's Subgraphs"
   PUBLISHER_SUBGRAPHS_DEPLOYED
   USER_BADGES_WON
 }
 
 """
 BadgeDefinitions are created by the BadgeDefinitionManager smart contract.
-Subgraphs may also have genesis BadgeDefinitions that are baked in for retroactive 
+Subgraphs may also have genesis BadgeDefinitions that are baked in for retroactive
 drops.
 """
 type BadgeDefinition @entity {
@@ -352,7 +352,6 @@ type BadgeDefinition @entity {
   "Badges awarded with this definition"
   earnedBadges: [EarnedBadge!]! @derivedFrom(field: "definition")
 }
-
 
 ################################
 #### Internal Badge Entities ###
@@ -381,7 +380,6 @@ type MetricConsumer @entity {
   "BadgeDefinitions using this metric"
   badgeDefinitions: [BadgeDefinition!]!
 }
-
 
 ################################
 # These are only required by Emblem frontend

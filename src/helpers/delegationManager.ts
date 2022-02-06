@@ -51,7 +51,7 @@ export function processStakeDelegatedLocked(event: StakeDelegatedLocked): void {
   );
   let indexerId = beneficiaryIfLockWallet(event.params.indexer.toHexString());
   let tokens = event.params.tokens;
-  let eventData = new EarnedBadgeEventData(event, null);
+  let eventData = new EarnedBadgeEventData(event, []);
   _processStakeDelegatedLocked(delegatorId, indexerId, tokens, eventData);
 }
 

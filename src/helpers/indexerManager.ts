@@ -1,36 +1,36 @@
+import { log } from "@graphprotocol/graph-ts";
+import { BigInt } from "@graphprotocol/graph-ts/index";
+import { RewardsAssigned } from "../../generated/RewardsManager/RewardsManager";
 import {
   Allocation,
   Indexer,
   SubgraphAllocation,
 } from "../../generated/schema";
 import {
-  createOrLoadEntityStats,
-  createOrLoadGraphAccount,
-} from "../helpers/models";
-import {
   AllocationClosed,
-  AllocationCreated,
-  RebateClaimed,
-  DelegationParametersUpdated,
   AllocationCollected,
+  AllocationCreated,
+  DelegationParametersUpdated,
+  RebateClaimed,
 } from "../../generated/Staking/Staking";
-import { RewardsAssigned } from "../../generated/RewardsManager/RewardsManager";
-import { BigInt } from "@graphprotocol/graph-ts/index";
-import { log } from "@graphprotocol/graph-ts";
-import {
-  zeroBI,
-  BADGE_AWARD_METADATA_NAME_TOKENS,
-  BADGE_AWARD_METADATA_NAME_SUBGRAPH_DEPLOYMENT,
-  BADGE_METRIC_INDEXER_ALLOCATIONS_OPENED,
-  BADGE_METRIC_INDEXER_SUBGRAPHS_INDEXED,
-  BADGE_METRIC_INDEXER_QUERY_FEES_COLLECTED,
-} from "./constants";
-import { beneficiaryIfLockWallet } from "../mappings/graphTokenLockWallet";
 import {
   EarnedBadgeEventData,
   EarnedBadgeEventMetadata,
 } from "../Emblem/emblemModels";
 import { incrementProgress } from "../Emblem/metricProgress";
+import {
+  createOrLoadEntityStats,
+  createOrLoadGraphAccount,
+} from "../helpers/models";
+import { beneficiaryIfLockWallet } from "../mappings/graphTokenLockWallet";
+import {
+  BADGE_AWARD_METADATA_NAME_SUBGRAPH_DEPLOYMENT,
+  BADGE_AWARD_METADATA_NAME_TOKENS,
+  BADGE_METRIC_INDEXER_ALLOCATIONS_OPENED,
+  BADGE_METRIC_INDEXER_QUERY_FEES_COLLECTED,
+  BADGE_METRIC_INDEXER_SUBGRAPHS_INDEXED,
+  zeroBI,
+} from "./constants";
 
 ////////////////      Public
 
@@ -47,7 +47,7 @@ export function processAllocationCreated(event: AllocationCreated): void {
 }
 
 export function processAllocationClosed(event: AllocationClosed): void {
-  let eventData = new EarnedBadgeEventData(event, null);
+  let eventData = new EarnedBadgeEventData(event, []);
   _processAllocationClosed(
     event.params.allocationID.toHexString(),
     event.params.subgraphDeploymentID.toHex(),
@@ -57,7 +57,7 @@ export function processAllocationClosed(event: AllocationClosed): void {
 }
 
 export function processAllocationCollected(event: AllocationCollected): void {
-  let eventData = new EarnedBadgeEventData(event, null);
+  let eventData = new EarnedBadgeEventData(event, []);
   let indexerId = beneficiaryIfLockWallet(event.params.indexer.toHexString());
   _processAllocationCollected(indexerId, event.params.rebateFees, eventData);
 }
@@ -71,7 +71,7 @@ export function processDelegationParametersUpdated(
   event: DelegationParametersUpdated
 ): void {
   let indexerId = beneficiaryIfLockWallet(event.params.indexer.toHexString());
-  let eventData = new EarnedBadgeEventData(event, null);
+  let eventData = new EarnedBadgeEventData(event, []);
   _processDelegationParametersUpdated(
     indexerId,
     event.params.indexingRewardCut.toI32(),
@@ -82,7 +82,7 @@ export function processDelegationParametersUpdated(
 export function processRewardsAssigned(event: RewardsAssigned): void {
   let indexerId = beneficiaryIfLockWallet(event.params.indexer.toHexString());
   let amount = event.params.amount;
-  let eventData = new EarnedBadgeEventData(event, null);
+  let eventData = new EarnedBadgeEventData(event, []);
   _processRewardsAssigned(indexerId, amount, eventData);
 }
 
