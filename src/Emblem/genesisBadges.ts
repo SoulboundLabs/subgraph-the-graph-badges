@@ -19,7 +19,7 @@ export function generateGenesisBadgeDefinitions(): void {
   //////// INDEXER BADGES ////////
 
   createOrLoadBadgeDefinition(
-    "Subgraph Alchemist I",
+    "Subgraph Alchemist",
     "Index 1 Subgraph",
     BADGE_METRIC_INDEXER_SUBGRAPHS_INDEXED,
     BigInt.fromI32(1),
@@ -61,7 +61,7 @@ export function generateGenesisBadgeDefinitions(): void {
   );
 
   createOrLoadBadgeDefinition(
-    "Nexus I",
+    "Nexus",
     "Open 1 Allocation",
     BADGE_METRIC_INDEXER_ALLOCATIONS_OPENED,
     BigInt.fromI32(1),
@@ -86,7 +86,7 @@ export function generateGenesisBadgeDefinitions(): void {
   );
 
   createOrLoadBadgeDefinition(
-    "Allegiance I",
+    "Allegiance",
     "Receieve GRT from 1 Delegator",
     BADGE_METRIC_INDEXER_DELEGATOR_COUNT,
     BigInt.fromI32(1),
@@ -218,7 +218,7 @@ export function generateGenesisBadgeDefinitions(): void {
   );
 
   createOrLoadBadgeDefinition(
-    "Subgraph Smith I",
+    "Subgraph Smith",
     "Deploy 1 Subgraph to the Decentralized Network",
     BADGE_METRIC_PUBLISHER_SUBGRAPHS_DEPLOYED,
     BigInt.fromI32(1),
