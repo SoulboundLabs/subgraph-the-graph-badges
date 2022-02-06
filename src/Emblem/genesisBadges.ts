@@ -1,16 +1,16 @@
 import { BigInt } from "@graphprotocol/graph-ts";
 import { createOrLoadBadgeDefinition } from "../Emblem/emblemModels";
 import {
-  BADGE_METRIC_CURATOR_SUBGRAPHS_SIGNALLED,
-  BADGE_METRIC_PUBLISHER_SUBGRAPHS_DEPLOYED,
-  BADGE_METRIC_PUBLISHER_SIGNAL_ATTRACTED,
-  BADGE_METRIC_CURATOR_HOUSE_ODDS,
-  BADGE_METRIC_INDEXER_SUBGRAPHS_INDEXED,
   BADGE_METRIC_CURATOR_APE,
-  BADGE_METRIC_INDEXER_QUERY_FEES_COLLECTED,
+  BADGE_METRIC_CURATOR_HOUSE_ODDS,
+  BADGE_METRIC_CURATOR_SUBGRAPHS_SIGNALLED,
+  BADGE_METRIC_DELEGATOR_INDEXERS,
   BADGE_METRIC_INDEXER_ALLOCATIONS_OPENED,
   BADGE_METRIC_INDEXER_DELEGATOR_COUNT,
-  BADGE_METRIC_DELEGATOR_INDEXERS,
+  BADGE_METRIC_INDEXER_QUERY_FEES_COLLECTED,
+  BADGE_METRIC_INDEXER_SUBGRAPHS_INDEXED,
+  BADGE_METRIC_PUBLISHER_SIGNAL_ATTRACTED,
+  BADGE_METRIC_PUBLISHER_SUBGRAPHS_DEPLOYED,
 } from "../helpers/constants";
 
 // In order for retroactive badge drops to cover the entire subgraph
@@ -24,7 +24,7 @@ export function generateGenesisBadgeDefinitions(): void {
     BADGE_METRIC_INDEXER_SUBGRAPHS_INDEXED,
     BigInt.fromI32(1),
     BigInt.fromI32(1),
-    ""
+    "QmPn3R7DwHmziQBEWB1KFj1tCshBMEVvx4Ss8577hvB6fq"
   );
   createOrLoadBadgeDefinition(
     "Subgraph Alchemist II",
@@ -32,7 +32,7 @@ export function generateGenesisBadgeDefinitions(): void {
     BADGE_METRIC_INDEXER_SUBGRAPHS_INDEXED,
     BigInt.fromI32(5),
     BigInt.fromI32(2),
-    ""
+    "QmVMeDznjgqGUJzpp4V6ifgR1EB5puDLENhQsHMstNnjSq"
   );
   createOrLoadBadgeDefinition(
     "Subgraph Alchemist III",
@@ -40,7 +40,7 @@ export function generateGenesisBadgeDefinitions(): void {
     BADGE_METRIC_INDEXER_SUBGRAPHS_INDEXED,
     BigInt.fromI32(15),
     BigInt.fromI32(3),
-    ""
+    "QmZj8qWbkjDScm4ruFJkc8HhSs64MRRHp7qm5xBS6Asv5h"
   );
 
   createOrLoadBadgeDefinition(
@@ -113,12 +113,12 @@ export function generateGenesisBadgeDefinitions(): void {
   //////// DELEGATOR BADGES ////////
 
   createOrLoadBadgeDefinition(
-    "Guardian I",
+    "Guardian",
     "Delegate to 1 Indexer (100 GRT Delegation Minimum)",
     BADGE_METRIC_DELEGATOR_INDEXERS,
     BigInt.fromI32(1),
     BigInt.fromI32(1),
-    ""
+    "QmR4LXsfHnA3Ja3oftPoU8XvRbL7Drwkrm9dQnKmxcadKK"
   );
   createOrLoadBadgeDefinition(
     "Guardian II",
@@ -126,7 +126,7 @@ export function generateGenesisBadgeDefinitions(): void {
     BADGE_METRIC_DELEGATOR_INDEXERS,
     BigInt.fromI32(3),
     BigInt.fromI32(2),
-    ""
+    "QmQFEtTFdE2hxwoH67eouzrozD8Aw92Z6xaVnFqdojhm2b"
   );
   createOrLoadBadgeDefinition(
     "Guardian III",
@@ -134,7 +134,7 @@ export function generateGenesisBadgeDefinitions(): void {
     BADGE_METRIC_DELEGATOR_INDEXERS,
     BigInt.fromI32(10),
     BigInt.fromI32(3),
-    ""
+    "QmNW6dEDgYuwLnQk6bQqSBwKvXq6NkRk6H6asxcwhPf4GZ"
   );
   createOrLoadBadgeDefinition(
     "Guardian IV",
@@ -142,15 +142,7 @@ export function generateGenesisBadgeDefinitions(): void {
     BADGE_METRIC_DELEGATOR_INDEXERS,
     BigInt.fromI32(25),
     BigInt.fromI32(4),
-    ""
-  );
-  createOrLoadBadgeDefinition(
-    "Guardian V",
-    "Delegate to 50 Indexers (100 GRT Delegation Minimum)",
-    BADGE_METRIC_DELEGATOR_INDEXERS,
-    BigInt.fromI32(50),
-    BigInt.fromI32(5),
-    ""
+    "QmQP2o2xnXPiqXpKXkto3uxry3Xwrai3RaXVHSevFYhJxf"
   );
 
   //////// CURATOR BADGES ////////
@@ -161,7 +153,7 @@ export function generateGenesisBadgeDefinitions(): void {
     BADGE_METRIC_CURATOR_SUBGRAPHS_SIGNALLED,
     BigInt.fromI32(1),
     BigInt.fromI32(1),
-    ""
+    "QmTMCkPW6A4EXyjFRU2fghtthhws5RTssb61dCTNcr7usy"
   );
   createOrLoadBadgeDefinition(
     "Pathfinder II",
@@ -169,7 +161,7 @@ export function generateGenesisBadgeDefinitions(): void {
     BADGE_METRIC_CURATOR_SUBGRAPHS_SIGNALLED,
     BigInt.fromI32(5),
     BigInt.fromI32(2),
-    ""
+    "QmVURMTnATX6WT8B4fQ5JwU4P1ruCecgr2NSkFfKnYHLhJ"
   );
   createOrLoadBadgeDefinition(
     "Pathfinder III",
@@ -177,7 +169,7 @@ export function generateGenesisBadgeDefinitions(): void {
     BADGE_METRIC_CURATOR_SUBGRAPHS_SIGNALLED,
     BigInt.fromI32(10),
     BigInt.fromI32(3),
-    ""
+    "QmPiV2RVDYgQGfP7NMWePfPvrNf16ErvFsucS4Rv7vcjAS"
   );
 
   createOrLoadBadgeDefinition(
@@ -201,7 +193,7 @@ export function generateGenesisBadgeDefinitions(): void {
   //////// DEVELOPER BADGES ////////
 
   createOrLoadBadgeDefinition(
-    "Beacon I",
+    "Beacon",
     "Attract 1k GRT of Signal from Curators",
     BADGE_METRIC_PUBLISHER_SIGNAL_ATTRACTED,
     BigInt.fromString("1000000000000000000000"),
@@ -231,7 +223,7 @@ export function generateGenesisBadgeDefinitions(): void {
     BADGE_METRIC_PUBLISHER_SUBGRAPHS_DEPLOYED,
     BigInt.fromI32(1),
     BigInt.fromI32(1),
-    ""
+    "QmWFEodHLQhVrBAL7nC6QgagREDeYsRC7eSGrtyohR6fbu"
   );
   createOrLoadBadgeDefinition(
     "Subgraph Smith II",
@@ -239,7 +231,7 @@ export function generateGenesisBadgeDefinitions(): void {
     BADGE_METRIC_PUBLISHER_SUBGRAPHS_DEPLOYED,
     BigInt.fromI32(3),
     BigInt.fromI32(1),
-    ""
+    "QmVvV9osrbqmX54a6pTJRqDkgJUTsfNRK1Hk7fkD4EgXxz"
   );
   createOrLoadBadgeDefinition(
     "Subgraph Smith III",
@@ -247,6 +239,6 @@ export function generateGenesisBadgeDefinitions(): void {
     BADGE_METRIC_PUBLISHER_SUBGRAPHS_DEPLOYED,
     BigInt.fromI32(10),
     BigInt.fromI32(3),
-    ""
+    "QmYy1TFzQkzjs3SPAcWrt5Z5X3Y8NdGcsTUbyWGhoDLtsb"
   );
 }
