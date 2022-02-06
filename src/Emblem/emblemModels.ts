@@ -1,3 +1,4 @@
+import { BigInt, ethereum } from "@graphprotocol/graph-ts/index";
 import {
   BadgeDefinition,
   BadgeUser,
@@ -8,8 +9,6 @@ import {
 } from "../../generated/schema";
 import { zeroBI } from "../helpers/constants";
 import { createOrLoadEntityStats } from "../helpers/models";
-import { BigInt, ethereum } from "@graphprotocol/graph-ts/index";
-import { log } from "@graphprotocol/graph-ts";
 
 export function createOrLoadBadgeUser(address: string): BadgeUser {
   let badgeUser = BadgeUser.load(address);
@@ -28,7 +27,8 @@ export function createOrLoadBadgeDefinition(
   metric: string,
   threshold: BigInt,
   votingPower: BigInt,
-  ipfsURI: string
+  ipfsURI: string,
+  level: i32
 ): BadgeDefinition {
   let badgeDefinition = BadgeDefinition.load(name);
 
@@ -40,6 +40,7 @@ export function createOrLoadBadgeDefinition(
     badgeDefinition.votingPower = votingPower;
     badgeDefinition.ipfsURI = ipfsURI;
     badgeDefinition.earnedBadgeCount = 0;
+    badgeDefinition.level = level;
 
     badgeDefinition.save();
 

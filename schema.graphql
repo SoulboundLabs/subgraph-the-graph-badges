@@ -343,6 +343,8 @@ type BadgeDefinition @entity {
   metric: BadgeMetric!
   "Value that metric must reach in order for a badge to be awarded"
   threshold: BigInt!
+  "The level of the badge in the badge track, from 0 to N"
+  level: Int
   "Voting power acrued when badge is awarded"
   votingPower: BigInt!
   "Total count of earned badges"
