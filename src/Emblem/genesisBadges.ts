@@ -45,32 +45,32 @@ export function generateGenesisBadgeDefinitions(): void {
 
   createOrLoadBadgeDefinition(
     "Query Collector I",
-    "Collect 1,000 GRT in Query Fees",
+    "Collect 1,000 GRT in query fees",
     BADGE_METRIC_INDEXER_QUERY_FEES_COLLECTED,
     BigInt.fromI32(1000),
     BigInt.fromI32(1),
-    ""
+    "QmQtTg5s3AYv8txwXJVnfmUraAPhvPMi3y7QFx97T5an58"
   );
   createOrLoadBadgeDefinition(
     "Query Collector II",
-    "Collect 10,000 GRT in Query Fees",
+    "Collect 10,000 GRT in query fees",
     BADGE_METRIC_INDEXER_QUERY_FEES_COLLECTED,
     BigInt.fromI32(10000),
     BigInt.fromI32(1),
-    ""
+    "QmR4zGzHuJDoN93DAq7FBbXRPAYfgZAFCeHego7TC9Ff6f"
   );
 
   createOrLoadBadgeDefinition(
     "Nexus",
-    "Open 1 Allocation",
+    "Open 1 allocation",
     BADGE_METRIC_INDEXER_ALLOCATIONS_OPENED,
     BigInt.fromI32(1),
     BigInt.fromI32(1),
-    ""
+    "QmP9Hv8kJQt3YXa1ng5kdqpd9nCCoqyD25R3Auz5h7ueAE"
   );
   createOrLoadBadgeDefinition(
     "Nexus II",
-    "Open 10 Allocations",
+    "Open 10 allocations",
     BADGE_METRIC_INDEXER_ALLOCATIONS_OPENED,
     BigInt.fromI32(10),
     BigInt.fromI32(2),
@@ -78,7 +78,7 @@ export function generateGenesisBadgeDefinitions(): void {
   );
   createOrLoadBadgeDefinition(
     "Nexus III",
-    "Open 25 Allocations",
+    "Open 25 allocations",
     BADGE_METRIC_INDEXER_ALLOCATIONS_OPENED,
     BigInt.fromI32(25),
     BigInt.fromI32(3),
@@ -87,7 +87,7 @@ export function generateGenesisBadgeDefinitions(): void {
 
   createOrLoadBadgeDefinition(
     "Allegiance",
-    "Receieve GRT from 1 Delegator",
+    "Receive GRT from 1 Delegator",
     BADGE_METRIC_INDEXER_DELEGATOR_COUNT,
     BigInt.fromI32(1),
     BigInt.fromI32(1),
@@ -95,7 +95,7 @@ export function generateGenesisBadgeDefinitions(): void {
   );
   createOrLoadBadgeDefinition(
     "Allegiance II",
-    "Receieve GRT from 25 Delegators",
+    "Receive GRT from 25 Delegators",
     BADGE_METRIC_INDEXER_DELEGATOR_COUNT,
     BigInt.fromI32(25),
     BigInt.fromI32(2),
@@ -103,7 +103,7 @@ export function generateGenesisBadgeDefinitions(): void {
   );
   createOrLoadBadgeDefinition(
     "Allegiance III",
-    "Receieve GRT from 100 Delegators",
+    "Receive GRT from 100 Delegators",
     BADGE_METRIC_INDEXER_DELEGATOR_COUNT,
     BigInt.fromI32(100),
     BigInt.fromI32(3),
@@ -114,7 +114,7 @@ export function generateGenesisBadgeDefinitions(): void {
 
   createOrLoadBadgeDefinition(
     "Guardian",
-    "Delegate to 1 Indexer (100 GRT Delegation Minimum)",
+    "Delegate to 1 Indexer (100 GRT minimum)",
     BADGE_METRIC_DELEGATOR_INDEXERS,
     BigInt.fromI32(1),
     BigInt.fromI32(1),
@@ -122,7 +122,7 @@ export function generateGenesisBadgeDefinitions(): void {
   );
   createOrLoadBadgeDefinition(
     "Guardian II",
-    "Delegate to 3 Indexers (100 GRT Delegation Minimum)",
+    "Delegate to 3 Indexers (100 GRT minimum)",
     BADGE_METRIC_DELEGATOR_INDEXERS,
     BigInt.fromI32(3),
     BigInt.fromI32(2),
@@ -130,7 +130,7 @@ export function generateGenesisBadgeDefinitions(): void {
   );
   createOrLoadBadgeDefinition(
     "Guardian III",
-    "Delegate to 10 Indexer (100 GRT Delegation Minimum)",
+    "Delegate to 10 Indexer (100 GRT minimum)",
     BADGE_METRIC_DELEGATOR_INDEXERS,
     BigInt.fromI32(10),
     BigInt.fromI32(3),
@@ -138,7 +138,7 @@ export function generateGenesisBadgeDefinitions(): void {
   );
   createOrLoadBadgeDefinition(
     "Guardian IV",
-    "Delegate to 25 Indexers (100 GRT Delegation Minimum)",
+    "Delegate to 25 Indexers (100 GRT minimum)",
     BADGE_METRIC_DELEGATOR_INDEXERS,
     BigInt.fromI32(25),
     BigInt.fromI32(4),
@@ -194,7 +194,7 @@ export function generateGenesisBadgeDefinitions(): void {
 
   createOrLoadBadgeDefinition(
     "Beacon",
-    "Attract 1k GRT of Signal from Curators",
+    "Attract 1k GRT of signal from curators",
     BADGE_METRIC_PUBLISHER_SIGNAL_ATTRACTED,
     BigInt.fromString("1000000000000000000000"),
     BigInt.fromI32(1),
@@ -202,7 +202,7 @@ export function generateGenesisBadgeDefinitions(): void {
   );
   createOrLoadBadgeDefinition(
     "Beacon II",
-    "Attract 10k GRT of Signal from Curators",
+    "Attract 10k GRT of signal from curators",
     BADGE_METRIC_PUBLISHER_SIGNAL_ATTRACTED,
     BigInt.fromString("10000000000000000000000"),
     BigInt.fromI32(2),
@@ -210,7 +210,7 @@ export function generateGenesisBadgeDefinitions(): void {
   );
   createOrLoadBadgeDefinition(
     "Beacon III",
-    "Attract 30k GRT of Signal from Curators",
+    "Attract 30k GRT of signal from curators",
     BADGE_METRIC_PUBLISHER_SIGNAL_ATTRACTED,
     BigInt.fromString("30000000000000000000000"),
     BigInt.fromI32(3),
@@ -219,7 +219,7 @@ export function generateGenesisBadgeDefinitions(): void {
 
   createOrLoadBadgeDefinition(
     "Subgraph Smith",
-    "Deploy 1 Subgraph to the Decentralized Network",
+    "Deploy 1 subgraph to the Decentralized Network",
     BADGE_METRIC_PUBLISHER_SUBGRAPHS_DEPLOYED,
     BigInt.fromI32(1),
     BigInt.fromI32(1),
@@ -227,7 +227,7 @@ export function generateGenesisBadgeDefinitions(): void {
   );
   createOrLoadBadgeDefinition(
     "Subgraph Smith II",
-    "Deploy 3 Subgraphs to the Decentralized Network",
+    "Deploy 3 subgraphs to the Decentralized Network",
     BADGE_METRIC_PUBLISHER_SUBGRAPHS_DEPLOYED,
     BigInt.fromI32(3),
     BigInt.fromI32(1),
@@ -235,7 +235,7 @@ export function generateGenesisBadgeDefinitions(): void {
   );
   createOrLoadBadgeDefinition(
     "Subgraph Smith III",
-    "Deploy 10 Subgraphs to the Decentralized Network",
+    "Deploy 10 subgraphs to the Decentralized Network",
     BADGE_METRIC_PUBLISHER_SUBGRAPHS_DEPLOYED,
     BigInt.fromI32(10),
     BigInt.fromI32(3),
