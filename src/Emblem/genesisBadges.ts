@@ -48,7 +48,7 @@ export function generateGenesisBadgeDefinitions(): void {
 
   createOrLoadBadgeDefinition(
     "Query Collector",
-    "Collect 1,000 GRT in query fees",
+    "Collect 1k GRT in query fees",
     BADGE_METRIC_INDEXER_QUERY_FEES_COLLECTED,
     BigInt.fromI32(1000),
     BigInt.fromI32(1),
@@ -57,7 +57,7 @@ export function generateGenesisBadgeDefinitions(): void {
   );
   createOrLoadBadgeDefinition(
     "Query Collector II",
-    "Collect 10,000 GRT in query fees",
+    "Collect 10k GRT in query fees",
     BADGE_METRIC_INDEXER_QUERY_FEES_COLLECTED,
     BigInt.fromI32(10000),
     BigInt.fromI32(1),
@@ -85,7 +85,7 @@ export function generateGenesisBadgeDefinitions(): void {
   );
   createOrLoadBadgeDefinition(
     "Nexus III",
-    "Open 25 allocations",
+    "Open 25 Allocations",
     BADGE_METRIC_INDEXER_ALLOCATIONS_OPENED,
     BigInt.fromI32(25),
     BigInt.fromI32(3),
@@ -192,7 +192,7 @@ export function generateGenesisBadgeDefinitions(): void {
 
   createOrLoadBadgeDefinition(
     "House Odds",
-    "Be the first to curate on your own subgraph",
+    "Simultaneously Deploy and Signal on your Subgraph",
     BADGE_METRIC_CURATOR_HOUSE_ODDS,
     BigInt.fromI32(1),
     BigInt.fromI32(1),
@@ -202,7 +202,7 @@ export function generateGenesisBadgeDefinitions(): void {
 
   createOrLoadBadgeDefinition(
     "Planet of the Aped",
-    "Curate on another user's subgraph within 100 blocks",
+    "Signal within 100 blocks of a Subgraph's Deployment",
     BADGE_METRIC_CURATOR_APE,
     BigInt.fromI32(1),
     BigInt.fromI32(1),
@@ -214,7 +214,7 @@ export function generateGenesisBadgeDefinitions(): void {
 
   createOrLoadBadgeDefinition(
     "Beacon",
-    "Attract 1k GRT of signal from curators",
+    "Receive 1k GRT in Curator Signal on your Subgraphs",
     BADGE_METRIC_PUBLISHER_SIGNAL_ATTRACTED,
     BigInt.fromString("1000000000000000000000"),
     BigInt.fromI32(1),
@@ -223,7 +223,7 @@ export function generateGenesisBadgeDefinitions(): void {
   );
   createOrLoadBadgeDefinition(
     "Beacon II",
-    "Attract 10k GRT of signal from curators",
+    "Receive 10k GRT in Curator Signal on your Subgraphs",
     BADGE_METRIC_PUBLISHER_SIGNAL_ATTRACTED,
     BigInt.fromString("10000000000000000000000"),
     BigInt.fromI32(2),
@@ -232,7 +232,7 @@ export function generateGenesisBadgeDefinitions(): void {
   );
   createOrLoadBadgeDefinition(
     "Beacon III",
-    "Attract 30k GRT of signal from curators",
+    "Receive 30k GRT in Curator Signal on your Subgraphs",
     BADGE_METRIC_PUBLISHER_SIGNAL_ATTRACTED,
     BigInt.fromString("30000000000000000000000"),
     BigInt.fromI32(3),
@@ -242,7 +242,7 @@ export function generateGenesisBadgeDefinitions(): void {
 
   createOrLoadBadgeDefinition(
     "Subgraph Smith",
-    "Deploy 1 subgraph to the Decentralized Network",
+    "Deploy 1 Subgraph to the Decentralized Network",
     BADGE_METRIC_PUBLISHER_SUBGRAPHS_DEPLOYED,
     BigInt.fromI32(1),
     BigInt.fromI32(1),
@@ -251,7 +251,7 @@ export function generateGenesisBadgeDefinitions(): void {
   );
   createOrLoadBadgeDefinition(
     "Subgraph Smith II",
-    "Deploy 3 subgraphs to the Decentralized Network",
+    "Deploy 3 Subgraphs to the Decentralized Network",
     BADGE_METRIC_PUBLISHER_SUBGRAPHS_DEPLOYED,
     BigInt.fromI32(3),
     BigInt.fromI32(1),
@@ -260,7 +260,7 @@ export function generateGenesisBadgeDefinitions(): void {
   );
   createOrLoadBadgeDefinition(
     "Subgraph Smith III",
-    "Deploy 10 subgraphs to the Decentralized Network",
+    "Deploy 10 Subgraphs to the Decentralized Network",
     BADGE_METRIC_PUBLISHER_SUBGRAPHS_DEPLOYED,
     BigInt.fromI32(10),
     BigInt.fromI32(3),
