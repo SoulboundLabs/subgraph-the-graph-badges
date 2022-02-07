@@ -131,7 +131,7 @@ export function generateGenesisBadgeDefinitions(): void {
 
   createOrLoadBadgeDefinition(
     "Guardian",
-    "Delegate to 1 Indexer (100 GRT minimum)",
+    "Delegate to 1 Indexer",
     BADGE_METRIC_DELEGATOR_INDEXERS,
     BigInt.fromI32(1),
     BigInt.fromI32(1),
@@ -140,7 +140,7 @@ export function generateGenesisBadgeDefinitions(): void {
   );
   createOrLoadBadgeDefinition(
     "Guardian II",
-    "Delegate to 3 Indexers (100 GRT minimum)",
+    "Delegate to 3 Indexers",
     BADGE_METRIC_DELEGATOR_INDEXERS,
     BigInt.fromI32(3),
     BigInt.fromI32(2),
@@ -149,7 +149,7 @@ export function generateGenesisBadgeDefinitions(): void {
   );
   createOrLoadBadgeDefinition(
     "Guardian III",
-    "Delegate to 10 Indexer (100 GRT minimum)",
+    "Delegate to 10 Indexer",
     BADGE_METRIC_DELEGATOR_INDEXERS,
     BigInt.fromI32(10),
     BigInt.fromI32(3),
