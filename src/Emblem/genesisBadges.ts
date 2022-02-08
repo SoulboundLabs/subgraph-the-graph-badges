@@ -68,7 +68,7 @@ export function generateGenesisBadgeDefinitions(): void {
     BigInt.fromI32(25000),
     BigInt.fromI32(1),
     "QmP9Hv8kJQt3YXa1ng5kdqpd9nCCoqyD25R3Auz5h7ueAE",
-    1
+    2
   );
 
   // createOrLoadBadgeDefinition(
@@ -124,7 +124,7 @@ export function generateGenesisBadgeDefinitions(): void {
     BigInt.fromI32(100),
     BigInt.fromI32(3),
     "QmbPNXnTzY5BWELt9WpcDgRs4JHkb8UBDNdbthXS4JGvyk",
-    1
+    2
   );
 
   //////// DELEGATOR BADGES ////////
