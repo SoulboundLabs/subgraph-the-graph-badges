@@ -20,7 +20,7 @@ export function generateGenesisBadgeDefinitions(): void {
     BADGE_METRIC_INDEXER_SUBGRAPHS_INDEXED,
     BigInt.fromI32(1),
     BigInt.fromI32(1),
-    "QmbDipp9aEjwR5su3PMuN8BeSkCWBrHyQ9GX9ZNRTYAGPw",
+    "QmUEaHQdXoAcNeyyNmm6G4WGHkUdxTyq42M41bcitzoiyr",
     0
   );
   createOrLoadBadgeDefinition(
