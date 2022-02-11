@@ -15,7 +15,7 @@ export function generateGenesisBadgeDefinitions(): void {
   //////// INDEXER BADGES ////////
 
   createOrLoadBadgeDefinition(
-    "Alchemist",
+    "Alchemist I",
     "Index 1 Subgraph",
     BADGE_METRIC_INDEXER_SUBGRAPHS_INDEXED,
     BigInt.fromI32(1),
@@ -40,7 +40,7 @@ export function generateGenesisBadgeDefinitions(): void {
   );
 
   createOrLoadBadgeDefinition(
-    "Query Collector",
+    "Query Collector I",
     "Collect 1k GRT in query fees",
     BADGE_METRIC_INDEXER_QUERY_FEES_COLLECTED,
     BigInt.fromI32(1000),
@@ -94,7 +94,7 @@ export function generateGenesisBadgeDefinitions(): void {
   // );
 
   createOrLoadBadgeDefinition(
-    "Allegiance",
+    "Allegiance I",
     "Receive GRT from 1 Delegator",
     BADGE_METRIC_INDEXER_DELEGATOR_COUNT,
     BigInt.fromI32(1),
@@ -121,7 +121,7 @@ export function generateGenesisBadgeDefinitions(): void {
   //////// DELEGATOR BADGES ////////
 
   createOrLoadBadgeDefinition(
-    "Guardian",
+    "Guardian I",
     "Delegate to 1 Indexer",
     BADGE_METRIC_DELEGATOR_INDEXERS,
     BigInt.fromI32(1),
@@ -157,7 +157,7 @@ export function generateGenesisBadgeDefinitions(): void {
   //////// CURATOR BADGES ////////
 
   createOrLoadBadgeDefinition(
-    "Pathfinder",
+    "Pathfinder I",
     "Signal 1 Subgraph",
     BADGE_METRIC_CURATOR_SUBGRAPHS_SIGNALLED,
     BigInt.fromI32(1),
@@ -232,7 +232,7 @@ export function generateGenesisBadgeDefinitions(): void {
   // );
 
   createOrLoadBadgeDefinition(
-    "Subgraph Smith",
+    "Subgraph Smith I",
     "Deploy 1 Subgraph to the Decentralized Network",
     BADGE_METRIC_PUBLISHER_SUBGRAPHS_DEPLOYED,
     BigInt.fromI32(1),
