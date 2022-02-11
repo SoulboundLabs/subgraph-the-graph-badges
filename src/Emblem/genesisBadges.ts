@@ -20,8 +20,7 @@ export function generateGenesisBadgeDefinitions(): void {
     BADGE_METRIC_INDEXER_SUBGRAPHS_INDEXED,
     BigInt.fromI32(1),
     BigInt.fromI32(1),
-    "QmUEaHQdXoAcNeyyNmm6G4WGHkUdxTyq42M41bcitzoiyr",
-    0
+    "QmUEaHQdXoAcNeyyNmm6G4WGHkUdxTyq42M41bcitzoiyr"
   );
   createOrLoadBadgeDefinition(
     "Alchemist II",
@@ -29,8 +28,7 @@ export function generateGenesisBadgeDefinitions(): void {
     BADGE_METRIC_INDEXER_SUBGRAPHS_INDEXED,
     BigInt.fromI32(5),
     BigInt.fromI32(2),
-    "QmdGCw5KPVZSEnjnETJjScTfikPHU1a3u79iygv5dCd8LW",
-    1
+    "QmdGCw5KPVZSEnjnETJjScTfikPHU1a3u79iygv5dCd8LW"
   );
   createOrLoadBadgeDefinition(
     "Alchemist III",
@@ -38,8 +36,7 @@ export function generateGenesisBadgeDefinitions(): void {
     BADGE_METRIC_INDEXER_SUBGRAPHS_INDEXED,
     BigInt.fromI32(15),
     BigInt.fromI32(3),
-    "QmXLWweMekLqNik3PAw3XaV2ADY9ZqNbNUfgBBcm3cBQt7",
-    2
+    "QmXLWweMekLqNik3PAw3XaV2ADY9ZqNbNUfgBBcm3cBQt7"
   );
 
   createOrLoadBadgeDefinition(
@@ -48,8 +45,7 @@ export function generateGenesisBadgeDefinitions(): void {
     BADGE_METRIC_INDEXER_QUERY_FEES_COLLECTED,
     BigInt.fromI32(1000),
     BigInt.fromI32(1),
-    "QmWoj4di4bukC81PNCeSRSuQqEhLoo75XHANvuz7n4ejPe",
-    0
+    "QmWoj4di4bukC81PNCeSRSuQqEhLoo75XHANvuz7n4ejPe"
   );
   createOrLoadBadgeDefinition(
     "Query Collector II",
@@ -57,8 +53,7 @@ export function generateGenesisBadgeDefinitions(): void {
     BADGE_METRIC_INDEXER_QUERY_FEES_COLLECTED,
     BigInt.fromI32(10000),
     BigInt.fromI32(1),
-    "QmdcHm17vat66zXFkjjACZWcRWpik7DVE7WZTkdjQtaZpu",
-    1
+    "QmdcHm17vat66zXFkjjACZWcRWpik7DVE7WZTkdjQtaZpu"
   );
 
   createOrLoadBadgeDefinition(
@@ -67,8 +62,7 @@ export function generateGenesisBadgeDefinitions(): void {
     BADGE_METRIC_INDEXER_QUERY_FEES_COLLECTED,
     BigInt.fromI32(25000),
     BigInt.fromI32(1),
-    "QmNN7exESvL8jcoyVbroFf7vkFUa697jenR8E7fX3nyRTa",
-    2
+    "QmNN7exESvL8jcoyVbroFf7vkFUa697jenR8E7fX3nyRTa"
   );
 
   // createOrLoadBadgeDefinition(
@@ -105,8 +99,7 @@ export function generateGenesisBadgeDefinitions(): void {
     BADGE_METRIC_INDEXER_DELEGATOR_COUNT,
     BigInt.fromI32(1),
     BigInt.fromI32(1),
-    "QmXgB1WoFF428Za3ZNdV4UTk37SLZYone8frDvatzQZQYK",
-    0
+    "QmXgB1WoFF428Za3ZNdV4UTk37SLZYone8frDvatzQZQYK"
   );
   createOrLoadBadgeDefinition(
     "Allegiance II",
@@ -114,8 +107,7 @@ export function generateGenesisBadgeDefinitions(): void {
     BADGE_METRIC_INDEXER_DELEGATOR_COUNT,
     BigInt.fromI32(25),
     BigInt.fromI32(2),
-    "QmQLccipGjZRQmvbUcQ6wJq8kJakzzPDxXXtAtBAsZi4MS",
-    1
+    "QmQLccipGjZRQmvbUcQ6wJq8kJakzzPDxXXtAtBAsZi4MS"
   );
   createOrLoadBadgeDefinition(
     "Allegiance III",
@@ -123,8 +115,7 @@ export function generateGenesisBadgeDefinitions(): void {
     BADGE_METRIC_INDEXER_DELEGATOR_COUNT,
     BigInt.fromI32(100),
     BigInt.fromI32(3),
-    "QmRtiUL6t1xF2Uovn3nG5Tpn8sRryX1SCnznVUrHbiqpVx",
-    2
+    "QmRtiUL6t1xF2Uovn3nG5Tpn8sRryX1SCnznVUrHbiqpVx"
   );
 
   //////// DELEGATOR BADGES ////////
@@ -135,8 +126,7 @@ export function generateGenesisBadgeDefinitions(): void {
     BADGE_METRIC_DELEGATOR_INDEXERS,
     BigInt.fromI32(1),
     BigInt.fromI32(1),
-    "QmUPwGioNXezPMxTfarqQeHsWsnMAU78rAxCvcSfHP3FAV",
-    0
+    "QmUPwGioNXezPMxTfarqQeHsWsnMAU78rAxCvcSfHP3FAV"
   );
   createOrLoadBadgeDefinition(
     "Guardian II",
@@ -144,8 +134,7 @@ export function generateGenesisBadgeDefinitions(): void {
     BADGE_METRIC_DELEGATOR_INDEXERS,
     BigInt.fromI32(3),
     BigInt.fromI32(2),
-    "QmQezYFjQNzFs1cj1No2EFTXbURMLKv91ig3LyqNqYpkb2",
-    1
+    "QmQezYFjQNzFs1cj1No2EFTXbURMLKv91ig3LyqNqYpkb2"
   );
   createOrLoadBadgeDefinition(
     "Guardian III",
@@ -153,8 +142,7 @@ export function generateGenesisBadgeDefinitions(): void {
     BADGE_METRIC_DELEGATOR_INDEXERS,
     BigInt.fromI32(10),
     BigInt.fromI32(3),
-    "QmQh8Yj4yPskDDnoSYPePndHZtiRcpU1Hv9ZKhDozsibZ4",
-    2
+    "QmQh8Yj4yPskDDnoSYPePndHZtiRcpU1Hv9ZKhDozsibZ4"
   );
   // createOrLoadBadgeDefinition(
   //   "Guardian IV",
@@ -174,8 +162,7 @@ export function generateGenesisBadgeDefinitions(): void {
     BADGE_METRIC_CURATOR_SUBGRAPHS_SIGNALLED,
     BigInt.fromI32(1),
     BigInt.fromI32(1),
-    "QmcHq3c7iVofoNKS9Fs1JgopuwdJ2bULq6V4PKv8QSyj3W",
-    0
+    "QmcHq3c7iVofoNKS9Fs1JgopuwdJ2bULq6V4PKv8QSyj3W"
   );
   createOrLoadBadgeDefinition(
     "Pathfinder II",
@@ -183,8 +170,7 @@ export function generateGenesisBadgeDefinitions(): void {
     BADGE_METRIC_CURATOR_SUBGRAPHS_SIGNALLED,
     BigInt.fromI32(5),
     BigInt.fromI32(2),
-    "Qma2xWEBGDfA4ZPcSQK63VyDNYTvBDH7qyziJnbReA9okH",
-    1
+    "Qma2xWEBGDfA4ZPcSQK63VyDNYTvBDH7qyziJnbReA9okH"
   );
   createOrLoadBadgeDefinition(
     "Pathfinder III",
@@ -192,8 +178,7 @@ export function generateGenesisBadgeDefinitions(): void {
     BADGE_METRIC_CURATOR_SUBGRAPHS_SIGNALLED,
     BigInt.fromI32(10),
     BigInt.fromI32(3),
-    "QmcuHtFdcFgQo1VrqBMCvbm9NdPrXBUB498T47aAKKNMTe",
-    2
+    "QmcuHtFdcFgQo1VrqBMCvbm9NdPrXBUB498T47aAKKNMTe"
   );
 
   // createOrLoadBadgeDefinition(
@@ -252,8 +237,7 @@ export function generateGenesisBadgeDefinitions(): void {
     BADGE_METRIC_PUBLISHER_SUBGRAPHS_DEPLOYED,
     BigInt.fromI32(1),
     BigInt.fromI32(1),
-    "Qmb82JUQeEhH2wFP7KyYz6pPXiRPrg6SqLMVo65r3r1fHq",
-    0
+    "Qmb82JUQeEhH2wFP7KyYz6pPXiRPrg6SqLMVo65r3r1fHq"
   );
   createOrLoadBadgeDefinition(
     "Subgraph Smith II",
@@ -261,8 +245,7 @@ export function generateGenesisBadgeDefinitions(): void {
     BADGE_METRIC_PUBLISHER_SUBGRAPHS_DEPLOYED,
     BigInt.fromI32(3),
     BigInt.fromI32(1),
-    "QmdrG6SoScdMtBPSSZBabembeAXmtWxm7AwUPQUyN6cj2o",
-    1
+    "QmdrG6SoScdMtBPSSZBabembeAXmtWxm7AwUPQUyN6cj2o"
   );
   createOrLoadBadgeDefinition(
     "Subgraph Smith III",
@@ -270,7 +253,6 @@ export function generateGenesisBadgeDefinitions(): void {
     BADGE_METRIC_PUBLISHER_SUBGRAPHS_DEPLOYED,
     BigInt.fromI32(10),
     BigInt.fromI32(3),
-    "QmUobcPJ2PBg5UxnmQ9BP4n19EXQgW6SG7ugoS6wRQVP8u",
-    2
+    "QmUobcPJ2PBg5UxnmQ9BP4n19EXQgW6SG7ugoS6wRQVP8u"
   );
 }

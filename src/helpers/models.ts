@@ -14,6 +14,8 @@ export function createOrLoadEntityStats(): EntityStats {
     entityStats.tokenLockWalletCount = 0;
     entityStats.earnedBadgeCount = 0;
     entityStats.badgeWinnerCount = 0;
+    entityStats.badgeDefinitionCount = 0;
+    entityStats.lastMerkledBadgeIndex = -1;
 
     entityStats.save();
   }

@@ -1,5 +1,4 @@
 import {
-  BadgeUser,
   Progress,
   MetricConsumer,
   BadgeDefinition,
@@ -46,9 +45,10 @@ function updateProgress(
     // iterate through BadgeDefinitions tracking this metric
     let badgeDefinitions = _badgeDefinitionsForMetric(progress.metric);
     for (let i = 0; i < badgeDefinitions.length; i++) {
-      let badgeDefinition = BadgeDefinition.load(
-        badgeDefinitions[i]
-      ) as BadgeDefinition;
+      let badgeDefinition = changetype<BadgeDefinition>(
+        BadgeDefinition.load(badgeDefinitions[i])
+      );
+
       if (updatedValue.ge(badgeDefinition.threshold)) {
         createEarnedBadge(badgeDefinition, progress.badgeUser, eventData);
       }

@@ -10,13 +10,14 @@ import {
   StakeDelegated,
   StakeDelegatedLocked,
   RebateClaimed,
-  DelegationParametersUpdated
+  DelegationParametersUpdated,
 } from "../../generated/Staking/Staking";
 import {
   processAllocationClosed,
   processAllocationCreated,
   processRebateClaimed,
-  processDelegationParametersUpdated
+  processDelegationParametersUpdated,
+  processAllocationCollected,
 } from "../helpers/indexerManager";
 import {
   processStakeDelegated,
@@ -74,7 +75,7 @@ export function handleAllocationClosed(event: AllocationClosed): void {
 // as query Fees. rebate is from cobbs douglas, which we get from claim()
 export function handleAllocationCollected(event: AllocationCollected): void {
   log.debug("AllocationCollected event found", []);
-  
+  processAllocationCollected(event);
 }
 
 /**
@@ -120,7 +121,9 @@ export function handleRebateClaimed(event: RebateClaimed): void {
 /**
  * @dev Emitted when `indexer` update the delegation parameters for its delegation pool.
  */
-export function handleDelegationParametersUpdated(event: DelegationParametersUpdated): void {
+export function handleDelegationParametersUpdated(
+  event: DelegationParametersUpdated
+): void {
   log.debug("DelegationParametersUpdated event found", []);
   processDelegationParametersUpdated(event);
 }

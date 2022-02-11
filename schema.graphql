@@ -22,6 +22,10 @@ type EntityStats @entity {
   earnedBadgeCount: Int!
   "Number of unique BadgeWinners"
   badgeWinnerCount: Int!
+  "Number of unique BadgeDefinitions created (including Genesis badges)"
+  badgeDefinitionCount: Int!
+  "Index of most recently earned badge included in a merkle tree"
+  lastMerkledBadgeIndex: Int!
 }
 
 type GraphAccount @entity {
@@ -249,6 +253,8 @@ type Protocol @entity {
   id: ID!
 }
 
+
+
 ########################
 #### Badge Entities ####
 ########################
@@ -303,10 +309,42 @@ type EarnedBadge @entity {
   definition: BadgeDefinition!
   "Ordered number in which the badge was awarded for the associated definition"
   awardNumber: Int!
-  "Ordered number in which the badge was awarded across all badges"
-  globalAwardNumber: Int!
   "Data specific to this earnedBadges of a given BadgeDefinition"
   metadata: [EarnedBadgeMetadata!]! @derivedFrom(field: "earnedBadge")
+  "Stores reference to global badge number"
+  earnedBadgeCount: EarnedBadgeCount! @derivedFrom(field: "earnedBadge")
+
+  "keccak256({WinnerAddress}-{BadgeDefinitionNumber})"
+  hash: Bytes!
+  "Bytes32 encoded badge leaf useful for encryption testing"
+  encodedLeaf: Bytes!
+}
+
+"""
+Orders EarnedBadges for future merkle proof verification
+"""
+type EarnedBadgeCount @entity {
+  "incrementing number"
+  id: ID!
+  "Ordered number in which the badge was awarded across all badges"
+  globalBadgeNumber: Int!
+  "Associated earnedBadge"
+  earnedBadge: EarnedBadge!
+}
+
+type MerkleRoot @entity {
+  id: ID!
+  root: Bytes!
+  earnedBadgeCountStart: Int!
+  numberOfBadges: Int!
+}
+
+type MerkleNode @entity {
+  id: ID!
+  childEncoding: Bytes!
+  hash: Bytes!
+  depth: Int!
+  index: Int!
 }
 
 """
@@ -319,19 +357,16 @@ enum BadgeMetric {
   INDEXER_DELEGATOR_COUNT
   DELEGATOR_INDEXERS
   CURATOR_SUBGRAPHS_SIGNALLED
-  CURATOR_HOUSE_ODDS
-  "incremented when a curator is the first to signal on their own subgraph"
-  CURATOR_APE
-  "incremented with a curator curates on another badgeWinner's subgraph within 100 blocks"
-  PUBLISHER_SIGNAL_ATTRACTED
-  "the amount of GRT signalled on a given Publisher's Subgraphs"
+  CURATOR_HOUSE_ODDS    "incremented when a curator is the first to signal on their own subgraph"
+  CURATOR_APE   "incremented with a curator curates on another badgeWinner's subgraph within 100 blocks"
+  PUBLISHER_SIGNAL_ATTRACTED  "the amount of GRT signalled on a given Publisher's Subgraphs"
   PUBLISHER_SUBGRAPHS_DEPLOYED
   USER_BADGES_WON
 }
 
 """
 BadgeDefinitions are created by the BadgeDefinitionManager smart contract.
-Subgraphs may also have genesis BadgeDefinitions that are baked in for retroactive
+Subgraphs may also have genesis BadgeDefinitions that are baked in for retroactive 
 drops.
 """
 type BadgeDefinition @entity {
@@ -343,17 +378,18 @@ type BadgeDefinition @entity {
   metric: BadgeMetric!
   "Value that metric must reach in order for a badge to be awarded"
   threshold: BigInt!
-  "The level of the badge in the badge track, from 0 to N"
-  level: Int
   "Voting power acrued when badge is awarded"
   votingPower: BigInt!
   "Total count of earned badges"
   earnedBadgeCount: Int!
   "IPFS URI containing metadata about this BadgeDefinition"
   ipfsURI: String!
+  "Incrementing number for efficient on-chain representation"
+  badgeDefinitionNumber: Int!
   "Badges awarded with this definition"
   earnedBadges: [EarnedBadge!]! @derivedFrom(field: "definition")
 }
+
 
 ################################
 #### Internal Badge Entities ###
@@ -382,6 +418,7 @@ type MetricConsumer @entity {
   "BadgeDefinitions using this metric"
   badgeDefinitions: [BadgeDefinition!]!
 }
+
 
 ################################
 # These are only required by Emblem frontend

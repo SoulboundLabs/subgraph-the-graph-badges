@@ -13,7 +13,7 @@ dataSources:
       startBlock: {{blockNumber}}
     mapping:
       kind: ethereum/events
-      apiVersion: 0.0.4
+      apiVersion: 0.0.5
       language: wasm/assemblyscript
       file: ./src/mappings/staking.ts
       entities:
@@ -47,7 +47,7 @@ dataSources:
       startBlock: {{blockNumber}}
     mapping:
       kind: ethereum/events
-      apiVersion: 0.0.4
+      apiVersion: 0.0.5
       language: wasm/assemblyscript
       file: ./src/mappings/rewardsManager.ts
       entities:
@@ -68,7 +68,7 @@ dataSources:
       startBlock: {{blockNumber}}
     mapping:
       kind: ethereum/events
-      apiVersion: 0.0.4
+      apiVersion: 0.0.5
       language: wasm/assemblyscript
       file: ./src/mappings/gns.ts
       entities:
@@ -106,7 +106,7 @@ dataSources:
     mapping:
       kind: ethereum/events
       file: ./src/mappings/graphTokenLockWallet.ts
-      apiVersion: 0.0.4
+      apiVersion: 0.0.5
       language: wasm/assemblyscript
       entities:
         - GraphTokenLockWallet
@@ -126,7 +126,7 @@ dataSources:
     mapping:
       kind: ethereum/events
       file: ./src/mappings/graphTokenLockWallet.ts
-      apiVersion: 0.0.4
+      apiVersion: 0.0.5
       language: wasm/assemblyscript
       entities:
         - GraphTokenLockWallet
