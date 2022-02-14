@@ -3,9 +3,9 @@
 ########################
 
 """
-Singleton entity that tracks numbers and stats
+Singleton entity that tracks numbers and stats relating to The Graph
 """
-type EntityStats @entity {
+type TheGraphEntityStats @entity {
   "ID is set to 1"
   id: ID!
   "Number of indexers"
@@ -18,14 +18,22 @@ type EntityStats @entity {
   publisherCount: Int!
   "Number of TokenLockWallets"
   tokenLockWalletCount: Int!
+}
+
+"""
+Singleton entity that tracks numbers and stats relating to Emblem
+"""
+type EmblemEntityStats @entity {
+  "ID is set to 1"
+  id: ID!
   "Number of badges earned"
   earnedBadgeCount: Int!
   "Number of unique BadgeWinners"
   badgeWinnerCount: Int!
   "Number of unique BadgeDefinitions created (including Genesis badges)"
   badgeDefinitionCount: Int!
-  "Index of most recently earned badge included in a merkle tree"
-  lastMerkledBadgeIndex: Int!
+  "Number of BadgeMetric entities"
+  badgeMetricCount: Int!
 }
 
 type GraphAccount @entity {
@@ -332,36 +340,10 @@ type EarnedBadgeCount @entity {
   earnedBadge: EarnedBadge!
 }
 
-type MerkleRoot @entity {
+type BadgeMetric @entity {
   id: ID!
-  root: Bytes!
-  earnedBadgeCountStart: Int!
-  numberOfBadges: Int!
-}
-
-type MerkleNode @entity {
-  id: ID!
-  childEncoding: Bytes!
-  hash: Bytes!
-  depth: Int!
-  index: Int!
-}
-
-"""
-These metrics can be referenced by a BadgeDefinitionFactory smart contract
-"""
-enum BadgeMetric {
-  INDEXER_SUBGRAPHS_INDEXED
-  INDEXER_QUERY_FEES_COLLECTED
-  INDEXER_ALLOCATIONS_OPENED
-  INDEXER_DELEGATOR_COUNT
-  DELEGATOR_INDEXERS
-  CURATOR_SUBGRAPHS_SIGNALLED
-  CURATOR_HOUSE_ODDS    "incremented when a curator is the first to signal on their own subgraph"
-  CURATOR_APE   "incremented with a curator curates on another badgeWinner's subgraph within 100 blocks"
-  PUBLISHER_SIGNAL_ATTRACTED  "the amount of GRT signalled on a given Publisher's Subgraphs"
-  PUBLISHER_SUBGRAPHS_DEPLOYED
-  USER_BADGES_WON
+  metricNumber: Int!
+  metricName: String!
 }
 
 """
@@ -446,4 +428,20 @@ type EarnedBadgeMetadata @entity {
   value: String!
   "EarnedBadge the metadata refers to"
   earnedBadge: EarnedBadge!
+}
+
+"""
+Merkle Roots that have been posted on chain by an oracle are stored here
+"""
+type MerkleRoot @entity {
+  "root"
+  id: ID!
+  "merkle root posted"
+  root: Bytes!
+  "starting index for leaf lookup"
+  earnedBadgeCountStart: Int!
+  "number of badges in merkle tree (must be power of 2)"
+  numberOfBadges: Int!
+  "true if merkle root was verified by subgraph"
+  valid: Boolean!
 }

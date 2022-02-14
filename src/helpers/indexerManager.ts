@@ -19,7 +19,7 @@ import {
 } from "../Emblem/emblemModels";
 import { incrementProgress } from "../Emblem/metricProgress";
 import {
-  createOrLoadEntityStats,
+  createOrLoadTheGraphEntityStats,
   createOrLoadGraphAccount,
 } from "../helpers/models";
 import { beneficiaryIfLockWallet } from "../mappings/graphTokenLockWallet";
@@ -29,8 +29,8 @@ import {
   BADGE_METRIC_INDEXER_ALLOCATIONS_OPENED,
   BADGE_METRIC_INDEXER_QUERY_FEES_COLLECTED,
   BADGE_METRIC_INDEXER_SUBGRAPHS_INDEXED,
-  zeroBI,
-} from "./constants";
+} from "../Emblem/metrics";
+import { zeroBI } from "./constants";
 
 ////////////////      Public
 
@@ -228,7 +228,7 @@ export function createOrLoadIndexer(
     indexer.queryFeesCollected = zeroBI();
     indexer.save();
 
-    let entityStats = createOrLoadEntityStats();
+    let entityStats = createOrLoadTheGraphEntityStats();
     entityStats.indexerCount = entityStats.indexerCount + 1;
     entityStats.save();
   }

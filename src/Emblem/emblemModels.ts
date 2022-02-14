@@ -6,13 +6,54 @@ import {
   EarnedBadgeMetadata,
   EarnedBadgeCount,
   MetricConsumer,
-  MerkleRoot,
-  MerkleNode,
+  BadgeMetric,
+  EmblemEntityStats,
 } from "../../generated/schema";
 import { zeroBI } from "../helpers/constants";
-import { createOrLoadEntityStats } from "../helpers/models";
 import { BigInt, ethereum } from "@graphprotocol/graph-ts/index";
 import { crypto, Bytes } from "@graphprotocol/graph-ts";
+import { BadgeDefinitionCreated } from "../../generated/EmblemSubgraphController/EmblemSubgraphController";
+import { generateBadgeMetrics } from "./metrics";
+import { generateGenesisBadgeDefinitions } from "./genesisBadges";
+
+export function processBadgeDefinitionCreated(
+  event: BadgeDefinitionCreated
+): void {
+  const entityStats = createOrLoadEmblemEntityStats();
+  const badgeDefinitionNumber = entityStats.badgeDefinitionCount + 1;
+  const metricNumber = event.params._metric;
+  let badgeMetric = BadgeMetric.load(metricNumber.toString());
+  if (badgeMetric != null) {
+    badgeMetric = badgeMetric as BadgeMetric;
+    createOrLoadBadgeDefinition(
+      BigInt.fromI32(badgeDefinitionNumber).toString(),
+      metricNumber.toString(),
+      badgeMetric.metricName,
+      event.params._threshold,
+      zeroBI(),
+      ""
+    );
+  }
+}
+
+export function createOrLoadEmblemEntityStats(): EmblemEntityStats {
+  let entityStats = EmblemEntityStats.load("1");
+
+  if (entityStats == null) {
+    entityStats = new EmblemEntityStats("1");
+    entityStats.earnedBadgeCount = 0;
+    entityStats.badgeWinnerCount = 0;
+    entityStats.badgeDefinitionCount = 0;
+    entityStats.badgeMetricCount = 0;
+
+    entityStats.save();
+
+    generateBadgeMetrics();
+    generateGenesisBadgeDefinitions();
+  }
+
+  return entityStats as EmblemEntityStats;
+}
 
 export function createOrLoadBadgeUser(address: string): BadgeUser {
   let badgeUser = BadgeUser.load(address);
@@ -36,6 +77,8 @@ export function createOrLoadBadgeDefinition(
   let badgeDefinition = BadgeDefinition.load(name);
 
   if (badgeDefinition == null) {
+    _createOrLoadBadgeMetric(metric);
+
     badgeDefinition = new BadgeDefinition(name);
     badgeDefinition.description = description;
     badgeDefinition.metric = metric;
@@ -44,7 +87,7 @@ export function createOrLoadBadgeDefinition(
     badgeDefinition.ipfsURI = ipfsURI;
     badgeDefinition.earnedBadgeCount = 0;
 
-    let entityStats = createOrLoadEntityStats();
+    let entityStats = createOrLoadEmblemEntityStats();
     badgeDefinition.badgeDefinitionNumber = entityStats.badgeDefinitionCount;
     entityStats.badgeDefinitionCount = entityStats.badgeDefinitionCount + 1;
     entityStats.save();
@@ -59,6 +102,19 @@ export function createOrLoadBadgeDefinition(
   }
 
   return badgeDefinition as BadgeDefinition;
+}
+
+function _createOrLoadBadgeMetric(metricName: string): BadgeMetric {
+  let metric = BadgeMetric.load(metricName);
+  if (metric == null) {
+    metric = new BadgeMetric(metricName);
+    const entityStats = createOrLoadEmblemEntityStats();
+    metric.metricNumber = entityStats.badgeMetricCount;
+    metric.save();
+    entityStats.badgeMetricCount = entityStats.badgeMetricCount + 1;
+    entityStats.save();
+  }
+  return metric as BadgeMetric;
 }
 
 function createOrLoadMetricConsumer(metric: string): MetricConsumer {
@@ -81,7 +137,7 @@ export function createEarnedBadge(
 
   if (earnedBadge == null) {
     // increment global, badgeDefinition, and badgeWinner earnedBadgeCounts
-    let entityStats = createOrLoadEntityStats();
+    let entityStats = createOrLoadEmblemEntityStats();
     let earnedBadgeCount = new EarnedBadgeCount(
       BigInt.fromI32(entityStats.earnedBadgeCount).toString()
     );
@@ -123,124 +179,7 @@ export function createEarnedBadge(
     entityStats.save();
     badgeDefinition.earnedBadgeCount = badgeDefinition.earnedBadgeCount + 1;
     badgeDefinition.save();
-
-    _generateMerkleRootIfNeeded();
   }
-}
-
-function _generateMerkleRootIfNeeded(): void {
-  let entityStats = createOrLoadEntityStats();
-  let merkleTreeSize = 256; // could add to schema and allow on-chain actions to change this value
-  if (entityStats.earnedBadgeCount % merkleTreeSize == 0) {
-    let r = _generateMerkleRoot(
-      entityStats.lastMerkledBadgeIndex + 1,
-      merkleTreeSize
-    );
-    let mRoot = new MerkleRoot(r.toHexString());
-    mRoot.root = r;
-    mRoot.earnedBadgeCountStart = entityStats.lastMerkledBadgeIndex + 1;
-    mRoot.numberOfBadges = merkleTreeSize;
-    mRoot.save();
-
-    entityStats.lastMerkledBadgeIndex =
-      entityStats.lastMerkledBadgeIndex + merkleTreeSize;
-    entityStats.save();
-  }
-}
-
-function _generateMerkleRoot(
-  badgeNumberStart: i32,
-  numberOfBadges: i32
-): Bytes {
-  let maxDepth = Math.log2(numberOfBadges) as i32;
-  return _generateMerkleRootWithDepth(
-    badgeNumberStart,
-    numberOfBadges,
-    0,
-    maxDepth
-  );
-}
-
-function _generateMerkleRootWithDepth(
-  badgeNumberStart: i32,
-  numberOfBadges: i32,
-  depth: i32,
-  maxDepth: i32
-): Bytes {
-  if (numberOfBadges > 2) {
-    let leftBranch = _generateMerkleRootWithDepth(
-      badgeNumberStart,
-      numberOfBadges / 2,
-      depth + 1,
-      maxDepth
-    );
-    let rightBranch = _generateMerkleRootWithDepth(
-      badgeNumberStart + numberOfBadges / 2,
-      numberOfBadges / 2,
-      depth + 1,
-      maxDepth
-    );
-    let encoded = _concatBytes32(leftBranch, rightBranch);
-    let hash = changetype<Bytes>(crypto.keccak256(encoded));
-
-    let node = new MerkleNode(hash.toHex()) as MerkleNode;
-    node.hash = hash;
-    node.childEncoding = changetype<Bytes>(encoded);
-    node.depth = depth;
-    node.index = (badgeNumberStart / Math.pow(2, maxDepth - depth)) as i32;
-    node.save();
-    return hash;
-  } else {
-    let leftLeaf = _leafIdToHash(BigInt.fromI32(badgeNumberStart).toString());
-    let rightLeaf = _leafIdToHash(
-      BigInt.fromI32(badgeNumberStart + 1).toString()
-    );
-    let encoded = _concatBytes32(leftLeaf, rightLeaf);
-    let hash = changetype<Bytes>(crypto.keccak256(encoded));
-
-    let node = new MerkleNode(hash.toHex()) as MerkleNode;
-    node.hash = hash;
-    node.childEncoding = changetype<Bytes>(encoded);
-    node.depth = depth;
-    node.index = badgeNumberStart / 2;
-    node.save();
-
-    return hash;
-  }
-}
-
-function _concatBytes32(firstBytes: Bytes, secondBytes: Bytes): Bytes {
-  let fullBytes = Bytes.fromHexString(
-    firstBytes
-      .toHex()
-      .concat(
-        "5555555555555555555555555555555555555555555555555555555555555555"
-      )
-  );
-  for (let i = 0; i < 32; i++) {
-    fullBytes.fill(secondBytes[i], i + 32, i + 33);
-  }
-  return changetype<Bytes>(fullBytes);
-}
-
-function _leafIdToHash(leafId: string): Bytes {
-  let leaf = EarnedBadgeCount.load(leafId) as EarnedBadgeCount;
-  let earnedBadge = EarnedBadge.load(leaf.earnedBadge) as EarnedBadge;
-  return changetype<Bytes>(earnedBadge.hash);
-}
-
-// The Graph's Assemblyscript Ethereum API doesn't appear to support packed encoding
-// This function turns a BadgeWinner address + BadgeDefinition number into an Ethereum
-// word identical to encoding an address with a uint8 using solidity's built in abi.encodePacked()
-function _encodeLeaf(badgeWinner: string, badgeDefinitionId: i32): Bytes {
-  let encodedLeaf = Bytes.fromHexString(badgeWinner.concat("00"));
-  return changetype<Bytes>(encodedLeaf.fill(badgeDefinitionId, 20, 22));
-}
-
-function _hashLeaf(badgeWinner: string, badgeDefinitionId: i32): Bytes {
-  return changetype<Bytes>(
-    crypto.keccak256(_encodeLeaf(badgeWinner, badgeDefinitionId))
-  );
 }
 
 function _createOrLoadBadgeWinner(userId: string): BadgeWinner {
@@ -254,7 +193,7 @@ function _createOrLoadBadgeWinner(userId: string): BadgeWinner {
     winner.votingPower = zeroBI();
     winner.save();
 
-    let entityStats = createOrLoadEntityStats();
+    let entityStats = createOrLoadEmblemEntityStats();
     entityStats.badgeWinnerCount = entityStats.badgeWinnerCount + 1;
     entityStats.save();
   }
@@ -304,4 +243,18 @@ export class EarnedBadgeEventData {
     this.timestamp = event.block.timestamp;
     this.metadata = metadata;
   }
+}
+
+// The Graph's Assemblyscript Ethereum API doesn't appear to support packed encoding
+// This function turns a BadgeWinner address + BadgeDefinition number into an Ethereum
+// word identical to encoding an address with a uint8 using solidity's built in abi.encodePacked()
+function _encodeLeaf(badgeWinner: string, badgeDefinitionId: i32): Bytes {
+  let encodedLeaf = Bytes.fromHexString(badgeWinner.concat("00"));
+  return changetype<Bytes>(encodedLeaf.fill(badgeDefinitionId, 20, 22));
+}
+
+function _hashLeaf(badgeWinner: string, badgeDefinitionId: i32): Bytes {
+  return changetype<Bytes>(
+    crypto.keccak256(_encodeLeaf(badgeWinner, badgeDefinitionId))
+  );
 }

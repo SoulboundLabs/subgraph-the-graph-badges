@@ -1,7 +1,7 @@
 import { TokenLockCreated } from "../../generated/GraphTokenLockWalletManager/GraphTokenLockWalletManager";
 import { log } from "@graphprotocol/graph-ts";
 import { TokenLockWallet } from "../../generated/schema";
-import { createOrLoadEntityStats } from "../helpers/models";
+import { createOrLoadTheGraphEntityStats } from "../helpers/models";
 import { generateGenesisBadgeDefinitions } from "../Emblem/genesisBadges";
 
 export function handleTokenLockCreated(event: TokenLockCreated): void {
@@ -12,7 +12,7 @@ export function handleTokenLockCreated(event: TokenLockCreated): void {
   tokenLock.beneficiary = event.params.beneficiary.toHexString();
   tokenLock.save();
 
-  let entityStats = createOrLoadEntityStats();
+  let entityStats = createOrLoadTheGraphEntityStats();
   entityStats.tokenLockWalletCount = entityStats.tokenLockWalletCount + 1;
   entityStats.save();
 

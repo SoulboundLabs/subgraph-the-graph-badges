@@ -18,9 +18,12 @@ import { beneficiaryIfLockWallet } from "../mappings/graphTokenLockWallet";
 import {
   BADGE_AWARD_METADATA_NAME_SUBGRAPH,
   BADGE_METRIC_PUBLISHER_SUBGRAPHS_DEPLOYED,
-  zeroBI,
-} from "./constants";
-import { createOrLoadEntityStats, createOrLoadGraphAccount } from "./models";
+} from "../Emblem/metrics";
+import {
+  createOrLoadTheGraphEntityStats,
+  createOrLoadGraphAccount,
+} from "./models";
+import { zeroBI } from "./constants";
 
 ////////////////      Public
 
@@ -134,7 +137,7 @@ function _createOrLoadPublisher(publisherId: string): Publisher {
     publisher.subgraphCount = 0;
     publisher.save();
 
-    let entityStats = createOrLoadEntityStats();
+    let entityStats = createOrLoadTheGraphEntityStats();
     entityStats.publisherCount = entityStats.publisherCount + 1;
     entityStats.save();
   }

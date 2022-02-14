@@ -7,7 +7,7 @@ import {
   BADGE_METRIC_INDEXER_QUERY_FEES_COLLECTED,
   BADGE_METRIC_INDEXER_SUBGRAPHS_INDEXED,
   BADGE_METRIC_PUBLISHER_SUBGRAPHS_DEPLOYED,
-} from "../helpers/constants";
+} from "./metrics";
 
 // In order for retroactive badge drops to cover the entire subgraph
 // history, this function needs to be called from the first event.

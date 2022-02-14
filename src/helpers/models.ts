@@ -1,26 +1,31 @@
-import { EntityStats, GraphAccount, Protocol } from "../../generated/schema";
-import { createOrLoadBadgeUser } from "../Emblem/emblemModels";
-import { PROTOCOL_NAME_THE_GRAPH, zeroBI } from "./constants";
+import {
+  TheGraphEntityStats,
+  GraphAccount,
+  Protocol,
+} from "../../generated/schema";
+import {
+  createOrLoadBadgeUser,
+  createOrLoadEmblemEntityStats,
+} from "../Emblem/emblemModels";
+import { PROTOCOL_NAME_THE_GRAPH } from "./constants";
 
-export function createOrLoadEntityStats(): EntityStats {
-  let entityStats = EntityStats.load("1");
+export function createOrLoadTheGraphEntityStats(): TheGraphEntityStats {
+  let entityStats = TheGraphEntityStats.load("1");
 
   if (entityStats == null) {
-    entityStats = new EntityStats("1");
+    entityStats = new TheGraphEntityStats("1");
     entityStats.indexerCount = 0;
     entityStats.delegatorCount = 0;
     entityStats.curatorCount = 0;
     entityStats.publisherCount = 0;
     entityStats.tokenLockWalletCount = 0;
-    entityStats.earnedBadgeCount = 0;
-    entityStats.badgeWinnerCount = 0;
-    entityStats.badgeDefinitionCount = 0;
-    entityStats.lastMerkledBadgeIndex = -1;
 
     entityStats.save();
+
+    createOrLoadEmblemEntityStats();
   }
 
-  return entityStats as EntityStats;
+  return entityStats as TheGraphEntityStats;
 }
 
 ////////////////      GraphAccount

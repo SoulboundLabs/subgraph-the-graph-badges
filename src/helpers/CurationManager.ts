@@ -19,9 +19,9 @@ import {
   BADGE_METRIC_CURATOR_HOUSE_ODDS,
   BADGE_METRIC_CURATOR_SUBGRAPHS_SIGNALLED,
   BADGE_METRIC_PUBLISHER_SIGNAL_ATTRACTED,
-  zeroBD,
-} from "./constants";
-import { createOrLoadEntityStats } from "./models";
+} from "../Emblem/metrics";
+import { createOrLoadTheGraphEntityStats } from "./models";
+import { zeroBD } from "./constants";
 
 ////////////////      Public
 
@@ -209,7 +209,7 @@ function _createOrLoadCurator(
     curator.uniqueSignalCount = 0;
     curator.save();
 
-    let entityStats = createOrLoadEntityStats();
+    let entityStats = createOrLoadTheGraphEntityStats();
     let curatorCount = entityStats.curatorCount + 1;
     entityStats.curatorCount = curatorCount;
     entityStats.save();

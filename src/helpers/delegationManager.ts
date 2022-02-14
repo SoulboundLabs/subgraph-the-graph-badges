@@ -10,7 +10,7 @@ import {
 } from "../Emblem/emblemModels";
 import { incrementProgress } from "../Emblem/metricProgress";
 import {
-  createOrLoadEntityStats,
+  createOrLoadTheGraphEntityStats,
   createOrLoadGraphAccount,
 } from "../helpers/models";
 import { beneficiaryIfLockWallet } from "../mappings/graphTokenLockWallet";
@@ -19,9 +19,9 @@ import {
   BADGE_AWARD_METADATA_NAME_TOKENS,
   BADGE_METRIC_DELEGATOR_INDEXERS,
   BADGE_METRIC_INDEXER_DELEGATOR_COUNT,
-  zeroBI,
-} from "./constants";
+} from "../Emblem/metrics";
 import { createOrLoadIndexer } from "./indexerManager";
+import { zeroBI } from "./constants";
 
 ////////////////      Public
 
@@ -119,7 +119,7 @@ export function createOrLoadDelegator(id: string): Delegator {
     delegator.uniqueActiveDelegationCount = 0;
     delegator.save();
 
-    let entityStats = createOrLoadEntityStats();
+    let entityStats = createOrLoadTheGraphEntityStats();
     let delegatorCount = entityStats.delegatorCount + 1;
     entityStats.delegatorCount = delegatorCount;
     entityStats.save();
