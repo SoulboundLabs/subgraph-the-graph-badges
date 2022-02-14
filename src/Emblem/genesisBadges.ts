@@ -20,7 +20,7 @@ export function generateGenesisBadgeDefinitions(): void {
     BADGE_METRIC_INDEXER_SUBGRAPHS_INDEXED,
     BigInt.fromI32(1),
     BigInt.fromI32(1),
-    "QmUEaHQdXoAcNeyyNmm6G4WGHkUdxTyq42M41bcitzoiyr"
+    "QmWTiYmoucGmr6EpPweimcZYvfXyfhsRRxxFthCFKrEktN"
   );
   createOrLoadBadgeDefinition(
     "Alchemist II",
@@ -134,7 +134,7 @@ export function generateGenesisBadgeDefinitions(): void {
     BADGE_METRIC_DELEGATOR_INDEXERS,
     BigInt.fromI32(3),
     BigInt.fromI32(2),
-    "QmQezYFjQNzFs1cj1No2EFTXbURMLKv91ig3LyqNqYpkb2"
+    "QmezkgQA82CFRW3tXEKpyrpt7h1hrMF4dxCSL2ouMJbFZZ"
   );
   createOrLoadBadgeDefinition(
     "Guardian III",
