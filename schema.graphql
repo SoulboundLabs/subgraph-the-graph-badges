@@ -23,7 +23,7 @@ type TheGraphEntityStats @entity {
 type GraphAccount @entity {
   "ETH address of Graph Account"
   id: ID!
-  "BadgeWinner associated with this Graph Account"
+  "BadgeUser associated with this Graph Account"
   badgeUser: BadgeUser!
   "Number of Graph badges awarded to this account"
   awardCount: Int!
@@ -305,11 +305,6 @@ type EarnedBadge @entity {
   metadata: [EarnedBadgeMetadata!]! @derivedFrom(field: "earnedBadge")
   "Stores reference to global badge number"
   earnedBadgeCount: EarnedBadgeCount! @derivedFrom(field: "earnedBadge")
-
-  "keccak256({WinnerAddress}-{BadgeDefinitionNumber})"
-  hash: Bytes!
-  "Bytes32 encoded badge leaf useful for encryption testing"
-  encodedLeaf: Bytes!
 }
 
 """
@@ -431,18 +426,3 @@ type MetricConsumer @entity {
   badgeDefinitions: [BadgeDefinition!]!
 }
 
-"""
-Merkle Roots that have been posted on chain by an oracle are stored here
-"""
-type MerkleRoot @entity {
-  "root"
-  id: ID!
-  "merkle root posted"
-  root: Bytes!
-  "starting index for leaf lookup"
-  earnedBadgeCountStart: Int!
-  "number of badges in merkle tree (must be power of 2)"
-  numberOfBadges: Int!
-  "true if merkle root was verified by subgraph"
-  valid: Boolean!
-}
