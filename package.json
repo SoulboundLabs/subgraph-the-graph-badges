@@ -17,8 +17,8 @@
     "deploy-local": "npx graph deploy emblem-dao/the-graph-badges --ipfs http://localhost:5001 --node http://127.0.0.1:8020",
     "prep:addresses:mainnet": "ts-node config/mainnetAddressScript.ts && mustache ./config/generatedAddresses.json ./config/addresses.template.ts > ./config/addresses.ts",
     "prep:addresses:rinkeby": "ts-node config/rinkebyAddressScript.ts && mustache ./config/generatedAddresses.json ./config/addresses.template.ts > ./config/addresses.ts",
-    "prepare:rinkeby": "yarn prep:addresses:rinkeby && mustache ./config/generatedAddresses.json subgraph.template.yaml > subgraph.yaml && graph codegen --output-dir src/types/",
-    "prepare:mainnet": "yarn prep:addresses:mainnet && mustache ./config/generatedAddresses.json subgraph.template.yaml > subgraph.yaml && graph codegen --output-dir src/types/",
+    "prepare:rinkeby": "npm run prep:addresses:rinkeby && mustache ./config/generatedAddresses.json subgraph.template.yaml > subgraph.yaml && graph codegen --output-dir src/types/",
+    "prepare:mainnet": "npm run prep:addresses:mainnet && mustache ./config/generatedAddresses.json subgraph.template.yaml > subgraph.yaml && graph codegen --output-dir src/types/",
     "prepare": "husky install"
   },
   "lint-staged": {

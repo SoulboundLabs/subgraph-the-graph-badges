@@ -134,7 +134,7 @@ export function generateGenesisBadgeDefinitions(): void {
     BADGE_METRIC_CURATOR_SUBGRAPHS_SIGNALLED,
     BigInt.fromI32(5),
     BigInt.fromI32(2),
-    "QmPPD2s53kt11wW9KLhmVrYXHSdLtH2H23NhYAYUsALJ3Y"
+    "QmYphgzNZpvMrGtt67PheAbFXUgEs1Guu3wFvg1zmzuvBe"
   );
   createOrLoadBadgeDefinition(
     "Pathfinder III",
@@ -142,7 +142,7 @@ export function generateGenesisBadgeDefinitions(): void {
     BADGE_METRIC_CURATOR_SUBGRAPHS_SIGNALLED,
     BigInt.fromI32(10),
     BigInt.fromI32(3),
-    "QmenzU7AGTNAvdfzjShCt1ZBd9WaEm41zLGF1JmW7hs4k4"
+    "QmaFkio5rvgnKfddF4xTph2bxVHr9Uaf298w7v33KGDNVv"
   );
 
   //////// DEVELOPER BADGES ////////
