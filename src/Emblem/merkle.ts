@@ -57,8 +57,10 @@ function _generateMerkleRootWithDepth(
 
     return hash;
   } else {
-    let leftLeaf = _leafIdToHash(BigInt.fromI32(badgeNumberStart).toString());
-    let rightLeaf = _leafIdToHash(
+    let leftLeaf = _earnedBadgeCountToHash(
+      BigInt.fromI32(badgeNumberStart).toString()
+    );
+    let rightLeaf = _earnedBadgeCountToHash(
       BigInt.fromI32(badgeNumberStart + 1).toString()
     );
     let encoded = _concatBytes32(leftLeaf, rightLeaf);
@@ -82,7 +84,7 @@ function _concatBytes32(firstBytes: Bytes, secondBytes: Bytes): Bytes {
   return changetype<Bytes>(fullBytes);
 }
 
-function _leafIdToHash(leafId: string): Bytes {
+function _earnedBadgeCountToHash(earnedBadgeCountId: string): Bytes {
   let leaf = EarnedBadgeCount.load(leafId) as EarnedBadgeCount;
   let earnedBadge = EarnedBadge.load(leaf.earnedBadge) as EarnedBadge;
   return changetype<Bytes>(earnedBadge.hash);
