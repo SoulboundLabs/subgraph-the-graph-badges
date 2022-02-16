@@ -49,5 +49,6 @@ function createBadgeMetric(metricNumber: i32, metricName: string): void {
     badgeMetric = new BadgeMetric(badgeMetricId);
     badgeMetric.metricNumber = metricNumber;
     badgeMetric.metricName = metricName;
+    badgeMetric.save();
   }
 }
