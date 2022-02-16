@@ -44,7 +44,7 @@ export function generateGenesisBadgeDefinitions(): void {
     "Query Collector I",
     "Collect 1k GRT in query fees",
     BADGE_METRIC_INDEXER_QUERY_FEES_COLLECTED,
-    BigInt.fromI32(1000),
+    BigInt.fromString("1000000000000000000000"),
     BigInt.fromI32(1),
     "QmWoj4di4bukC81PNCeSRSuQqEhLoo75XHANvuz7n4ejPe"
   );
@@ -52,7 +52,7 @@ export function generateGenesisBadgeDefinitions(): void {
     "Query Collector II",
     "Collect 10k GRT in query fees",
     BADGE_METRIC_INDEXER_QUERY_FEES_COLLECTED,
-    BigInt.fromI32(10000),
+    BigInt.fromString("10000000000000000000000"),
     BigInt.fromI32(1),
     "QmdcHm17vat66zXFkjjACZWcRWpik7DVE7WZTkdjQtaZpu"
   );
@@ -61,7 +61,7 @@ export function generateGenesisBadgeDefinitions(): void {
     "Query Collector III",
     "Collect 25k GRT in query fees",
     BADGE_METRIC_INDEXER_QUERY_FEES_COLLECTED,
-    BigInt.fromI32(25000),
+    BigInt.fromString("25000000000000000000000"),
     BigInt.fromI32(1),
     "QmNN7exESvL8jcoyVbroFf7vkFUa697jenR8E7fX3nyRTa"
   );
