@@ -123,7 +123,7 @@ export function createEarnedBadge(
     earnedBadgeCount.earnedBadge = badgeId;
     earnedBadgeCount.save();
 
-    let badgeWinner = _createOrLoadBadgeWinner(badgeUserId);
+    let badgeWinner = _createOrLoadBadgeWinner(badgeUserId, entityStats);
     badgeWinner.earnedBadgeCount = badgeWinner.earnedBadgeCount + 1;
     badgeWinner.votingPower = badgeWinner.votingPower.plus(
       badgeDefinition.votingPower
@@ -152,7 +152,10 @@ export function createEarnedBadge(
   }
 }
 
-function _createOrLoadBadgeWinner(userId: string): BadgeWinner {
+function _createOrLoadBadgeWinner(
+  userId: string,
+  entityStats: EmblemEntityStats
+): BadgeWinner {
   let winner = BadgeWinner.load(userId);
 
   if (winner == null) {
@@ -163,7 +166,6 @@ function _createOrLoadBadgeWinner(userId: string): BadgeWinner {
     winner.votingPower = zeroBI();
     winner.save();
 
-    let entityStats = createOrLoadEmblemEntityStats();
     entityStats.badgeWinnerCount = entityStats.badgeWinnerCount + 1;
     entityStats.save();
   }
