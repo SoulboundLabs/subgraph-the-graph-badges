@@ -11,30 +11,8 @@ import {
 } from "../../generated/schema";
 import { zeroBI } from "../helpers/constants";
 import { BigInt, ethereum } from "@graphprotocol/graph-ts/index";
-import { crypto, Bytes } from "@graphprotocol/graph-ts";
-import { BadgeDefinitionCreated } from "../../generated/EmblemSubgraphController/EmblemSubgraphController";
 import { generateBadgeMetrics } from "./metrics";
 import { generateGenesisBadgeDefinitions } from "./genesisBadges";
-
-export function processBadgeDefinitionCreated(
-  event: BadgeDefinitionCreated
-): void {
-  const entityStats = createOrLoadEmblemEntityStats();
-  const badgeDefinitionNumber = entityStats.badgeDefinitionCount + 1;
-  const metricNumber = event.params._metric;
-  let badgeMetric = BadgeMetric.load(metricNumber.toString());
-  if (badgeMetric != null) {
-    badgeMetric = badgeMetric as BadgeMetric;
-    createOrLoadBadgeDefinition(
-      BigInt.fromI32(badgeDefinitionNumber).toString(),
-      metricNumber.toString(),
-      badgeMetric.metricName,
-      event.params._threshold,
-      zeroBI(),
-      ""
-    );
-  }
-}
 
 export function createOrLoadEmblemEntityStats(): EmblemEntityStats {
   let entityStats = EmblemEntityStats.load("1");
@@ -159,14 +137,6 @@ export function createEarnedBadge(
     earnedBadge.transactionHash = eventData.transactionHash;
     earnedBadge.timestampAwarded = eventData.timestamp;
     earnedBadge.awardNumber = badgeDefinition.earnedBadgeCount + 1;
-    earnedBadge.encodedLeaf = _encodeLeaf(
-      badgeWinner.id,
-      badgeDefinition.badgeDefinitionNumber
-    );
-    earnedBadge.hash = _hashLeaf(
-      badgeWinner.id,
-      badgeDefinition.badgeDefinitionNumber
-    );
     earnedBadge.save();
 
     // create metadata entities
@@ -243,18 +213,4 @@ export class EarnedBadgeEventData {
     this.timestamp = event.block.timestamp;
     this.metadata = metadata;
   }
-}
-
-// The Graph's Assemblyscript Ethereum API doesn't appear to support packed encoding
-// This function turns a BadgeWinner address + BadgeDefinition number into an Ethereum
-// word identical to encoding an address with a uint8 using solidity's built in abi.encodePacked()
-function _encodeLeaf(badgeWinner: string, badgeDefinitionId: i32): Bytes {
-  let encodedLeaf = Bytes.fromHexString(badgeWinner.concat("00"));
-  return changetype<Bytes>(encodedLeaf.fill(badgeDefinitionId, 20, 22));
-}
-
-function _hashLeaf(badgeWinner: string, badgeDefinitionId: i32): Bytes {
-  return changetype<Bytes>(
-    crypto.keccak256(_encodeLeaf(badgeWinner, badgeDefinitionId))
-  );
 }
