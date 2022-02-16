@@ -1,18 +1,38 @@
-import { NSignalMinted, NSignalBurned } from "../../generated/GNS/GNS";
 import { BigDecimal, BigInt } from "@graphprotocol/graph-ts/index";
-import { Curator, NameSignal, Subgraph, Publisher } from "../../generated/schema";
-import { createOrLoadEntityStats, BadgeAwardEventData, BadgeAwardEventMetadata } from "./models";
-import { zeroBD, BADGE_TRACK_CURATOR_SUBGRAPHS, BADGE_TRACK_DEVELOPER_SIGNAL, BADGE_TRACK_CURATOR_HOUSE_ODDS, BADGE_TRACK_CURATOR_PLANET_OF_THE_APED, BADGE_AWARD_METADATA_NAME_CURATOR, BADGE_AWARD_METADATA_NAME_TOKENS, BADGE_AWARD_METADATA_NAME_SUBGRAPH } from "./constants";
-import { incrementProgressForTrack, updateProgressForTrack } from "../Badges/standardTrackBadges";
-import { log } from "@graphprotocol/graph-ts";
+import { NSignalBurned, NSignalMinted } from "../../generated/GNS/GNS";
+import { Curator, NameSignal, Subgraph } from "../../generated/schema";
+import {
+  EarnedBadgeEventData,
+  EarnedBadgeEventMetadata,
+} from "../Emblem/emblemModels";
+import {
+  addToProgress,
+  incrementProgress,
+  subtractFromProgress,
+} from "../Emblem/metricProgress";
 import { beneficiaryIfLockWallet } from "../mappings/graphTokenLockWallet";
+import {
+  BADGE_AWARD_METADATA_NAME_CURATOR,
+  BADGE_AWARD_METADATA_NAME_SUBGRAPH,
+  BADGE_AWARD_METADATA_NAME_TOKENS,
+  BADGE_METRIC_CURATOR_APE,
+  BADGE_METRIC_CURATOR_HOUSE_ODDS,
+  BADGE_METRIC_CURATOR_SUBGRAPHS_SIGNALLED,
+  BADGE_METRIC_PUBLISHER_SIGNAL_ATTRACTED,
+} from "../Emblem/metrics";
+import { createOrLoadTheGraphEntityStats } from "./models";
+import { zeroBD } from "./constants";
 
 ////////////////      Public
 
 export function processCurationSignal(event: NSignalMinted): void {
-  let subgraphOwner = beneficiaryIfLockWallet(event.params.graphAccount.toHexString());
+  let subgraphOwner = beneficiaryIfLockWallet(
+    event.params.graphAccount.toHexString()
+  );
   let subgraphNumber = event.params.subgraphNumber.toString();
-  let curatorId = beneficiaryIfLockWallet(event.params.nameCurator.toHexString());
+  let curatorId = beneficiaryIfLockWallet(
+    event.params.nameCurator.toHexString()
+  );
   let nSignal = event.params.nSignalCreated;
   let vSignal = event.params.vSignalCreated.toBigDecimal();
   let tokensDeposited = event.params.tokensDeposited;
@@ -28,13 +48,17 @@ export function processCurationSignal(event: NSignalMinted): void {
 }
 
 export function processCurationBurn(event: NSignalBurned): void {
-  let subgraphOwner = beneficiaryIfLockWallet(event.params.graphAccount.toHexString());
+  let subgraphOwner = beneficiaryIfLockWallet(
+    event.params.graphAccount.toHexString()
+  );
   let subgraphNumber = event.params.subgraphNumber.toString();
-  let curatorId = beneficiaryIfLockWallet(event.params.nameCurator.toHexString());
+  let curatorId = beneficiaryIfLockWallet(
+    event.params.nameCurator.toHexString()
+  );
   let nSignalBurnt = event.params.nSignalBurnt;
   let vSignalBurnt = event.params.vSignalBurnt.toBigDecimal();
   let tokensReceived = event.params.tokensReceived;
-  let eventData = new BadgeAwardEventData(event, null);
+  let eventData = new EarnedBadgeEventData(event, []);
   _processCurationBurn(
     subgraphOwner,
     subgraphNumber,
@@ -58,28 +82,43 @@ function _processCurationSignal(
   event: NSignalMinted
 ): void {
   let subgraphId = subgraphOwner.concat("-").concat(subgraphNumber);
-  let metadata: Array<BadgeAwardEventMetadata> = [
-    new BadgeAwardEventMetadata(BADGE_AWARD_METADATA_NAME_TOKENS, tokensDeposited.toString()),
-    new BadgeAwardEventMetadata(BADGE_AWARD_METADATA_NAME_CURATOR, curatorId),
-    new BadgeAwardEventMetadata(BADGE_AWARD_METADATA_NAME_SUBGRAPH, subgraphOwner.concat("-").concat(subgraphNumber))
+  let metadata: Array<EarnedBadgeEventMetadata> = [
+    new EarnedBadgeEventMetadata(
+      BADGE_AWARD_METADATA_NAME_TOKENS,
+      tokensDeposited.toString()
+    ),
+    new EarnedBadgeEventMetadata(BADGE_AWARD_METADATA_NAME_CURATOR, curatorId),
+    new EarnedBadgeEventMetadata(
+      BADGE_AWARD_METADATA_NAME_SUBGRAPH,
+      subgraphOwner.concat("-").concat(subgraphNumber)
+    ),
   ];
-  let eventData = new BadgeAwardEventData(event, metadata);
+  let eventData = new EarnedBadgeEventData(event, metadata);
   let nameSignal = createOrLoadNameSignal(curatorId, subgraphId, eventData);
 
   let isNameSignalBecomingActive =
     nameSignal.nameSignal.isZero() && !nSignal.isZero();
   if (isNameSignalBecomingActive) {
-    incrementProgressForTrack(BADGE_TRACK_CURATOR_SUBGRAPHS, curatorId, eventData);
+    incrementProgress(
+      curatorId,
+      BADGE_METRIC_CURATOR_SUBGRAPHS_SIGNALLED,
+      eventData
+    );
+
     let subgraph = Subgraph.load(subgraphId) as Subgraph;
     let curatorIsSubgraphOwner = subgraphOwner == curatorId;
-    
-    if (eventData.blockNumber.minus(subgraph.blockPublished).le(BigInt.fromI32(100))
-    && !curatorIsSubgraphOwner) {
-      incrementProgressForTrack(BADGE_TRACK_CURATOR_PLANET_OF_THE_APED, curatorId, eventData);
+
+    if (
+      eventData.blockNumber
+        .minus(subgraph.blockPublished)
+        .le(BigInt.fromI32(100)) &&
+      !curatorIsSubgraphOwner
+    ) {
+      incrementProgress(curatorId, BADGE_METRIC_CURATOR_APE, eventData);
     }
 
     if (curatorIsSubgraphOwner) {
-      incrementProgressForTrack(BADGE_TRACK_CURATOR_HOUSE_ODDS, curatorId, eventData);
+      incrementProgress(curatorId, BADGE_METRIC_CURATOR_HOUSE_ODDS, eventData);
     }
   }
 
@@ -111,10 +150,12 @@ function _processCurationSignal(
   }
   nameSignal.save();
 
-  let publisher = Publisher.load(subgraphOwner);
-  publisher.currentCurationTokens = publisher.currentCurationTokens.plus(tokensDeposited);
-  publisher.save();
-  updateProgressForTrack(BADGE_TRACK_DEVELOPER_SIGNAL, subgraphOwner, publisher.currentCurationTokens, eventData);
+  addToProgress(
+    subgraphOwner,
+    BADGE_METRIC_PUBLISHER_SIGNAL_ATTRACTED,
+    tokensDeposited,
+    eventData
+  );
 }
 
 function _processCurationBurn(
@@ -124,7 +165,7 @@ function _processCurationBurn(
   nSignalBurnt: BigInt,
   vSignalBurnt: BigDecimal,
   tokensReceived: BigInt,
-  eventData: BadgeAwardEventData
+  eventData: EarnedBadgeEventData
 ): void {
   let subgraphId = subgraphOwner.concat("-").concat(subgraphNumber);
   let nameSignal = createOrLoadNameSignal(curatorId, subgraphId, eventData);
@@ -146,18 +187,19 @@ function _processCurationBurn(
   }
   nameSignal.save();
 
-  let publisher = Publisher.load(subgraphOwner);
-  publisher.currentCurationTokens = publisher.currentCurationTokens.minus(tokensReceived);
-  publisher.save();
-
-  updateProgressForTrack(BADGE_TRACK_DEVELOPER_SIGNAL, subgraphOwner, publisher.currentCurationTokens, eventData);
+  subtractFromProgress(
+    subgraphOwner,
+    BADGE_METRIC_PUBLISHER_SIGNAL_ATTRACTED,
+    tokensReceived,
+    eventData
+  );
 }
 
 ////////////////      Models
 
 function _createOrLoadCurator(
   id: string,
-  eventData: BadgeAwardEventData
+  eventData: EarnedBadgeEventData
 ): Curator {
   let curator = Curator.load(id);
 
@@ -167,7 +209,7 @@ function _createOrLoadCurator(
     curator.uniqueSignalCount = 0;
     curator.save();
 
-    let entityStats = createOrLoadEntityStats();
+    let entityStats = createOrLoadTheGraphEntityStats();
     let curatorCount = entityStats.curatorCount + 1;
     entityStats.curatorCount = curatorCount;
     entityStats.save();
@@ -179,7 +221,7 @@ function _createOrLoadCurator(
 export function createOrLoadNameSignal(
   curatorId: string,
   subgraphId: string,
-  eventData: BadgeAwardEventData
+  eventData: EarnedBadgeEventData
 ): NameSignal {
   let nameSignalID = curatorId.concat("-").concat(subgraphId);
   let nameSignal = NameSignal.load(nameSignalID);

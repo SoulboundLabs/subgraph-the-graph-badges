@@ -1,6 +1,8 @@
 import { TokenLockCreated } from "../../generated/GraphTokenLockWalletManager/GraphTokenLockWalletManager";
 import { log } from "@graphprotocol/graph-ts";
 import { TokenLockWallet } from "../../generated/schema";
+import { createOrLoadTheGraphEntityStats } from "../helpers/models";
+import { generateGenesisBadgeDefinitions } from "../Emblem/genesisBadges";
 
 export function handleTokenLockCreated(event: TokenLockCreated): void {
   log.debug("TokenLockWalletCreated event found", []);
@@ -9,6 +11,10 @@ export function handleTokenLockCreated(event: TokenLockCreated): void {
   );
   tokenLock.beneficiary = event.params.beneficiary.toHexString();
   tokenLock.save();
+
+  let entityStats = createOrLoadTheGraphEntityStats();
+  entityStats.tokenLockWalletCount = entityStats.tokenLockWalletCount + 1;
+  entityStats.save();
 }
 
 export function isTokenLockWallet(address: string): boolean {
@@ -20,8 +26,7 @@ export function beneficiaryIfLockWallet(lockWalletId: string): string {
   let lockWallet = TokenLockWallet.load(lockWalletId);
   if (lockWallet != null) {
     return lockWallet.beneficiary;
-  }
-  else {
+  } else {
     return lockWalletId;
   }
 }

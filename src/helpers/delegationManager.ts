@@ -4,22 +4,24 @@ import {
   StakeDelegated,
   StakeDelegatedLocked,
 } from "../../generated/Staking/Staking";
-import { incrementProgressForTrack } from "../Badges/standardTrackBadges";
 import {
-  BadgeAwardEventData,
-  BadgeAwardEventMetadata,
-  createOrLoadEntityStats,
+  EarnedBadgeEventData,
+  EarnedBadgeEventMetadata,
+} from "../Emblem/emblemModels";
+import { incrementProgress } from "../Emblem/metricProgress";
+import {
+  createOrLoadTheGraphEntityStats,
   createOrLoadGraphAccount,
 } from "../helpers/models";
 import { beneficiaryIfLockWallet } from "../mappings/graphTokenLockWallet";
 import {
   BADGE_AWARD_METADATA_NAME_DELEGATOR,
   BADGE_AWARD_METADATA_NAME_TOKENS,
-  BADGE_TRACK_DELEGATOR_INDEXERS,
-  BADGE_TRACK_INDEXER_DELEGATOR_COUNT,
-  zeroBI,
-} from "./constants";
+  BADGE_METRIC_DELEGATOR_INDEXERS,
+  BADGE_METRIC_INDEXER_DELEGATOR_COUNT,
+} from "../Emblem/metrics";
 import { createOrLoadIndexer } from "./indexerManager";
+import { zeroBI } from "./constants";
 
 ////////////////      Public
 
@@ -29,17 +31,17 @@ export function processStakeDelegated(event: StakeDelegated): void {
   );
   let indexerId = beneficiaryIfLockWallet(event.params.indexer.toHexString());
   let tokens = event.params.tokens;
-  let metadata: Array<BadgeAwardEventMetadata> = [
-    new BadgeAwardEventMetadata(
+  let metadata: Array<EarnedBadgeEventMetadata> = [
+    new EarnedBadgeEventMetadata(
       BADGE_AWARD_METADATA_NAME_DELEGATOR,
       delegatorId
     ),
-    new BadgeAwardEventMetadata(
+    new EarnedBadgeEventMetadata(
       BADGE_AWARD_METADATA_NAME_TOKENS,
       tokens.toString()
     ),
   ];
-  let eventData = new BadgeAwardEventData(event, metadata);
+  let eventData = new EarnedBadgeEventData(event, metadata);
   _processStakeDelegated(delegatorId, indexerId, tokens, eventData);
 }
 
@@ -49,7 +51,7 @@ export function processStakeDelegatedLocked(event: StakeDelegatedLocked): void {
   );
   let indexerId = beneficiaryIfLockWallet(event.params.indexer.toHexString());
   let tokens = event.params.tokens;
-  let eventData = new BadgeAwardEventData(event, null);
+  let eventData = new EarnedBadgeEventData(event, []);
   _processStakeDelegatedLocked(delegatorId, indexerId, tokens, eventData);
 }
 
@@ -59,7 +61,7 @@ function _processStakeDelegated(
   delegatorId: string,
   indexerId: string,
   tokens: BigInt,
-  eventData: BadgeAwardEventData
+  eventData: EarnedBadgeEventData
 ): void {
   createOrLoadDelegator(delegatorId);
   let indexer = createOrLoadIndexer(indexerId, eventData);
@@ -81,11 +83,8 @@ function _processStakeDelegated(
   ) {
     delegatedStake.crossed100 = true;
     delegatedStake.save();
-    incrementProgressForTrack(
-      BADGE_TRACK_DELEGATOR_INDEXERS,
-      delegatorId,
-      eventData
-    );
+
+    incrementProgress(delegatorId, BADGE_METRIC_DELEGATOR_INDEXERS, eventData);
   }
 }
 
@@ -93,7 +92,7 @@ function _processStakeDelegatedLocked(
   delegatorId: string,
   indexerId: string,
   tokens: BigInt,
-  eventData: BadgeAwardEventData
+  eventData: EarnedBadgeEventData
 ): void {
   let indexer = createOrLoadIndexer(indexerId, eventData);
   indexer.delegatedTokens = indexer.delegatedTokens.minus(tokens);
@@ -120,7 +119,7 @@ export function createOrLoadDelegator(id: string): Delegator {
     delegator.uniqueActiveDelegationCount = 0;
     delegator.save();
 
-    let entityStats = createOrLoadEntityStats();
+    let entityStats = createOrLoadTheGraphEntityStats();
     let delegatorCount = entityStats.delegatorCount + 1;
     entityStats.delegatorCount = delegatorCount;
     entityStats.save();
@@ -132,7 +131,7 @@ export function createOrLoadDelegator(id: string): Delegator {
 export function createOrLoadDelegatedStake(
   delegatorId: string,
   indexerId: string,
-  eventData: BadgeAwardEventData
+  eventData: EarnedBadgeEventData
 ): DelegatedStake {
   let id = delegatorId.concat("-").concat(indexerId);
   let delegatedStake = DelegatedStake.load(id);
@@ -145,9 +144,9 @@ export function createOrLoadDelegatedStake(
     delegatedStake.crossed100 = false;
     delegatedStake.save();
 
-    incrementProgressForTrack(
-      BADGE_TRACK_INDEXER_DELEGATOR_COUNT,
+    incrementProgress(
       indexerId,
+      BADGE_METRIC_INDEXER_DELEGATOR_COUNT,
       eventData
     );
   }

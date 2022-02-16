@@ -3,13 +3,11 @@
 ########################
 
 """
-Singleton entity that tracks numbers and stats
+Singleton entity that tracks numbers and stats relating to The Graph
 """
-type EntityStats @entity {
+type TheGraphEntityStats @entity {
   "ID is set to 1"
   id: ID!
-  "Number of winners with voting power"
-  voterCount: Int!
   "Number of indexers"
   indexerCount: Int!
   "Number of delegators"
@@ -18,36 +16,17 @@ type EntityStats @entity {
   curatorCount: Int!
   "Number of publishers"
   publisherCount: Int!
-  "Number of badge awarded"
-  awardCount: Int!
-}
-
-type Winner @entity {
-  "ETH address of the winner"
-  id: ID!
-  "Number of badge awards won"
-  awardCount: Int!
-  "Number of badge awards minted"
-  mintedAwardCount: Int!
-  "Voting power accumulated from all badges"
-  votingPower: BigInt!
-  "Badges awarded to address"
-  badgesAwarded: [BadgeAward!]! @derivedFrom(field: "winner")
-  "Graph Account associated with this ETH address. Null until activity is detected"
-  graphAccount: GraphAccount @derivedFrom(field: "winner")
-  "Progress this account has made along all badge tracks"
-  allBadgeTrackProgress: BadgeTrackProgress @derivedFrom(field: "winner")
+  "Number of TokenLockWallets"
+  tokenLockWalletCount: Int!
 }
 
 type GraphAccount @entity {
   "ETH address of Graph Account"
   id: ID!
-  "Winner associated with this Graph Account"
-  winner: Winner!
+  "BadgeWinner associated with this Graph Account"
+  badgeUser: BadgeUser!
   "Number of Graph badges awarded to this account"
   awardCount: Int!
-  "Voting power accumulated from graph badges"
-  votingPower: BigInt!
   "Indexer fields for this Graph Account. Null if never indexed"
   indexer: Indexer @derivedFrom(field: "account")
   "Delegator fields for this Graph Account. Null if never delegated"
@@ -198,8 +177,6 @@ type Publisher @entity {
   subgraphs: [Subgraph!]! @derivedFrom(field: "owner")
   "Number of Subgraphs this Publisher has deployed"
   subgraphCount: Int!
-  "Current GRT being curated on subgraphs deployed by this publisher"
-  currentCurationTokens: BigInt!
 }
 
 type Subgraph @entity {
@@ -239,7 +216,7 @@ type SubgraphVersion @entity {
   "Subgraph deployment of this version"
   subgraphDeployment: SubgraphDeployment!
   "Version number"
-  version: Int!
+  version: BigInt!
   "Subgraph version metadata content address"
   metadataHash: Bytes!
 }
@@ -260,18 +237,60 @@ type SubgraphDeployment @entity {
   versions: [SubgraphVersion!]! @derivedFrom(field: "subgraphDeployment")
 }
 
+"""
+Protocols indexed by this subgraph
+"""
+type Protocol @entity {
+  "Name of the protocol"
+  id: ID!
+}
+
+
+
 ########################
 #### Badge Entities ####
 ########################
 
 """
-The badge that is awarded to winner
+Ethereum accounts this subgraph is tracking in order to award badges
 """
-type BadgeAward @entity {
-  "{badgeName}-{awardCount}"
+type BadgeUser @entity {
+  "Ethereum address"
   id: ID!
-  "Address of the winner"
-  winner: Winner!
+  "Graph Account associated with this user"
+  graphAccount: GraphAccount! @derivedFrom(field: "badgeUser")
+  "BadgeWinner null if no badges won"
+  badgeWinner: BadgeWinner @derivedFrom(field: "badgeUser")
+  "Progress user has made along predefined metrics"
+  progress: [Progress!]! @derivedFrom(field: "badgeUser")
+}
+
+"""
+BadgeUsers that have earned at least one badge
+"""
+type BadgeWinner @entity {
+  "ETH address of the BadgeWinner"
+  id: ID!
+  "Associated BadgeUser"
+  badgeUser: BadgeUser!
+  "Number of badge awards won"
+  earnedBadgeCount: Int!
+  "Number of badge awards minted"
+  mintedAwardCount: Int!
+  "Voting power accumulated from all badges"
+  votingPower: BigInt!
+  "Badges awarded to address"
+  earnedBadges: [EarnedBadge!]! @derivedFrom(field: "badgeWinner")
+}
+
+"""
+EarnedBadges are awarded to BadgeWinners for satisfying BadgeDefinition thresholds
+"""
+type EarnedBadge @entity {
+  "{badgeName}-{BadgeWinner}"
+  id: ID!
+  "Address of the BadgeWinner"
+  badgeWinner: BadgeWinner!
   "Block number in which badge was awarded"
   blockAwarded: BigInt!
   "Timestamp in which badge was awarded"
@@ -282,13 +301,103 @@ type BadgeAward @entity {
   definition: BadgeDefinition!
   "Ordered number in which the badge was awarded for the associated definition"
   awardNumber: Int!
-  "Ordered number in which the badge was awarded across all badges"
-  globalAwardNumber: Int!
-  "Data specific to this badgeAwards of a given BadgeDefinition"
-  metadata: [BadgeAwardMetadata!]! @derivedFrom(field: "badgeAward")
+  "Data specific to this earnedBadges of a given BadgeDefinition"
+  metadata: [EarnedBadgeMetadata!]! @derivedFrom(field: "earnedBadge")
+  "Stores reference to global badge number"
+  earnedBadgeCount: EarnedBadgeCount! @derivedFrom(field: "earnedBadge")
+
+  "keccak256({WinnerAddress}-{BadgeDefinitionNumber})"
+  hash: Bytes!
+  "Bytes32 encoded badge leaf useful for encryption testing"
+  encodedLeaf: Bytes!
 }
 
-enum BadgeAwardMetadataName {
+"""
+Orders EarnedBadges for future merkle proof verification
+"""
+type EarnedBadgeCount @entity {
+  "incrementing number"
+  id: ID!
+  "Ordered number in which the badge was awarded across all badges"
+  globalBadgeNumber: Int!
+  "Associated earnedBadge"
+  earnedBadge: EarnedBadge!
+}
+
+type BadgeMetric @entity {
+  id: ID!
+  metricNumber: Int!
+  metricName: String!
+}
+
+"""
+BadgeDefinitions are created by the BadgeDefinitionManager smart contract.
+Subgraphs may also have genesis BadgeDefinitions that are baked in for retroactive 
+drops.
+"""
+type BadgeDefinition @entity {
+  "Name of badge"
+  id: ID!
+  "Description of badge"
+  description: String!
+  "Name of metric being tracked"
+  metric: BadgeMetric!
+  "Value that metric must reach in order for a badge to be awarded"
+  threshold: BigInt!
+  "Voting power acrued when badge is awarded"
+  votingPower: BigInt!
+  "Total count of earned badges"
+  earnedBadgeCount: Int!
+  "IPFS URI containing metadata about this BadgeDefinition"
+  ipfsURI: String!
+  "Incrementing number for efficient on-chain representation"
+  badgeDefinitionNumber: Int!
+  "Badges awarded with this definition"
+  earnedBadges: [EarnedBadge!]! @derivedFrom(field: "definition")
+}
+
+
+################################
+#### Internal Badge Entities ###
+################################
+
+
+"""
+Singleton entity that tracks numbers and stats relating to Emblem
+"""
+type EmblemEntityStats @entity {
+  "ID is set to 1"
+  id: ID!
+  "Number of badges earned"
+  earnedBadgeCount: Int!
+  "Number of unique BadgeWinners"
+  badgeWinnerCount: Int!
+  "Number of unique BadgeDefinitions created (including Genesis badges)"
+  badgeDefinitionCount: Int!
+  "Number of BadgeMetric entities"
+  badgeMetricCount: Int!
+}
+
+"""
+Saves progress along a metric for an account
+"""
+type Progress @entity {
+  "{Account address}-{BadgeMetric}"
+  id: ID!
+  "Account who has made this progress"
+  badgeUser: BadgeUser!
+  "BadgeMetric being tracked"
+  metric: BadgeMetric!
+  "Current value of metric. Negative progress is not supported. value can only go up"
+  value: BigInt!
+}
+
+
+################################
+# These are only required by Emblem frontend
+################################
+
+enum EarnedBadgeMetadataName {
   INDEXER
   DELEGATOR
   CURATOR
@@ -299,67 +408,41 @@ enum BadgeAwardMetadataName {
 }
 
 """
-BadgeAward metadata specific to the given BadgeDefinition
+EarnedBadge metadata specific to the given BadgeDefinition
 """
-type BadgeAwardMetadata @entity {
-  "{BadgeAward}-{metricName}"
+type EarnedBadgeMetadata @entity {
+  "{EarnedBadge}-{metricName}"
   id: ID!
   "Name of metric"
-  name: BadgeAwardMetadataName!
+  name: EarnedBadgeMetadataName!
   "Value"
   value: String!
-  "BadgeAward the metadata refers to"
-  badgeAward: BadgeAward!
-}
-
-type BadgeTrack @entity {
-  "Name of Badge Track"
-  id: ID!
-  "Protocol Role enum"
-  protocolRole: String!
-  "Protocol"
-  protocol: Protocol!
-  "Badge Definitions included in this track"
-  badgeDefinitions: [BadgeDefinition!]! @derivedFrom(field: "badgeTrack")
+  "EarnedBadge the metadata refers to"
+  earnedBadge: EarnedBadge!
 }
 
 """
-Additional details related to the badge
+BadgeMetric -> BadgeDefinitions tracking that metric
 """
-type BadgeDefinition @entity {
-  "Name of the badge"
+type MetricConsumer @entity {
+  "BadgeMetric"
   id: ID!
-  "Description of the badge"
-  description: String!
-  "IFTP link to the NFT badge"
-  image: String!
-  "Name of the artist responsible for NFT badge"
-  votingPower: BigInt!
-  "Total count of awards"
-  awardCount: Int!
-  "Track this badge definition belongs to"
-  badgeTrack: BadgeTrack!
-  "Badges awarded with this definition"
-  badgeAwards: [BadgeAward!]! @derivedFrom(field: "definition")
-}
-
-type BadgeTrackProgress @entity {
-  "Winner + badge track ID"
-  id: ID!
-  "Winner"
-  winner: Winner!
-  "Maximum level achieved on this track"
-  level: Int!
-  "Progress number representing the metric being tracked"
-  progress: BigInt!
-  "Badge Track this progress refers to"
-  badgeTrack: BadgeTrack!
+  "BadgeDefinitions using this metric"
+  badgeDefinitions: [BadgeDefinition!]!
 }
 
 """
-Protocols indexed by this subgraph
+Merkle Roots that have been posted on chain by an oracle are stored here
 """
-type Protocol @entity {
-  "Name of the protocol"
+type MerkleRoot @entity {
+  "root"
   id: ID!
+  "merkle root posted"
+  root: Bytes!
+  "starting index for leaf lookup"
+  earnedBadgeCountStart: Int!
+  "number of badges in merkle tree (must be power of 2)"
+  numberOfBadges: Int!
+  "true if merkle root was verified by subgraph"
+  valid: Boolean!
 }

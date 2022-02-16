@@ -13,11 +13,11 @@ dataSources:
       startBlock: {{blockNumber}}
     mapping:
       kind: ethereum/events
-      apiVersion: 0.0.4
+      apiVersion: 0.0.5
       language: wasm/assemblyscript
       file: ./src/mappings/staking.ts
       entities:
-        - BadgeAward
+        - EarnedBadge
         - Indexer
         - Delegator
       abis:
@@ -47,7 +47,7 @@ dataSources:
       startBlock: {{blockNumber}}
     mapping:
       kind: ethereum/events
-      apiVersion: 0.0.4
+      apiVersion: 0.0.5
       language: wasm/assemblyscript
       file: ./src/mappings/rewardsManager.ts
       entities:
@@ -68,7 +68,7 @@ dataSources:
       startBlock: {{blockNumber}}
     mapping:
       kind: ethereum/events
-      apiVersion: 0.0.4
+      apiVersion: 0.0.5
       language: wasm/assemblyscript
       file: ./src/mappings/gns.ts
       entities:
@@ -79,7 +79,7 @@ dataSources:
         - Winner
         - NameSignal
         - BadgeDefinition
-        - BadgeAward
+        - EarnedBadge
       abis:
         - name: GNS
           file: ./node_modules/@graphprotocol/contracts/dist/abis/GNS.json
@@ -106,7 +106,7 @@ dataSources:
     mapping:
       kind: ethereum/events
       file: ./src/mappings/graphTokenLockWallet.ts
-      apiVersion: 0.0.4
+      apiVersion: 0.0.5
       language: wasm/assemblyscript
       entities:
         - GraphTokenLockWallet
@@ -122,11 +122,11 @@ dataSources:
     source:
       address: "{{graphTokenLockWalletManager2}}"
       abi: GraphTokenLockWalletManager
-      startBlock: {{blockNumber}}
+      startBlock: 12908982
     mapping:
       kind: ethereum/events
       file: ./src/mappings/graphTokenLockWallet.ts
-      apiVersion: 0.0.4
+      apiVersion: 0.0.5
       language: wasm/assemblyscript
       entities:
         - GraphTokenLockWallet
@@ -136,3 +136,32 @@ dataSources:
       eventHandlers:
         - event: TokenLockCreated(indexed address,indexed bytes32,indexed address,address,uint256,uint256,uint256,uint256,uint256,uint256,uint8)
           handler: handleTokenLockCreated
+  - kind: ethereum/contract
+    name: EmblemSubgraphController
+    network: {{network}}
+    source:
+      address: "0x36E8479FF502f4C56CF72525179Fb661B5CA12cf"
+      abi: EmblemSubgraphController
+      startBlock: 10159781
+    mapping:
+      kind: ethereum/events
+      file: ./src/mappings/emblemSubgraphController.ts
+      apiVersion: 0.0.5
+      language: wasm/assemblyscript
+      entities:
+        - BadgeDefinition
+        - MerkleRoot
+      abis:
+        - name: EmblemSubgraphController
+          file: ./abis/EmblemSubgraphController.json
+        - name: AccessControl
+          file: ./abis/AccessControl.json
+        - name: FxBaseRootTunnel
+          file: ./abis/FxBaseRootTunnel.json
+      eventHandlers:
+        - event: BadgeDefinitionCreated(indexed uint32,uint32,uint256)
+          handler: handleBadgeDefinitionCreated
+        - event: MerkleRootPosted(indexed bytes32,uint32,uint32)
+          handler: handleMerkleRootPosted
+        
+

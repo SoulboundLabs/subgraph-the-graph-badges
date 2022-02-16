@@ -1,30 +1,36 @@
-import { Allocation, BadgeAward, Indexer, SubgraphAllocation, TokenLockWallet } from "../../generated/schema";
+import { log } from "@graphprotocol/graph-ts";
+import { BigInt } from "@graphprotocol/graph-ts/index";
+import { RewardsAssigned } from "../../generated/RewardsManager/RewardsManager";
 import {
-  createOrLoadEntityStats,
-  createOrLoadGraphAccount,
-  BadgeAwardEventData,
-  BadgeAwardEventMetadata
-} from "../helpers/models";
+  Allocation,
+  Indexer,
+  SubgraphAllocation,
+} from "../../generated/schema";
 import {
   AllocationClosed,
+  AllocationCollected,
   AllocationCreated,
+  DelegationParametersUpdated,
   RebateClaimed,
-  DelegationParametersUpdated, 
-  AllocationCollected
 } from "../../generated/Staking/Staking";
-import { RewardsAssigned } from "../../generated/RewardsManager/RewardsManager";
-import { BigInt } from "@graphprotocol/graph-ts/index";
-import { log } from "@graphprotocol/graph-ts";
-import { incrementProgressForTrack, updateProgressForTrack } from "../Badges/standardTrackBadges";
-import { 
-  BADGE_TRACK_INDEXER_SUBGRAPHS, 
-  BADGE_TRACK_INDEXER_QUERY_FEE, 
-  BADGE_TRACK_INDEXER_ALLOCATIONS_OPENED,
-  zeroBI, 
-  BADGE_AWARD_METADATA_NAME_TOKENS, 
-  BADGE_AWARD_METADATA_NAME_SUBGRAPH_DEPLOYMENT 
-} from "./constants";
+import {
+  EarnedBadgeEventData,
+  EarnedBadgeEventMetadata,
+} from "../Emblem/emblemModels";
+import { incrementProgress } from "../Emblem/metricProgress";
+import {
+  createOrLoadTheGraphEntityStats,
+  createOrLoadGraphAccount,
+} from "../helpers/models";
 import { beneficiaryIfLockWallet } from "../mappings/graphTokenLockWallet";
+import {
+  BADGE_AWARD_METADATA_NAME_SUBGRAPH_DEPLOYMENT,
+  BADGE_AWARD_METADATA_NAME_TOKENS,
+  BADGE_METRIC_INDEXER_ALLOCATIONS_OPENED,
+  BADGE_METRIC_INDEXER_QUERY_FEES_COLLECTED,
+  BADGE_METRIC_INDEXER_SUBGRAPHS_INDEXED,
+} from "../Emblem/metrics";
+import { zeroBI } from "./constants";
 
 ////////////////      Public
 
@@ -41,7 +47,7 @@ export function processAllocationCreated(event: AllocationCreated): void {
 }
 
 export function processAllocationClosed(event: AllocationClosed): void {
-  let eventData = new BadgeAwardEventData(event, null);
+  let eventData = new EarnedBadgeEventData(event, []);
   _processAllocationClosed(
     event.params.allocationID.toHexString(),
     event.params.subgraphDeploymentID.toHex(),
@@ -51,29 +57,24 @@ export function processAllocationClosed(event: AllocationClosed): void {
 }
 
 export function processAllocationCollected(event: AllocationCollected): void {
-  let eventData = new BadgeAwardEventData(event, null);
+  let eventData = new EarnedBadgeEventData(event, []);
   let indexerId = beneficiaryIfLockWallet(event.params.indexer.toHexString());
-  _processAllocationCollected(
-    indexerId,
-    event.params.rebateFees,
-    eventData
-  );
+  _processAllocationCollected(indexerId, event.params.rebateFees, eventData);
 }
 
 export function processRebateClaimed(event: RebateClaimed): void {
   let indexerId = beneficiaryIfLockWallet(event.params.indexer.toHexString());
-  _processRebateClaimed(
-    indexerId,
-    event.params.delegationFees
-  );
+  _processRebateClaimed(indexerId, event.params.delegationFees);
 }
 
-export function processDelegationParametersUpdated(event: DelegationParametersUpdated): void {
+export function processDelegationParametersUpdated(
+  event: DelegationParametersUpdated
+): void {
   let indexerId = beneficiaryIfLockWallet(event.params.indexer.toHexString());
-  let eventData = new BadgeAwardEventData(event, null);
+  let eventData = new EarnedBadgeEventData(event, []);
   _processDelegationParametersUpdated(
-    indexerId, 
-    event.params.indexingRewardCut.toI32(), 
+    indexerId,
+    event.params.indexingRewardCut.toI32(),
     eventData
   );
 }
@@ -81,12 +82,8 @@ export function processDelegationParametersUpdated(event: DelegationParametersUp
 export function processRewardsAssigned(event: RewardsAssigned): void {
   let indexerId = beneficiaryIfLockWallet(event.params.indexer.toHexString());
   let amount = event.params.amount;
-  let eventData = new BadgeAwardEventData(event, null);
-  _processRewardsAssigned(
-    indexerId,
-    amount,
-    eventData
-  );
+  let eventData = new EarnedBadgeEventData(event, []);
+  _processRewardsAssigned(indexerId, amount, eventData);
 }
 
 ////////////////      Event Processing
@@ -101,17 +98,27 @@ function _processAllocationCreated(
 ): void {
   // check if this is the first time the indexer has allocated on this subgraph
   let subgraphAllocationId = indexerId.concat("-").concat(subgraphDeploymentId);
-  let metadata: Array<BadgeAwardEventMetadata> = [
-    new BadgeAwardEventMetadata(BADGE_AWARD_METADATA_NAME_TOKENS, tokens.toString()),
-    new BadgeAwardEventMetadata(BADGE_AWARD_METADATA_NAME_SUBGRAPH_DEPLOYMENT, subgraphDeploymentId)
+  let metadata: Array<EarnedBadgeEventMetadata> = [
+    new EarnedBadgeEventMetadata(
+      BADGE_AWARD_METADATA_NAME_TOKENS,
+      tokens.toString()
+    ),
+    new EarnedBadgeEventMetadata(
+      BADGE_AWARD_METADATA_NAME_SUBGRAPH_DEPLOYMENT,
+      subgraphDeploymentId
+    ),
   ];
-  let eventData = new BadgeAwardEventData(event, metadata);
-  
+  let eventData = new EarnedBadgeEventData(event, metadata);
+
   let subgraphAllocation = SubgraphAllocation.load(subgraphAllocationId);
   if (subgraphAllocation == null) {
     // first time indexer has allocated on this subgraph
-    _createSubgraphAllocation(indexerId, subgraphDeploymentId)
-    incrementProgressForTrack(BADGE_TRACK_INDEXER_SUBGRAPHS, indexerId, eventData);
+    _createSubgraphAllocation(indexerId, subgraphDeploymentId);
+    incrementProgress(
+      indexerId,
+      BADGE_METRIC_INDEXER_SUBGRAPHS_INDEXED,
+      eventData
+    );
   }
 
   // keep track of unique allocation
@@ -120,19 +127,23 @@ function _processAllocationCreated(
   indexer.uniqueOpenAllocationCount = indexer.uniqueOpenAllocationCount + 1;
   indexer.save();
 
-  incrementProgressForTrack(BADGE_TRACK_INDEXER_ALLOCATIONS_OPENED, indexerId, eventData);
+  incrementProgress(
+    indexerId,
+    BADGE_METRIC_INDEXER_ALLOCATIONS_OPENED,
+    eventData
+  );
 }
 
 function _processAllocationClosed(
   channelId: string,
   subgraphDeploymentID: string,
   epoch: BigInt,
-  eventData: BadgeAwardEventData
+  eventData: EarnedBadgeEventData
 ): void {
   let allocation = Allocation.load(channelId) as Allocation;
   allocation.closedAtEpoch = epoch;
   allocation.save();
-  
+
   let indexer = createOrLoadIndexer(allocation.indexer, eventData);
   indexer.uniqueOpenAllocationCount = indexer.uniqueOpenAllocationCount - 1;
   indexer.save();
@@ -141,16 +152,15 @@ function _processAllocationClosed(
 function _processAllocationCollected(
   indexerId: string,
   rebateFees: BigInt,
-  eventData: BadgeAwardEventData
+  eventData: EarnedBadgeEventData
 ): void {
   let indexer = createOrLoadIndexer(indexerId, eventData);
   indexer.queryFeesCollected = indexer.queryFeesCollected.plus(rebateFees);
   indexer.save();
 
-  updateProgressForTrack(
-    BADGE_TRACK_INDEXER_QUERY_FEE,
+  incrementProgress(
     indexerId,
-    indexer.queryFeesCollected,
+    BADGE_METRIC_INDEXER_QUERY_FEES_COLLECTED,
     eventData
   );
 }
@@ -158,17 +168,14 @@ function _processAllocationCollected(
 function _processDelegationParametersUpdated(
   indexerId: string,
   indexingRewardCut: number,
-  eventData: BadgeAwardEventData
+  eventData: EarnedBadgeEventData
 ): void {
   let indexer = createOrLoadIndexer(indexerId, eventData);
   indexer.indexingRewardCut = indexingRewardCut as i32;
   indexer.save();
 }
 
-function _processRebateClaimed(
-  indexerId: string,
-  tokens: BigInt
-): void {
+function _processRebateClaimed(indexerId: string, tokens: BigInt): void {
   let indexer = Indexer.load(indexerId) as Indexer;
   indexer.delegatedTokens = indexer.delegatedTokens.plus(tokens);
   indexer.save();
@@ -177,7 +184,7 @@ function _processRebateClaimed(
 function _processRewardsAssigned(
   indexerId: string,
   amount: BigInt,
-  eventData: BadgeAwardEventData
+  eventData: EarnedBadgeEventData
 ): void {
   let indexer = createOrLoadIndexer(indexerId, eventData);
 
@@ -190,16 +197,19 @@ function _processRewardsAssigned(
           .div(BigInt.fromI32(1000000));
 
   let delegatorIndexingRewards = amount.minus(indexerIndexingRewards);
-  indexer.delegatorIndexingRewards = indexer.delegatorIndexingRewards.plus(delegatorIndexingRewards);
-  // updateProgressForTrack(BADGE_TRACK_INDEXER_DISTRIBUTING, indexerId, indexer.delegatorIndexingRewards, eventData);
-  indexer.delegatedTokens = indexer.delegatedTokens.plus(delegatorIndexingRewards);
+  indexer.delegatorIndexingRewards = indexer.delegatorIndexingRewards.plus(
+    delegatorIndexingRewards
+  );
+  indexer.delegatedTokens = indexer.delegatedTokens.plus(
+    delegatorIndexingRewards
+  );
   indexer.save();
 }
 
 ////////////////      Models
 export function createOrLoadIndexer(
   id: string,
-  eventData: BadgeAwardEventData
+  eventData: EarnedBadgeEventData
 ): Indexer {
   log.debug("Loading indexer with id: {}", [id]);
 
@@ -218,7 +228,7 @@ export function createOrLoadIndexer(
     indexer.queryFeesCollected = zeroBI();
     indexer.save();
 
-    let entityStats = createOrLoadEntityStats();
+    let entityStats = createOrLoadTheGraphEntityStats();
     entityStats.indexerCount = entityStats.indexerCount + 1;
     entityStats.save();
   }

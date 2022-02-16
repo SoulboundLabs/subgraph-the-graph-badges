@@ -1,0 +1,53 @@
+import { BadgeMetric } from "../../generated/schema";
+import { BigInt } from "@graphprotocol/graph-ts/index";
+
+export const BADGE_AWARD_METADATA_NAME_INDEXER = "INDEXER";
+export const BADGE_AWARD_METADATA_NAME_DELEGATOR = "DELEGATOR";
+export const BADGE_AWARD_METADATA_NAME_CURATOR = "CURATOR";
+export const BADGE_AWARD_METADATA_NAME_DEVELOPER = "DEVELOPER";
+export const BADGE_AWARD_METADATA_NAME_SUBGRAPH = "SUBGRAPH";
+export const BADGE_AWARD_METADATA_NAME_SUBGRAPH_DEPLOYMENT =
+  "SUBGRAPH_DEPLOYMENT";
+export const BADGE_AWARD_METADATA_NAME_TOKENS = "TOKENS";
+
+export const BADGE_METRIC_INDEXER_SUBGRAPHS_INDEXED =
+  "INDEXER_SUBGRAPHS_INDEXED";
+export const BADGE_METRIC_INDEXER_QUERY_FEES_COLLECTED =
+  "INDEXER_QUERY_FEES_COLLECTED";
+export const BADGE_METRIC_INDEXER_ALLOCATIONS_OPENED =
+  "INDEXER_ALLOCATIONS_OPENED";
+export const BADGE_METRIC_INDEXER_DELEGATOR_COUNT = "INDEXER_DELEGATOR_COUNT";
+export const BADGE_METRIC_DELEGATOR_INDEXERS = "DELEGATOR_INDEXERS";
+export const BADGE_METRIC_CURATOR_SUBGRAPHS_SIGNALLED =
+  "CURATOR_SUBGRAPHS_SIGNALLED";
+export const BADGE_METRIC_CURATOR_HOUSE_ODDS = "CURATOR_HOUSE_ODDS";
+export const BADGE_METRIC_CURATOR_APE = "CURATOR_APE";
+export const BADGE_METRIC_PUBLISHER_SIGNAL_ATTRACTED =
+  "PUBLISHER_SIGNAL_ATTRACTED";
+export const BADGE_METRIC_PUBLISHER_SUBGRAPHS_DEPLOYED =
+  "PUBLISHER_SUBGRAPHS_DEPLOYED";
+export const BADGE_METRIC_USER_BADGES_WON = "BADGE_METRIC_USER_BADGES_WON";
+
+export function generateBadgeMetrics(): void {
+  createBadgeMetric(0, BADGE_METRIC_INDEXER_SUBGRAPHS_INDEXED);
+  createBadgeMetric(1, BADGE_METRIC_INDEXER_QUERY_FEES_COLLECTED);
+  createBadgeMetric(2, BADGE_METRIC_INDEXER_ALLOCATIONS_OPENED);
+  createBadgeMetric(3, BADGE_METRIC_INDEXER_DELEGATOR_COUNT);
+  createBadgeMetric(4, BADGE_METRIC_DELEGATOR_INDEXERS);
+  createBadgeMetric(5, BADGE_METRIC_CURATOR_SUBGRAPHS_SIGNALLED);
+  createBadgeMetric(6, BADGE_METRIC_CURATOR_HOUSE_ODDS);
+  createBadgeMetric(7, BADGE_METRIC_CURATOR_APE);
+  createBadgeMetric(8, BADGE_METRIC_PUBLISHER_SIGNAL_ATTRACTED);
+  createBadgeMetric(9, BADGE_METRIC_PUBLISHER_SUBGRAPHS_DEPLOYED);
+  createBadgeMetric(10, BADGE_METRIC_USER_BADGES_WON);
+}
+
+function createBadgeMetric(metricNumber: i32, metricName: string): void {
+  const badgeMetricId = BigInt.fromI32(metricNumber).toString();
+  let badgeMetric = BadgeMetric.load(badgeMetricId);
+  if (badgeMetric == null) {
+    badgeMetric = new BadgeMetric(badgeMetricId);
+    badgeMetric.metricNumber = metricNumber;
+    badgeMetric.metricName = metricName;
+  }
+}
