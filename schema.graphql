@@ -20,22 +20,6 @@ type TheGraphEntityStats @entity {
   tokenLockWalletCount: Int!
 }
 
-"""
-Singleton entity that tracks numbers and stats relating to Emblem
-"""
-type EmblemEntityStats @entity {
-  "ID is set to 1"
-  id: ID!
-  "Number of badges earned"
-  earnedBadgeCount: Int!
-  "Number of unique BadgeWinners"
-  badgeWinnerCount: Int!
-  "Number of unique BadgeDefinitions created (including Genesis badges)"
-  badgeDefinitionCount: Int!
-  "Number of BadgeMetric entities"
-  badgeMetricCount: Int!
-}
-
 type GraphAccount @entity {
   "ETH address of Graph Account"
   id: ID!
@@ -377,6 +361,23 @@ type BadgeDefinition @entity {
 #### Internal Badge Entities ###
 ################################
 
+
+"""
+Singleton entity that tracks numbers and stats relating to Emblem
+"""
+type EmblemEntityStats @entity {
+  "ID is set to 1"
+  id: ID!
+  "Number of badges earned"
+  earnedBadgeCount: Int!
+  "Number of unique BadgeWinners"
+  badgeWinnerCount: Int!
+  "Number of unique BadgeDefinitions created (including Genesis badges)"
+  badgeDefinitionCount: Int!
+  "Number of BadgeMetric entities"
+  badgeMetricCount: Int!
+}
+
 """
 Saves progress along a metric for an account
 """
@@ -389,16 +390,6 @@ type Progress @entity {
   metric: BadgeMetric!
   "Current value of metric. Negative progress is not supported. value can only go up"
   value: BigInt!
-}
-
-"""
-BadgeMetric -> BadgeDefinitions tracking that metric
-"""
-type MetricConsumer @entity {
-  "BadgeMetric"
-  id: ID!
-  "BadgeDefinitions using this metric"
-  badgeDefinitions: [BadgeDefinition!]!
 }
 
 
@@ -428,6 +419,16 @@ type EarnedBadgeMetadata @entity {
   value: String!
   "EarnedBadge the metadata refers to"
   earnedBadge: EarnedBadge!
+}
+
+"""
+BadgeMetric -> BadgeDefinitions tracking that metric
+"""
+type MetricConsumer @entity {
+  "BadgeMetric"
+  id: ID!
+  "BadgeDefinitions using this metric"
+  badgeDefinitions: [BadgeDefinition!]!
 }
 
 """
