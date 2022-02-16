@@ -149,7 +149,7 @@ export function generateGenesisBadgeDefinitions(): void {
   //////// DEVELOPER BADGES ////////
 
   createOrLoadBadgeDefinition(
-    "Beacon",
+    "Beacon I",
     "Receive 1k GRT in Curator Signal on your Subgraphs",
     BADGE_METRIC_PUBLISHER_SIGNAL_ATTRACTED,
     BigInt.fromString("1000000000000000000000"),
