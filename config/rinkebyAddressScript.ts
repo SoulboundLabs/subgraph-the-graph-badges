@@ -2,7 +2,6 @@ import * as networkAddresses from "@graphprotocol/contracts/addresses.json";
 import * as fs from "fs";
 import * as mustache from "mustache";
 import { Addresses } from "./addresses.template";
-import * as BadgethAddresses from "./badgethAddresses.json";
 
 // mustache doesn't like numbered object keys
 let renameAddresses: any = networkAddresses;
@@ -22,9 +21,6 @@ export let addresses: Addresses = {
   ensPublicResolver: "{{rinkeby.IPublicResolver}}",
   blockNumber: "",
   network: "",
-  badgethDAO: BadgethAddresses.rinkeby.BadgethDAO,
-  snapshotAdmin1: BadgethAddresses.rinkeby.SnapshotAdmin1,
-  snapshotAdmin2: BadgethAddresses.rinkeby.SnapshotAdmin2,
   graphTokenLockWalletManager1: "",
   graphTokenLockWalletManager2: "",
 };

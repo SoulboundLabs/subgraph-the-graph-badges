@@ -2,7 +2,6 @@ import * as networkAddresses from "@graphprotocol/contracts/addresses.json";
 import * as fs from "fs";
 import * as mustache from "mustache";
 import { Addresses } from "./addresses.template";
-import * as BadgethAddresses from "./badgethAddresses.json";
 
 // mustache doesn't like numbered object keys
 let renameAddresses: any = networkAddresses;
@@ -22,9 +21,6 @@ export let addresses: Addresses = {
   ensPublicResolver: "{{mainnet.IPublicResolver}}",
   blockNumber: "",
   network: "",
-  badgethDAO: BadgethAddresses.mainnet.BadgethDAO,
-  snapshotAdmin1: BadgethAddresses.mainnet.SnapshotAdmin1,
-  snapshotAdmin2: BadgethAddresses.mainnet.SnapshotAdmin2,
   graphTokenLockWalletManager1: "0xfcf78ac094288d7200cfdb367a8cd07108dfa128",
   graphTokenLockWalletManager2: "0x6284042d4da0931cbc64c5aab2d6184403095883",
 };
