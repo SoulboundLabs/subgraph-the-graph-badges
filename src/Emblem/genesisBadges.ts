@@ -3,9 +3,11 @@ import { createOrLoadBadgeDefinition } from "../Emblem/emblemModels";
 import {
   BADGE_METRIC_CURATOR_SUBGRAPHS_SIGNALLED,
   BADGE_METRIC_DELEGATOR_INDEXERS,
+  BADGE_METRIC_INDEXER_ALLOCATIONS_OPENED,
   BADGE_METRIC_INDEXER_DELEGATOR_COUNT,
   BADGE_METRIC_INDEXER_QUERY_FEES_COLLECTED,
   BADGE_METRIC_INDEXER_SUBGRAPHS_INDEXED,
+  BADGE_METRIC_PUBLISHER_SIGNAL_ATTRACTED,
   BADGE_METRIC_PUBLISHER_SUBGRAPHS_DEPLOYED,
 } from "./metrics";
 
@@ -65,34 +67,6 @@ export function generateGenesisBadgeDefinitions(): void {
     "QmNN7exESvL8jcoyVbroFf7vkFUa697jenR8E7fX3nyRTa"
   );
 
-  // createOrLoadBadgeDefinition(
-  //   "Nexus",
-  //   "Open 1 allocation",
-  //   BADGE_METRIC_INDEXER_ALLOCATIONS_OPENED,
-  //   BigInt.fromI32(1),
-  //   BigInt.fromI32(1),
-  //   "",
-  //   0
-  // );
-  // createOrLoadBadgeDefinition(
-  //   "Nexus II",
-  //   "Open 10 allocations",
-  //   BADGE_METRIC_INDEXER_ALLOCATIONS_OPENED,
-  //   BigInt.fromI32(10),
-  //   BigInt.fromI32(2),
-  //   "",
-  //   1
-  // );
-  // createOrLoadBadgeDefinition(
-  //   "Nexus III",
-  //   "Open 25 Allocations",
-  //   BADGE_METRIC_INDEXER_ALLOCATIONS_OPENED,
-  //   BigInt.fromI32(25),
-  //   BigInt.fromI32(3),
-  //   "",
-  //   2
-  // );
-
   createOrLoadBadgeDefinition(
     "Allegiance I",
     "Receive GRT from 1 Delegator",
@@ -144,15 +118,6 @@ export function generateGenesisBadgeDefinitions(): void {
     BigInt.fromI32(3),
     "QmQh8Yj4yPskDDnoSYPePndHZtiRcpU1Hv9ZKhDozsibZ4"
   );
-  // createOrLoadBadgeDefinition(
-  //   "Guardian IV",
-  //   "Delegate to 25 Indexers (100 GRT minimum)",
-  //   BADGE_METRIC_DELEGATOR_INDEXERS,
-  //   BigInt.fromI32(25),
-  //   BigInt.fromI32(4),
-  //   "QmQP2o2xnXPiqXpKXkto3uxry3Xwrai3RaXVHSevFYhJxf",
-  //   3
-  // );
 
   //////// CURATOR BADGES ////////
 
@@ -181,55 +146,32 @@ export function generateGenesisBadgeDefinitions(): void {
     "QmcuHtFdcFgQo1VrqBMCvbm9NdPrXBUB498T47aAKKNMTe"
   );
 
-  // createOrLoadBadgeDefinition(
-  //   "House Odds",
-  //   "Simultaneously Deploy and Signal on your Subgraph",
-  //   BADGE_METRIC_CURATOR_HOUSE_ODDS,
-  //   BigInt.fromI32(1),
-  //   BigInt.fromI32(1),
-  //   "",
-  //   0
-  // );
-
-  // createOrLoadBadgeDefinition(
-  //   "Planet of the Aped",
-  //   "Signal within 100 blocks of a Subgraph's Deployment",
-  //   BADGE_METRIC_CURATOR_APE,
-  //   BigInt.fromI32(1),
-  //   BigInt.fromI32(1),
-  //   "",
-  //   0
-  // );
-
   //////// DEVELOPER BADGES ////////
 
-  // createOrLoadBadgeDefinition(
-  //   "Beacon",
-  //   "Receive 1k GRT in Curator Signal on your Subgraphs",
-  //   BADGE_METRIC_PUBLISHER_SIGNAL_ATTRACTED,
-  //   BigInt.fromString("1000000000000000000000"),
-  //   BigInt.fromI32(1),
-  //   "",
-  //   0
-  // );
-  // createOrLoadBadgeDefinition(
-  //   "Beacon II",
-  //   "Receive 10k GRT in Curator Signal on your Subgraphs",
-  //   BADGE_METRIC_PUBLISHER_SIGNAL_ATTRACTED,
-  //   BigInt.fromString("10000000000000000000000"),
-  //   BigInt.fromI32(2),
-  //   "",
-  //   1
-  // );
-  // createOrLoadBadgeDefinition(
-  //   "Beacon III",
-  //   "Receive 30k GRT in Curator Signal on your Subgraphs",
-  //   BADGE_METRIC_PUBLISHER_SIGNAL_ATTRACTED,
-  //   BigInt.fromString("30000000000000000000000"),
-  //   BigInt.fromI32(3),
-  //   "",
-  //   2
-  // );
+  createOrLoadBadgeDefinition(
+    "Beacon",
+    "Receive 1k GRT in Curator Signal on your Subgraphs",
+    BADGE_METRIC_PUBLISHER_SIGNAL_ATTRACTED,
+    BigInt.fromString("1000000000000000000000"),
+    BigInt.fromI32(1),
+    "QmWcTEXphkxmQQgcKPiKEBdnYTLEmj7y8vAbcMaVqkpry7"
+  );
+  createOrLoadBadgeDefinition(
+    "Beacon II",
+    "Receive 10k GRT in Curator Signal on your Subgraphs",
+    BADGE_METRIC_PUBLISHER_SIGNAL_ATTRACTED,
+    BigInt.fromString("10000000000000000000000"),
+    BigInt.fromI32(2),
+    "QmWcTEXphkxmQQgcKPiKEBdnYTLEmj7y8vAbcMaVqkpry7"
+  );
+  createOrLoadBadgeDefinition(
+    "Beacon III",
+    "Receive 30k GRT in Curator Signal on your Subgraphs",
+    BADGE_METRIC_PUBLISHER_SIGNAL_ATTRACTED,
+    BigInt.fromString("30000000000000000000000"),
+    BigInt.fromI32(3),
+    "QmWcTEXphkxmQQgcKPiKEBdnYTLEmj7y8vAbcMaVqkpry7"
+  );
 
   createOrLoadBadgeDefinition(
     "Subgraph Smith I",
