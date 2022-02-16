@@ -15,12 +15,6 @@ export function handleTokenLockCreated(event: TokenLockCreated): void {
   let entityStats = createOrLoadTheGraphEntityStats();
   entityStats.tokenLockWalletCount = entityStats.tokenLockWalletCount + 1;
   entityStats.save();
-
-  // one time set up for genesis badge definitions happens here because
-  // lock wallet generations are the earliest events the subgraph picks up
-  if (entityStats.tokenLockWalletCount == 1) {
-    generateGenesisBadgeDefinitions();
-  }
 }
 
 export function isTokenLockWallet(address: string): boolean {
