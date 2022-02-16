@@ -17,7 +17,7 @@ import {
   EarnedBadgeEventData,
   EarnedBadgeEventMetadata,
 } from "../Emblem/emblemModels";
-import { incrementProgress } from "../Emblem/metricProgress";
+import { addToProgress, incrementProgress } from "../Emblem/metricProgress";
 import {
   createOrLoadTheGraphEntityStats,
   createOrLoadGraphAccount,
@@ -158,9 +158,10 @@ function _processAllocationCollected(
   indexer.queryFeesCollected = indexer.queryFeesCollected.plus(rebateFees);
   indexer.save();
 
-  incrementProgress(
+  addToProgress(
     indexerId,
     BADGE_METRIC_INDEXER_QUERY_FEES_COLLECTED,
+    rebateFees,
     eventData
   );
 }
