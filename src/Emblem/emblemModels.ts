@@ -1,18 +1,18 @@
+import { BigInt, ethereum } from "@graphprotocol/graph-ts/index";
 import {
   BadgeDefinition,
+  BadgeMetric,
   BadgeUser,
   BadgeWinner,
   EarnedBadge,
-  EarnedBadgeMetadata,
   EarnedBadgeCount,
-  MetricConsumer,
-  BadgeMetric,
+  EarnedBadgeMetadata,
   EmblemEntityStats,
+  MetricConsumer,
 } from "../../generated/schema";
 import { zeroBI } from "../helpers/constants";
-import { BigInt, ethereum } from "@graphprotocol/graph-ts/index";
-import { generateBadgeMetrics } from "./metrics";
 import { generateGenesisBadgeDefinitions } from "./genesisBadges";
+import { generateBadgeMetrics } from "./metrics";
 
 export function createOrLoadEmblemEntityStats(): EmblemEntityStats {
   let entityStats = EmblemEntityStats.load("1");
@@ -49,8 +49,9 @@ export function createOrLoadBadgeDefinition(
   description: string,
   metric: string,
   threshold: BigInt,
-  votingPower: BigInt,
-  ipfsURI: string
+  soulPower: BigInt,
+  ipfsURI: string,
+  protocolRoles: string[]
 ): BadgeDefinition {
   let badgeDefinition = BadgeDefinition.load(name);
 
@@ -61,9 +62,10 @@ export function createOrLoadBadgeDefinition(
     badgeDefinition.description = description;
     badgeDefinition.metric = metric;
     badgeDefinition.threshold = threshold;
-    badgeDefinition.votingPower = votingPower;
+    badgeDefinition.soulPower = soulPower;
     badgeDefinition.ipfsURI = ipfsURI;
     badgeDefinition.earnedBadgeCount = 0;
+    badgeDefinition.protocolRoles = protocolRoles;
 
     let entityStats = createOrLoadEmblemEntityStats();
     badgeDefinition.badgeDefinitionNumber = entityStats.badgeDefinitionCount;
@@ -125,8 +127,8 @@ export function createEarnedBadge(
 
     let badgeWinner = _createOrLoadBadgeWinner(badgeUserId, entityStats);
     badgeWinner.earnedBadgeCount = badgeWinner.earnedBadgeCount + 1;
-    badgeWinner.votingPower = badgeWinner.votingPower.plus(
-      badgeDefinition.votingPower
+    badgeWinner.soulPower = badgeWinner.soulPower.plus(
+      badgeDefinition.soulPower
     );
     badgeWinner.save();
 
@@ -163,7 +165,7 @@ function _createOrLoadBadgeWinner(
     winner.badgeUser = userId;
     winner.earnedBadgeCount = 0;
     winner.mintedAwardCount = 0;
-    winner.votingPower = zeroBI();
+    winner.soulPower = zeroBI();
     winner.save();
 
     entityStats.badgeWinnerCount = entityStats.badgeWinnerCount + 1;

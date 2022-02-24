@@ -245,8 +245,6 @@ type Protocol @entity {
   id: ID!
 }
 
-
-
 ########################
 #### Badge Entities ####
 ########################
@@ -278,7 +276,7 @@ type BadgeWinner @entity {
   "Number of badge awards minted"
   mintedAwardCount: Int!
   "Voting power accumulated from all badges"
-  votingPower: BigInt!
+  soulPower: BigInt!
   "Badges awarded to address"
   earnedBadges: [EarnedBadge!]! @derivedFrom(field: "badgeWinner")
 }
@@ -327,7 +325,7 @@ type BadgeMetric @entity {
 
 """
 BadgeDefinitions are created by the BadgeDefinitionManager smart contract.
-Subgraphs may also have genesis BadgeDefinitions that are baked in for retroactive 
+Subgraphs may also have genesis BadgeDefinitions that are baked in for retroactive
 drops.
 """
 type BadgeDefinition @entity {
@@ -339,8 +337,8 @@ type BadgeDefinition @entity {
   metric: BadgeMetric!
   "Value that metric must reach in order for a badge to be awarded"
   threshold: BigInt!
-  "Voting power acrued when badge is awarded"
-  votingPower: BigInt!
+  "Soul power accrued when badge is awarded"
+  soulPower: BigInt!
   "Total count of earned badges"
   earnedBadgeCount: Int!
   "IPFS URI containing metadata about this BadgeDefinition"
@@ -349,13 +347,22 @@ type BadgeDefinition @entity {
   badgeDefinitionNumber: Int!
   "Badges awarded with this definition"
   earnedBadges: [EarnedBadge!]! @derivedFrom(field: "definition")
+  "Protocol Role associated with badge"
+  protocolRoles: [ProtocolRole!]
 }
 
+enum ProtocolRole {
+  INDEXER
+  DELEGATOR
+  CURATOR
+  DEVELOPER
+  CONSUMER
+  FISHERMAN
+}
 
 ################################
 #### Internal Badge Entities ###
 ################################
-
 
 """
 Singleton entity that tracks numbers and stats relating to Emblem
@@ -386,7 +393,6 @@ type Progress @entity {
   "Current value of metric. Negative progress is not supported. value can only go up"
   value: BigInt!
 }
-
 
 ################################
 # These are only required by Emblem frontend
@@ -425,4 +431,3 @@ type MetricConsumer @entity {
   "BadgeDefinitions using this metric"
   badgeDefinitions: [BadgeDefinition!]!
 }
-

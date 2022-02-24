@@ -34,7 +34,8 @@ export function minimumDelegationStreak(): BigInt {
 
 export const PROTOCOL_NAME_THE_GRAPH = "The Graph";
 
-export const PROTOCOL_ROLE_INDEXER = "Indexer";
-export const PROTOCOL_ROLE_DELEGATOR = "Delegator";
-export const PROTOCOL_ROLE_CURATOR = "Curator";
-export const PROTOCOL_ROLE_SUBGRAPH_DEVELOPER = "Subgraph Developer";
+export const PROTOCOL_ROLE_INDEXER = "INDEXER";
+export const PROTOCOL_ROLE_DELEGATOR = "DELEGATOR";
+export const PROTOCOL_ROLE_CURATOR = "CURATOR";
+export const PROTOCOL_ROLE_SUBGRAPH_DEVELOPER = "SUBGRAPH DEVELOPER";
+export const PROTOCOL_ROLE_CONSUMER = "CONSUMER";
