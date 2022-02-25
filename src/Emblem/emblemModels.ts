@@ -9,6 +9,7 @@ import {
   EarnedBadgeMetadata,
   EmblemEntityStats,
   MetricConsumer,
+  WinnerRole,
 } from "../../generated/schema";
 import { zeroBI } from "../helpers/constants";
 import { generateGenesisBadgeDefinitions } from "./genesisBadges";
@@ -44,14 +45,32 @@ export function createOrLoadBadgeUser(address: string): BadgeUser {
   return badgeUser as BadgeUser;
 }
 
+export function createOrLoadWinnerRole(
+  address: string,
+  protocolRole: string
+): WinnerRole {
+  const id = address.concat("-").concat(protocolRole);
+  let winnerRole = WinnerRole.load(id);
+
+  if (winnerRole == null) {
+    winnerRole = new WinnerRole(id);
+    winnerRole.winner = address;
+    winnerRole.soulScore = zeroBI();
+    winnerRole.protocolRole = protocolRole;
+    winnerRole.save();
+  }
+
+  return winnerRole as WinnerRole;
+}
+
 export function createOrLoadBadgeDefinition(
   name: string,
   description: string,
   metric: string,
   threshold: BigInt,
-  soulPower: BigInt,
+  soulScore: BigInt,
   ipfsURI: string,
-  protocolRoles: string[]
+  protocolRole: string
 ): BadgeDefinition {
   let badgeDefinition = BadgeDefinition.load(name);
 
@@ -62,10 +81,10 @@ export function createOrLoadBadgeDefinition(
     badgeDefinition.description = description;
     badgeDefinition.metric = metric;
     badgeDefinition.threshold = threshold;
-    badgeDefinition.soulPower = soulPower;
+    badgeDefinition.soulScore = soulScore;
     badgeDefinition.ipfsURI = ipfsURI;
     badgeDefinition.earnedBadgeCount = 0;
-    badgeDefinition.protocolRoles = protocolRoles;
+    badgeDefinition.protocolRole = protocolRole;
 
     let entityStats = createOrLoadEmblemEntityStats();
     badgeDefinition.badgeDefinitionNumber = entityStats.badgeDefinitionCount;
@@ -125,10 +144,17 @@ export function createEarnedBadge(
     earnedBadgeCount.earnedBadge = badgeId;
     earnedBadgeCount.save();
 
+    let winnerRole = createOrLoadWinnerRole(
+      badgeUserId,
+      badgeDefinition.protocolRole
+    );
+    winnerRole.soulScore = winnerRole.soulScore.plus(badgeDefinition.soulScore);
+    winnerRole.save();
+
     let badgeWinner = _createOrLoadBadgeWinner(badgeUserId, entityStats);
     badgeWinner.earnedBadgeCount = badgeWinner.earnedBadgeCount + 1;
-    badgeWinner.soulPower = badgeWinner.soulPower.plus(
-      badgeDefinition.soulPower
+    badgeWinner.soulScore = badgeWinner.soulScore.plus(
+      badgeDefinition.soulScore
     );
     badgeWinner.save();
 
@@ -165,7 +191,7 @@ function _createOrLoadBadgeWinner(
     winner.badgeUser = userId;
     winner.earnedBadgeCount = 0;
     winner.mintedAwardCount = 0;
-    winner.soulPower = zeroBI();
+    winner.soulScore = zeroBI();
     winner.save();
 
     entityStats.badgeWinnerCount = entityStats.badgeWinnerCount + 1;

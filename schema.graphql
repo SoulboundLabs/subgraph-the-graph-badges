@@ -276,9 +276,10 @@ type BadgeWinner @entity {
   "Number of badge awards minted"
   mintedAwardCount: Int!
   "Voting power accumulated from all badges"
-  soulPower: BigInt!
+  soulScore: BigInt!
   "Badges awarded to address"
   earnedBadges: [EarnedBadge!]! @derivedFrom(field: "badgeWinner")
+  roles: [WinnerRole!]! @derivedFrom(field: "winner")
 }
 
 """
@@ -338,7 +339,7 @@ type BadgeDefinition @entity {
   "Value that metric must reach in order for a badge to be awarded"
   threshold: BigInt!
   "Soul power accrued when badge is awarded"
-  soulPower: BigInt!
+  soulScore: BigInt!
   "Total count of earned badges"
   earnedBadgeCount: Int!
   "IPFS URI containing metadata about this BadgeDefinition"
@@ -348,7 +349,20 @@ type BadgeDefinition @entity {
   "Badges awarded with this definition"
   earnedBadges: [EarnedBadge!]! @derivedFrom(field: "definition")
   "Protocol Role associated with badge"
-  protocolRoles: [ProtocolRole!]
+  protocolRole: ProtocolRole!
+}
+
+"""
+Tracks the winner's protocol roles and accumulated soul score
+"""
+type WinnerRole @entity {
+  "Winner ID + protocol role"
+  id: ID!
+  winner: BadgeWinner!
+  "Associated Protocol Role"
+  protocolRole: ProtocolRole!
+  "Accumulated soul score for badges with that protocol role"
+  soulScore: BigInt!
 }
 
 enum ProtocolRole {

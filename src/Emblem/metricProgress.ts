@@ -1,11 +1,11 @@
+import { BigInt } from "@graphprotocol/graph-ts";
 import {
-  Progress,
-  MetricConsumer,
   BadgeDefinition,
+  MetricConsumer,
+  Progress,
 } from "../../generated/schema";
 import { zeroBI } from "../helpers/constants";
-import { log, BigInt } from "@graphprotocol/graph-ts";
-import { EarnedBadgeEventData, createEarnedBadge } from "./emblemModels";
+import { createEarnedBadge, EarnedBadgeEventData } from "./emblemModels";
 
 export function incrementProgress(
   badgeUser: string,
