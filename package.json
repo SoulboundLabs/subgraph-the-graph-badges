@@ -12,6 +12,7 @@
     "create-local": "npx graph create emblem-dao/the-graph-badges --node http://127.0.0.1:8020",
     "build": "npx graph codegen && graph build",
     "codegen": "npx graph codegen",
+    "deploy-dev": "npx graph deploy --studio dev-emblem-the-graph-badges",
     "deploy": "npx graph deploy --studio emblem-the-graph-badges",
     "deploy-hardforks": "npx graph deploy hardforksoverknives/Emblem-dev --ipfs https://api.thegraph.com/ipfs/ --node https://api.thegraph.com/deploy/",
     "deploy-local": "npx graph deploy emblem-dao/the-graph-badges --ipfs http://localhost:5001 --node http://127.0.0.1:8020",
