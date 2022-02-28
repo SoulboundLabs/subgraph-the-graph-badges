@@ -1,10 +1,11 @@
-import { BadgeMetric } from "../../generated/schema";
 import { BigInt } from "@graphprotocol/graph-ts/index";
+import { BadgeMetric } from "../../generated/schema";
 
 export const BADGE_AWARD_METADATA_NAME_INDEXER = "INDEXER";
 export const BADGE_AWARD_METADATA_NAME_DELEGATOR = "DELEGATOR";
 export const BADGE_AWARD_METADATA_NAME_CURATOR = "CURATOR";
-export const BADGE_AWARD_METADATA_NAME_DEVELOPER = "DEVELOPER";
+export const BADGE_AWARD_METADATA_NAME_SUBGRAPH_DEVELOPER =
+  "SUBGRAPH_DEVELOPER";
 export const BADGE_AWARD_METADATA_NAME_SUBGRAPH = "SUBGRAPH";
 export const BADGE_AWARD_METADATA_NAME_SUBGRAPH_DEPLOYMENT =
   "SUBGRAPH_DEPLOYMENT";

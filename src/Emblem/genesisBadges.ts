@@ -3,8 +3,8 @@ import { createOrLoadBadgeDefinition } from "../Emblem/emblemModels";
 import {
   PROTOCOL_ROLE_CURATOR,
   PROTOCOL_ROLE_DELEGATOR,
-  PROTOCOL_ROLE_DEVELOPER,
   PROTOCOL_ROLE_INDEXER,
+  PROTOCOL_ROLE_SUBGRAPH_DEVELOPER,
 } from "../helpers/constants";
 import {
   BADGE_METRIC_CURATOR_SUBGRAPHS_SIGNALLED,
@@ -166,7 +166,7 @@ export function generateGenesisBadgeDefinitions(): void {
     PROTOCOL_ROLE_CURATOR
   );
 
-  //////// DEVELOPER BADGES ////////
+  //////// SUBGRAPH_DEVELOPER BADGES ////////
 
   createOrLoadBadgeDefinition(
     "Signal Acquired I",
@@ -175,7 +175,7 @@ export function generateGenesisBadgeDefinitions(): void {
     BigInt.fromString("1000000000000000000000"),
     BigInt.fromI32(1),
     "QmPLjA6zCqKyqa9465Qb7DFoMgWL8aj4CgN3fvDsQR53uy",
-    PROTOCOL_ROLE_DEVELOPER
+    PROTOCOL_ROLE_SUBGRAPH_DEVELOPER
   );
   createOrLoadBadgeDefinition(
     "Signal Acquired II",
@@ -184,7 +184,7 @@ export function generateGenesisBadgeDefinitions(): void {
     BigInt.fromString("10000000000000000000000"),
     BigInt.fromI32(4),
     "QmeE8mwVvsxSZ8hieW9Voeus3cknxavJvkWYJRqGGefe9v",
-    PROTOCOL_ROLE_DEVELOPER
+    PROTOCOL_ROLE_SUBGRAPH_DEVELOPER
   );
   createOrLoadBadgeDefinition(
     "Signal Acquired III",
@@ -193,7 +193,7 @@ export function generateGenesisBadgeDefinitions(): void {
     BigInt.fromString("30000000000000000000000"),
     BigInt.fromI32(7),
     "QmaWXCmacr7MmGhpfovELYRciX7t1BRjiECzXkmMu3Cyaf",
-    PROTOCOL_ROLE_DEVELOPER
+    PROTOCOL_ROLE_SUBGRAPH_DEVELOPER
   );
 
   createOrLoadBadgeDefinition(
@@ -203,7 +203,7 @@ export function generateGenesisBadgeDefinitions(): void {
     BigInt.fromI32(1),
     BigInt.fromI32(1),
     "QmXYG9s8LhwYLwZxSHxYaS8meCjDAJxr1PSiSn8JYfDjFS",
-    PROTOCOL_ROLE_DEVELOPER
+    PROTOCOL_ROLE_SUBGRAPH_DEVELOPER
   );
   createOrLoadBadgeDefinition(
     "Subgraph Deployed II",
@@ -212,7 +212,7 @@ export function generateGenesisBadgeDefinitions(): void {
     BigInt.fromI32(3),
     BigInt.fromI32(4),
     "QmRXK5HfunTFzjPb9p7ffq9DBoBKMNLQBEwX3v8BZWoUab",
-    PROTOCOL_ROLE_DEVELOPER
+    PROTOCOL_ROLE_SUBGRAPH_DEVELOPER
   );
   createOrLoadBadgeDefinition(
     "Subgraph Deployed III",
@@ -221,6 +221,6 @@ export function generateGenesisBadgeDefinitions(): void {
     BigInt.fromI32(10),
     BigInt.fromI32(7),
     "QmesqMvtp86duLQbfFX5rmYrqHq6GnQ8sNMr9gw7waHPJZ",
-    PROTOCOL_ROLE_DEVELOPER
+    PROTOCOL_ROLE_SUBGRAPH_DEVELOPER
   );
 }
