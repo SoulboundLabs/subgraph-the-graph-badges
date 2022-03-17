@@ -24,7 +24,7 @@ type GraphAccount @entity {
   "ETH address of Graph Account"
   id: ID!
   "BadgeUser associated with this Graph Account"
-  badgeUser: BadgeUser!
+  emblemUser: EmblemUser!
   "Number of Graph badges awarded to this account"
   awardCount: Int!
   "Indexer fields for this Graph Account. Null if never indexed"
@@ -252,44 +252,91 @@ type Protocol @entity {
 """
 Ethereum accounts this subgraph is tracking in order to award badges
 """
-type BadgeUser @entity {
+type EmblemUser @entity {
   "Ethereum address"
   id: ID!
   "Graph Account associated with this user"
-  graphAccount: GraphAccount! @derivedFrom(field: "badgeUser")
-  "BadgeWinner null if no badges won"
-  badgeWinner: BadgeWinner @derivedFrom(field: "badgeUser")
-  "Progress user has made along predefined metrics"
-  progress: [Progress!]! @derivedFrom(field: "badgeUser")
-}
+  graphAccount: GraphAccount! @derivedFrom(field: "emblemUser")
+  "Badges awarded to address"
+  earnedBadges: [EarnedBadge!]! @derivedFrom(field: "emblemUser")
+  "Progress being tracked along each BadgeMetric"
+  liveData: [EmblemUserLiveData!]! @derivedFrom(field: "emblemUser")
 
-"""
-BadgeUsers that have earned at least one badge
-"""
-type BadgeWinner @entity {
-  "ETH address of the BadgeWinner"
-  id: ID!
-  "Associated BadgeUser"
-  badgeUser: BadgeUser!
+  "Community score awarded when EmblemUsers complete badgeworthy on-chain activity"
+  communityScore: BigInt!
+
   "Number of badge awards won"
   earnedBadgeCount: Int!
-  "Number of badge awards minted"
-  mintedAwardCount: Int!
-  "Voting power accumulated from all badges"
-  soulScore: BigInt!
-  "Badges awarded to address"
-  earnedBadges: [EarnedBadge!]! @derivedFrom(field: "badgeWinner")
-  roles: [WinnerRole!]! @derivedFrom(field: "winner")
+  "block number when live data was last posted on-chain"
+  lastSyncedBlockNumber: BigInt!
 }
 
 """
-EarnedBadges are awarded to BadgeWinners for satisfying BadgeDefinition thresholds
+Orders EmblemUsers for merkle bridge compatibility (syncing live data)
+"""
+type EmblemUserCount @entity {
+  "incrementing number"
+  id: ID!
+  "Int representation of id"
+  userId: Int!
+  "assiciated EmblemUser"
+  emblemUser: EmblemUser!
+}
+
+type EmblemUserLiveData @entity {
+  "{EmblemUser}-{BadgeMetric}"
+  id: ID!
+  "EmblemUser making progress"
+  emblemUser: EmblemUser!
+  "BadgeMetric being tracked"
+  metric: BadgeMetric!
+  "Current value of metric"
+  value: BigInt!
+  "Value that was last posted on-chain in a valid merkle root"
+  valueOnChain: BigInt!
+  "Maximum value acheived by EmblemUser"
+  maxValue: BigInt!
+  "Block number when EmblemUser achieved maxValue"
+  maxValueBlockNumber: BigInt!
+}
+
+type MerkleRoot @entity {
+  "root"
+  id: ID!
+  "starting index of leaves"
+  startingIndex: Int!
+  "number of leaves in the merkle tree"
+  treeSize: Int!
+  "true if leaves are liveData rather than earnedBadges"
+  isLiveData: Boolean!
+  "true if leaves hashed to root"
+  isVerified: Boolean!
+  "oracle that posted the root"
+  emblemOracle: EmblemOracle
+}
+
+type EmblemOracle @entity {
+  "address"
+  id: ID!
+  "merkle roots posted"
+  rootsPosted: [MerkleRoot!]! @derivedFrom(field: "emblemOracle")
+  "percentage of posted merkle roots that pass subgraph verification"
+  performanceRating: Int!
+}
+
+"""
+EarnedBadges are awarded to EmblemUsers for satisfying BadgeDefinition thresholds. EarnedBadge 
+ids are an incrementing number, which facilitates future merkle proof verification via the Subgraph 
+Bridge. This creates a streamlined interface for smart contracts to emit events with a merkle root 
+and sorted range of leaves (in our case EarnedBadgeCounts) used to generate the root. With this data 
+the subgraph verifies that the leaves hash to the root, effectively verifying an arbitrarily sized 
+batch of data posted by an oracle.
 """
 type EarnedBadge @entity {
-  "{badgeName}-{BadgeWinner}"
+  "incrementing number"
   id: ID!
-  "Address of the BadgeWinner"
-  badgeWinner: BadgeWinner!
+  "Address of the EmblemUser"
+  emblemUser: EmblemUser!
   "Block number in which badge was awarded"
   blockAwarded: BigInt!
   "Timestamp in which badge was awarded"
@@ -300,28 +347,16 @@ type EarnedBadge @entity {
   definition: BadgeDefinition!
   "Ordered number in which the badge was awarded for the associated definition"
   awardNumber: Int!
-  "Data specific to this earnedBadges of a given BadgeDefinition"
+  "Data specific to earnedBadges of a given BadgeDefinition"
   metadata: [EarnedBadgeMetadata!]! @derivedFrom(field: "earnedBadge")
-  "Stores reference to global badge number"
-  earnedBadgeCount: EarnedBadgeCount! @derivedFrom(field: "earnedBadge")
 }
 
-"""
-Orders EarnedBadges for future merkle proof verification
-"""
-type EarnedBadgeCount @entity {
-  "incrementing number"
-  id: ID!
-  "Ordered number in which the badge was awarded across all badges"
-  globalBadgeNumber: Int!
-  "Associated earnedBadge"
-  earnedBadge: EarnedBadge!
-}
 
 type BadgeMetric @entity {
   id: ID!
   metricNumber: Int!
   metricName: String!
+  protocolRole: ProtocolRole!
 }
 
 """
@@ -330,39 +365,38 @@ Subgraphs may also have genesis BadgeDefinitions that are baked in for retroacti
 drops.
 """
 type BadgeDefinition @entity {
-  "Name of badge"
+  "incrementing number"
   id: ID!
+  "Name of badge"
+  name: String!
   "Description of badge"
   description: String!
-  "Name of metric being tracked"
+  "IPFS URI containing metadata about this BadgeDefinition"
+  ipfsURI: String!
+  "Metric being tracked"
   metric: BadgeMetric!
   "Value that metric must reach in order for a badge to be awarded"
   threshold: BigInt!
-  "Soul power accrued when badge is awarded"
-  soulScore: BigInt!
+  "Community score given when badge is awarded"
+  communityScore: BigInt!
   "Total count of earned badges"
   earnedBadgeCount: Int!
-  "IPFS URI containing metadata about this BadgeDefinition"
-  ipfsURI: String!
-  "Incrementing number for efficient on-chain representation"
-  badgeDefinitionNumber: Int!
   "Badges awarded with this definition"
   earnedBadges: [EarnedBadge!]! @derivedFrom(field: "definition")
-  "Protocol Role associated with badge"
-  protocolRole: ProtocolRole!
 }
 
 """
-Tracks the winner's protocol roles and accumulated soul score
+Tracks EmblemUser's protocol roles and role-specific community score
 """
-type WinnerRole @entity {
-  "Winner ID + protocol role"
+type EmblemUserRole @entity {
+  "{EmblemUser}-{ProtocolRole}"
   id: ID!
-  winner: BadgeWinner!
+  "Associated EmblemUser"
+  emblemUser: EmblemUser!
   "Associated Protocol Role"
   protocolRole: ProtocolRole!
-  "Accumulated soul score for badges with that protocol role"
-  soulScore: BigInt!
+  "Accumulated community score for badges with this protocol role"
+  communityScore: BigInt!
 }
 
 enum ProtocolRole {
@@ -372,6 +406,7 @@ enum ProtocolRole {
   SUBGRAPH_DEVELOPER
   CONSUMER
   FISHERMAN
+  EMBLEM_USER
 }
 
 ################################
@@ -387,25 +422,11 @@ type EmblemEntityStats @entity {
   "Number of badges earned"
   earnedBadgeCount: Int!
   "Number of unique BadgeWinners"
-  badgeWinnerCount: Int!
+  emblemUserCount: Int!
   "Number of unique BadgeDefinitions created (including Genesis badges)"
   badgeDefinitionCount: Int!
   "Number of BadgeMetric entities"
   badgeMetricCount: Int!
-}
-
-"""
-Saves progress along a metric for an account
-"""
-type Progress @entity {
-  "{Account address}-{BadgeMetric}"
-  id: ID!
-  "Account who has made this progress"
-  badgeUser: BadgeUser!
-  "BadgeMetric being tracked"
-  metric: BadgeMetric!
-  "Current value of metric. Negative progress is not supported. value can only go up"
-  value: BigInt!
 }
 
 ################################

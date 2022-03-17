@@ -2,14 +2,13 @@ import { BigInt, ethereum } from "@graphprotocol/graph-ts/index";
 import {
   BadgeDefinition,
   BadgeMetric,
-  BadgeUser,
-  BadgeWinner,
+  EmblemUser,
   EarnedBadge,
-  EarnedBadgeCount,
   EarnedBadgeMetadata,
   EmblemEntityStats,
   MetricConsumer,
-  WinnerRole,
+  EmblemUserRole,
+  EmblemUserCount,
 } from "../../generated/schema";
 import { zeroBI } from "../helpers/constants";
 import { generateGenesisBadgeDefinitions } from "./genesisBadges";
@@ -21,7 +20,6 @@ export function createOrLoadEmblemEntityStats(): EmblemEntityStats {
   if (entityStats == null) {
     entityStats = new EmblemEntityStats("1");
     entityStats.earnedBadgeCount = 0;
-    entityStats.badgeWinnerCount = 0;
     entityStats.badgeDefinitionCount = 0;
     entityStats.badgeMetricCount = 0;
 
@@ -34,68 +32,78 @@ export function createOrLoadEmblemEntityStats(): EmblemEntityStats {
   return entityStats as EmblemEntityStats;
 }
 
-export function createOrLoadBadgeUser(address: string): BadgeUser {
-  let badgeUser = BadgeUser.load(address);
+export function createOrLoadEmblemUser(address: string): EmblemUser {
+  let emblemUser = EmblemUser.load(address);
 
-  if (badgeUser == null) {
-    badgeUser = new BadgeUser(address);
-    badgeUser.save();
+  if (emblemUser == null) {
+    emblemUser = new EmblemUser(address);
+    emblemUser.communityScore = zeroBI();
+    emblemUser.earnedBadgeCount = 0;
+    emblemUser.lastSyncedBlockNumber = zeroBI();
+    emblemUser.save();
+
+    const entityStats = createOrLoadEmblemEntityStats();
+    const emblemUserCount = new EmblemUserCount(
+      BigInt.fromI32(entityStats.emblemUserCount).toString()
+    );
+    emblemUserCount.save();
+    entityStats.emblemUserCount = entityStats.emblemUserCount + 1;
+    entityStats.save();
   }
 
-  return badgeUser as BadgeUser;
+  return emblemUser as EmblemUser;
 }
 
-export function createOrLoadWinnerRole(
+export function createOrLoadEmblemUserRole(
   address: string,
   protocolRole: string
-): WinnerRole {
+): EmblemUserRole {
   const id = address.concat("-").concat(protocolRole);
-  let winnerRole = WinnerRole.load(id);
+  let emblemUserRole = EmblemUserRole.load(id);
 
-  if (winnerRole == null) {
-    winnerRole = new WinnerRole(id);
-    winnerRole.winner = address;
-    winnerRole.soulScore = zeroBI();
-    winnerRole.protocolRole = protocolRole;
-    winnerRole.save();
+  if (emblemUserRole == null) {
+    emblemUserRole = new EmblemUserRole(id);
+    emblemUserRole.emblemUser = address;
+    emblemUserRole.communityScore = zeroBI();
+    emblemUserRole.protocolRole = protocolRole;
+    emblemUserRole.save();
   }
 
-  return winnerRole as WinnerRole;
+  return emblemUserRole as EmblemUserRole;
 }
 
-export function createOrLoadBadgeDefinition(
+export function createBadgeDefinition(
   name: string,
   description: string,
-  metric: string,
+  metricId: i32,
   threshold: BigInt,
-  soulScore: BigInt,
-  ipfsURI: string,
-  protocolRole: string
+  communityScore: BigInt,
+  ipfsURI: string
 ): BadgeDefinition {
-  let badgeDefinition = BadgeDefinition.load(name);
+  let entityStats = createOrLoadEmblemEntityStats();
+  const badgeDefinitionId = BigInt.fromI32(
+    entityStats.badgeDefinitionCount
+  ).toString();
+  entityStats.badgeDefinitionCount = entityStats.badgeDefinitionCount + 1;
+  entityStats.save();
+
+  let badgeDefinition = BadgeDefinition.load(badgeDefinitionId);
 
   if (badgeDefinition == null) {
-    _createOrLoadBadgeMetric(metric);
-
-    badgeDefinition = new BadgeDefinition(name);
+    badgeDefinition = new BadgeDefinition(badgeDefinitionId);
+    badgeDefinition.name = name;
     badgeDefinition.description = description;
-    badgeDefinition.metric = metric;
+    badgeDefinition.metric = BigInt.fromI32(metricId).toString();
     badgeDefinition.threshold = threshold;
-    badgeDefinition.soulScore = soulScore;
+    badgeDefinition.communityScore = communityScore;
     badgeDefinition.ipfsURI = ipfsURI;
     badgeDefinition.earnedBadgeCount = 0;
-    badgeDefinition.protocolRole = protocolRole;
-
-    let entityStats = createOrLoadEmblemEntityStats();
-    badgeDefinition.badgeDefinitionNumber = entityStats.badgeDefinitionCount;
-    entityStats.badgeDefinitionCount = entityStats.badgeDefinitionCount + 1;
-    entityStats.save();
 
     badgeDefinition.save();
 
-    let metricConsumer = createOrLoadMetricConsumer(metric);
+    let metricConsumer = createOrLoadMetricConsumer(metricId);
     let consumers = metricConsumer.badgeDefinitions;
-    consumers.push(name);
+    consumers.push(badgeDefinitionId);
     metricConsumer.badgeDefinitions = consumers;
     metricConsumer.save();
   }
@@ -103,23 +111,10 @@ export function createOrLoadBadgeDefinition(
   return badgeDefinition as BadgeDefinition;
 }
 
-function _createOrLoadBadgeMetric(metricName: string): BadgeMetric {
-  let metric = BadgeMetric.load(metricName);
-  if (metric == null) {
-    metric = new BadgeMetric(metricName);
-    const entityStats = createOrLoadEmblemEntityStats();
-    metric.metricNumber = entityStats.badgeMetricCount;
-    metric.save();
-    entityStats.badgeMetricCount = entityStats.badgeMetricCount + 1;
-    entityStats.save();
-  }
-  return metric as BadgeMetric;
-}
-
-function createOrLoadMetricConsumer(metric: string): MetricConsumer {
-  let metricConsumer = MetricConsumer.load(metric);
+function createOrLoadMetricConsumer(metricId: i32): MetricConsumer {
+  let metricConsumer = MetricConsumer.load(BigInt.fromI32(metricId).toString());
   if (metricConsumer == null) {
-    metricConsumer = new MetricConsumer(metric);
+    metricConsumer = new MetricConsumer(BigInt.fromI32(metricId).toString());
     metricConsumer.badgeDefinitions = new Array<string>();
     metricConsumer.save();
   }
@@ -128,38 +123,36 @@ function createOrLoadMetricConsumer(metric: string): MetricConsumer {
 
 export function createEarnedBadge(
   badgeDefinition: BadgeDefinition,
-  badgeUserId: string,
+  emblemUserId: string,
   eventData: EarnedBadgeEventData
 ): void {
-  let badgeId = badgeDefinition.id.concat("-").concat(badgeUserId);
+  let entityStats = createOrLoadEmblemEntityStats();
+  let badgeId = BigInt.fromI32(entityStats.earnedBadgeCount + 1).toString();
+  entityStats.earnedBadgeCount = entityStats.earnedBadgeCount + 1;
+  entityStats.save();
+
   let earnedBadge = EarnedBadge.load(badgeId);
 
   if (earnedBadge == null) {
-    // increment global, badgeDefinition, and badgeWinner earnedBadgeCounts
-    let entityStats = createOrLoadEmblemEntityStats();
-    let earnedBadgeCount = new EarnedBadgeCount(
-      BigInt.fromI32(entityStats.earnedBadgeCount).toString()
+    let badgeMetric = BadgeMetric.load(badgeDefinition.metric) as BadgeMetric;
+    let emblemUserRole = createOrLoadEmblemUserRole(
+      emblemUserId,
+      badgeMetric.protocolRole
     );
-    earnedBadgeCount.globalBadgeNumber = entityStats.earnedBadgeCount;
-    earnedBadgeCount.earnedBadge = badgeId;
-    earnedBadgeCount.save();
+    emblemUserRole.communityScore = emblemUserRole.communityScore.plus(
+      badgeDefinition.communityScore
+    );
+    emblemUserRole.save();
 
-    let winnerRole = createOrLoadWinnerRole(
-      badgeUserId,
-      badgeDefinition.protocolRole
+    let emblemUser = createOrLoadEmblemUser(emblemUserId);
+    emblemUser.earnedBadgeCount = emblemUser.earnedBadgeCount + 1;
+    emblemUser.communityScore = emblemUser.communityScore.plus(
+      badgeDefinition.communityScore
     );
-    winnerRole.soulScore = winnerRole.soulScore.plus(badgeDefinition.soulScore);
-    winnerRole.save();
-
-    let badgeWinner = _createOrLoadBadgeWinner(badgeUserId, entityStats);
-    badgeWinner.earnedBadgeCount = badgeWinner.earnedBadgeCount + 1;
-    badgeWinner.soulScore = badgeWinner.soulScore.plus(
-      badgeDefinition.soulScore
-    );
-    badgeWinner.save();
+    emblemUser.save();
 
     earnedBadge = new EarnedBadge(badgeId);
-    earnedBadge.badgeWinner = badgeWinner.id;
+    earnedBadge.emblemUser = emblemUser.id;
     earnedBadge.definition = badgeDefinition.id;
     earnedBadge.blockAwarded = eventData.blockNumber;
     earnedBadge.transactionHash = eventData.transactionHash;
@@ -178,27 +171,6 @@ export function createEarnedBadge(
     badgeDefinition.earnedBadgeCount = badgeDefinition.earnedBadgeCount + 1;
     badgeDefinition.save();
   }
-}
-
-function _createOrLoadBadgeWinner(
-  userId: string,
-  entityStats: EmblemEntityStats
-): BadgeWinner {
-  let winner = BadgeWinner.load(userId);
-
-  if (winner == null) {
-    winner = new BadgeWinner(userId);
-    winner.badgeUser = userId;
-    winner.earnedBadgeCount = 0;
-    winner.mintedAwardCount = 0;
-    winner.soulScore = zeroBI();
-    winner.save();
-
-    entityStats.badgeWinnerCount = entityStats.badgeWinnerCount + 1;
-    entityStats.save();
-  }
-
-  return winner as BadgeWinner;
 }
 
 function _createOrLoadEarnedBadgeMetaData(

@@ -1,11 +1,5 @@
 import { BigInt } from "@graphprotocol/graph-ts";
-import { createOrLoadBadgeDefinition } from "../Emblem/emblemModels";
-import {
-  PROTOCOL_ROLE_CURATOR,
-  PROTOCOL_ROLE_DELEGATOR,
-  PROTOCOL_ROLE_INDEXER,
-  PROTOCOL_ROLE_SUBGRAPH_DEVELOPER,
-} from "../helpers/constants";
+import { createBadgeDefinition } from "../Emblem/emblemModels";
 import {
   BADGE_METRIC_CURATOR_SUBGRAPHS_SIGNALLED,
   BADGE_METRIC_DELEGATOR_INDEXERS,
@@ -21,206 +15,185 @@ import {
 export function generateGenesisBadgeDefinitions(): void {
   //////// INDEXER BADGES ////////
 
-  createOrLoadBadgeDefinition(
+  createBadgeDefinition(
     "Indexing Diversity I",
     "Index 1 Subgraph",
-    BADGE_METRIC_INDEXER_SUBGRAPHS_INDEXED,
+    0,
     BigInt.fromI32(1),
     BigInt.fromI32(1),
-    "QmQpJMDSuDsWHuVLetFLPMetKf9k8hHfTsopteuzkHDQ8z",
-    PROTOCOL_ROLE_INDEXER
+    "QmQpJMDSuDsWHuVLetFLPMetKf9k8hHfTsopteuzkHDQ8z"
   );
-  createOrLoadBadgeDefinition(
+  createBadgeDefinition(
     "Indexing Diversity II",
     "Index 5 Subgraphs",
-    BADGE_METRIC_INDEXER_SUBGRAPHS_INDEXED,
+    0,
     BigInt.fromI32(5),
     BigInt.fromI32(4),
-    "QmQbveFF8J5tT8yR9vqp87CG5z2E44i489mpR3p7Ff3AA5",
-    PROTOCOL_ROLE_INDEXER
+    "QmQbveFF8J5tT8yR9vqp87CG5z2E44i489mpR3p7Ff3AA5"
   );
-  createOrLoadBadgeDefinition(
+  createBadgeDefinition(
     "Indexing Diversity III",
     "Index 15 Subgraphs",
-    BADGE_METRIC_INDEXER_SUBGRAPHS_INDEXED,
+    0,
     BigInt.fromI32(15),
     BigInt.fromI32(7),
-    "QmeEwuH4ZE9E8FTb6jLJw7QHiRd6kY3CkMP3Uw5rbWJKzk",
-    PROTOCOL_ROLE_INDEXER
+    "QmeEwuH4ZE9E8FTb6jLJw7QHiRd6kY3CkMP3Uw5rbWJKzk"
   );
 
-  createOrLoadBadgeDefinition(
+  createBadgeDefinition(
     "Query Collector I",
     "Collect 1k GRT in query fees",
-    BADGE_METRIC_INDEXER_QUERY_FEES_COLLECTED,
+    1,
     BigInt.fromString("1000000000000000000000"),
     BigInt.fromI32(1),
-    "QmWoj4di4bukC81PNCeSRSuQqEhLoo75XHANvuz7n4ejPe",
-    PROTOCOL_ROLE_INDEXER
+    "QmWoj4di4bukC81PNCeSRSuQqEhLoo75XHANvuz7n4ejPe"
   );
-  createOrLoadBadgeDefinition(
+  createBadgeDefinition(
     "Query Collector II",
     "Collect 10k GRT in query fees",
-    BADGE_METRIC_INDEXER_QUERY_FEES_COLLECTED,
+    1,
     BigInt.fromString("10000000000000000000000"),
     BigInt.fromI32(4),
-    "QmdcHm17vat66zXFkjjACZWcRWpik7DVE7WZTkdjQtaZpu",
-    PROTOCOL_ROLE_INDEXER
+    "QmdcHm17vat66zXFkjjACZWcRWpik7DVE7WZTkdjQtaZpu"
   );
 
-  createOrLoadBadgeDefinition(
+  createBadgeDefinition(
     "Query Collector III",
     "Collect 25k GRT in query fees",
-    BADGE_METRIC_INDEXER_QUERY_FEES_COLLECTED,
+    1,
     BigInt.fromString("25000000000000000000000"),
     BigInt.fromI32(7),
-    "QmNN7exESvL8jcoyVbroFf7vkFUa697jenR8E7fX3nyRTa",
-    PROTOCOL_ROLE_INDEXER
+    "QmNN7exESvL8jcoyVbroFf7vkFUa697jenR8E7fX3nyRTa"
   );
 
-  createOrLoadBadgeDefinition(
+  createBadgeDefinition(
     "Delegation Received I",
     "Receive GRT from 1 Delegator",
-    BADGE_METRIC_INDEXER_DELEGATOR_COUNT,
+    3,
     BigInt.fromI32(1),
     BigInt.fromI32(1),
-    "QmZjYNzhdMagUWgmkw4ib17Vc5BP4JkHevY11AsP138uop",
-    PROTOCOL_ROLE_INDEXER
+    "QmZjYNzhdMagUWgmkw4ib17Vc5BP4JkHevY11AsP138uop"
   );
-  createOrLoadBadgeDefinition(
+  createBadgeDefinition(
     "Delegation Received II",
     "Receive GRT from 25 Delegators",
-    BADGE_METRIC_INDEXER_DELEGATOR_COUNT,
+    3,
     BigInt.fromI32(25),
     BigInt.fromI32(4),
-    "QmbC16nssC6GcCtMXv9RidCwEQoMsQQYquJtyRa9wM68iy",
-    PROTOCOL_ROLE_INDEXER
+    "QmbC16nssC6GcCtMXv9RidCwEQoMsQQYquJtyRa9wM68iy"
   );
-  createOrLoadBadgeDefinition(
+  createBadgeDefinition(
     "Delegation Received III",
     "Receive GRT from 100 Delegators",
-    BADGE_METRIC_INDEXER_DELEGATOR_COUNT,
+    3,
     BigInt.fromI32(100),
     BigInt.fromI32(7),
-    "QmcDnovgqSpgs6nrJanx2nFx9VJ9bYKZQDBu1oiapDdKQm",
-    PROTOCOL_ROLE_INDEXER
+    "QmcDnovgqSpgs6nrJanx2nFx9VJ9bYKZQDBu1oiapDdKQm"
   );
 
   //////// DELEGATOR BADGES ////////
 
-  createOrLoadBadgeDefinition(
+  createBadgeDefinition(
     "Delegation Diversity I",
     "Delegate to 1 Indexer",
-    BADGE_METRIC_DELEGATOR_INDEXERS,
+    4,
     BigInt.fromI32(1),
     BigInt.fromI32(1),
-    "QmX4vJh4TeBTiUufNUzSV43kgC411wphKhuFhspqLPypR9",
-    PROTOCOL_ROLE_DELEGATOR
+    "QmX4vJh4TeBTiUufNUzSV43kgC411wphKhuFhspqLPypR9"
   );
-  createOrLoadBadgeDefinition(
+  createBadgeDefinition(
     "Delegation Diversity II",
     "Delegate to 3 Indexers",
-    BADGE_METRIC_DELEGATOR_INDEXERS,
+    4,
     BigInt.fromI32(3),
     BigInt.fromI32(4),
-    "QmZGUNuUF4iwZ6KfGeCk7EzX9iUoMu3D9LkioyUB5DVhLs",
-    PROTOCOL_ROLE_DELEGATOR
+    "QmZGUNuUF4iwZ6KfGeCk7EzX9iUoMu3D9LkioyUB5DVhLs"
   );
-  createOrLoadBadgeDefinition(
+  createBadgeDefinition(
     "Delegation Diversity III",
     "Delegate to 10 Indexer",
-    BADGE_METRIC_DELEGATOR_INDEXERS,
+    4,
     BigInt.fromI32(10),
     BigInt.fromI32(7),
-    "QmeUG7igNjqy8jnbiJGCvxt5cQns7evUTRmfbvDTrdn8jm",
-    PROTOCOL_ROLE_DELEGATOR
+    "QmeUG7igNjqy8jnbiJGCvxt5cQns7evUTRmfbvDTrdn8jm"
   );
 
   //////// CURATOR BADGES ////////
 
-  createOrLoadBadgeDefinition(
+  createBadgeDefinition(
     "Signal Diversity I",
     "Signal 1 Subgraph",
-    BADGE_METRIC_CURATOR_SUBGRAPHS_SIGNALLED,
+    5,
     BigInt.fromI32(1),
     BigInt.fromI32(1),
-    "QmXoY4EnWEQHzxZagkPPKQU5kzgASPET5UN836yWDX3kxo",
-    PROTOCOL_ROLE_CURATOR
+    "QmXoY4EnWEQHzxZagkPPKQU5kzgASPET5UN836yWDX3kxo"
   );
-  createOrLoadBadgeDefinition(
+  createBadgeDefinition(
     "Signal Diversity II",
     "Signal 5 Subgraphs",
-    BADGE_METRIC_CURATOR_SUBGRAPHS_SIGNALLED,
+    5,
     BigInt.fromI32(5),
     BigInt.fromI32(4),
-    "QmYphgzNZpvMrGtt67PheAbFXUgEs1Guu3wFvg1zmzuvBe",
-    PROTOCOL_ROLE_CURATOR
+    "QmYphgzNZpvMrGtt67PheAbFXUgEs1Guu3wFvg1zmzuvBe"
   );
-  createOrLoadBadgeDefinition(
+  createBadgeDefinition(
     "Signal Diversity III",
     "Signal 10 Subgraphs",
-    BADGE_METRIC_CURATOR_SUBGRAPHS_SIGNALLED,
+    5,
     BigInt.fromI32(10),
     BigInt.fromI32(7),
-    "QmNq8oMC7erM6gNWFk5qV2c77fwsN3YZiajJLUyqf7sPV1",
-    PROTOCOL_ROLE_CURATOR
+    "QmNq8oMC7erM6gNWFk5qV2c77fwsN3YZiajJLUyqf7sPV1"
   );
 
   //////// SUBGRAPH_DEVELOPER BADGES ////////
 
-  createOrLoadBadgeDefinition(
+  createBadgeDefinition(
     "Signal Acquired I",
     "Receive 1k GRT in Curator Signal on your Subgraphs",
-    BADGE_METRIC_PUBLISHER_SIGNAL_ATTRACTED,
+    8,
     BigInt.fromString("1000000000000000000000"),
     BigInt.fromI32(1),
-    "QmPLjA6zCqKyqa9465Qb7DFoMgWL8aj4CgN3fvDsQR53uy",
-    PROTOCOL_ROLE_SUBGRAPH_DEVELOPER
+    "QmPLjA6zCqKyqa9465Qb7DFoMgWL8aj4CgN3fvDsQR53uy"
   );
-  createOrLoadBadgeDefinition(
+  createBadgeDefinition(
     "Signal Acquired II",
     "Receive 10k GRT in Curator Signal on your Subgraphs",
-    BADGE_METRIC_PUBLISHER_SIGNAL_ATTRACTED,
+    8,
     BigInt.fromString("10000000000000000000000"),
     BigInt.fromI32(4),
-    "QmeE8mwVvsxSZ8hieW9Voeus3cknxavJvkWYJRqGGefe9v",
-    PROTOCOL_ROLE_SUBGRAPH_DEVELOPER
+    "QmeE8mwVvsxSZ8hieW9Voeus3cknxavJvkWYJRqGGefe9v"
   );
-  createOrLoadBadgeDefinition(
+  createBadgeDefinition(
     "Signal Acquired III",
     "Receive 30k GRT in Curator Signal on your Subgraphs",
-    BADGE_METRIC_PUBLISHER_SIGNAL_ATTRACTED,
+    8,
     BigInt.fromString("30000000000000000000000"),
     BigInt.fromI32(7),
-    "QmaWXCmacr7MmGhpfovELYRciX7t1BRjiECzXkmMu3Cyaf",
-    PROTOCOL_ROLE_SUBGRAPH_DEVELOPER
+    "QmaWXCmacr7MmGhpfovELYRciX7t1BRjiECzXkmMu3Cyaf"
   );
 
-  createOrLoadBadgeDefinition(
+  createBadgeDefinition(
     "Subgraph Deployed I",
     "Deploy 1 Subgraph to the Decentralized Network",
-    BADGE_METRIC_PUBLISHER_SUBGRAPHS_DEPLOYED,
+    9,
     BigInt.fromI32(1),
     BigInt.fromI32(1),
-    "QmXYG9s8LhwYLwZxSHxYaS8meCjDAJxr1PSiSn8JYfDjFS",
-    PROTOCOL_ROLE_SUBGRAPH_DEVELOPER
+    "QmXYG9s8LhwYLwZxSHxYaS8meCjDAJxr1PSiSn8JYfDjFS"
   );
-  createOrLoadBadgeDefinition(
+  createBadgeDefinition(
     "Subgraph Deployed II",
     "Deploy 3 Subgraphs to the Decentralized Network",
-    BADGE_METRIC_PUBLISHER_SUBGRAPHS_DEPLOYED,
+    9,
     BigInt.fromI32(3),
     BigInt.fromI32(4),
-    "QmRXK5HfunTFzjPb9p7ffq9DBoBKMNLQBEwX3v8BZWoUab",
-    PROTOCOL_ROLE_SUBGRAPH_DEVELOPER
+    "QmRXK5HfunTFzjPb9p7ffq9DBoBKMNLQBEwX3v8BZWoUab"
   );
-  createOrLoadBadgeDefinition(
+  createBadgeDefinition(
     "Subgraph Deployed III",
     "Deploy 10 Subgraphs to the Decentralized Network",
-    BADGE_METRIC_PUBLISHER_SUBGRAPHS_DEPLOYED,
+    9,
     BigInt.fromI32(10),
     BigInt.fromI32(7),
-    "QmesqMvtp86duLQbfFX5rmYrqHq6GnQ8sNMr9gw7waHPJZ",
-    PROTOCOL_ROLE_SUBGRAPH_DEVELOPER
+    "QmesqMvtp86duLQbfFX5rmYrqHq6GnQ8sNMr9gw7waHPJZ"
   );
 }

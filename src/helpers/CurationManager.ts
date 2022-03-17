@@ -15,10 +15,10 @@ import {
   BADGE_AWARD_METADATA_NAME_CURATOR,
   BADGE_AWARD_METADATA_NAME_SUBGRAPH,
   BADGE_AWARD_METADATA_NAME_TOKENS,
-  BADGE_METRIC_CURATOR_APE,
-  BADGE_METRIC_CURATOR_HOUSE_ODDS,
-  BADGE_METRIC_CURATOR_SUBGRAPHS_SIGNALLED,
-  BADGE_METRIC_PUBLISHER_SIGNAL_ATTRACTED,
+  BADGE_METRIC_CURATOR_APE_ID,
+  BADGE_METRIC_CURATOR_HOUSE_ODDS_ID,
+  BADGE_METRIC_CURATOR_SUBGRAPHS_SIGNALLED_ID,
+  BADGE_METRIC_PUBLISHER_SIGNAL_ATTRACTED_ID,
 } from "../Emblem/metrics";
 import { createOrLoadTheGraphEntityStats } from "./models";
 import { zeroBD } from "./constants";
@@ -101,7 +101,7 @@ function _processCurationSignal(
   if (isNameSignalBecomingActive) {
     incrementProgress(
       curatorId,
-      BADGE_METRIC_CURATOR_SUBGRAPHS_SIGNALLED,
+      BADGE_METRIC_CURATOR_SUBGRAPHS_SIGNALLED_ID,
       eventData
     );
 
@@ -114,11 +114,15 @@ function _processCurationSignal(
         .le(BigInt.fromI32(100)) &&
       !curatorIsSubgraphOwner
     ) {
-      incrementProgress(curatorId, BADGE_METRIC_CURATOR_APE, eventData);
+      incrementProgress(curatorId, BADGE_METRIC_CURATOR_APE_ID, eventData);
     }
 
     if (curatorIsSubgraphOwner) {
-      incrementProgress(curatorId, BADGE_METRIC_CURATOR_HOUSE_ODDS, eventData);
+      incrementProgress(
+        curatorId,
+        BADGE_METRIC_CURATOR_HOUSE_ODDS_ID,
+        eventData
+      );
     }
   }
 
@@ -152,7 +156,7 @@ function _processCurationSignal(
 
   addToProgress(
     subgraphOwner,
-    BADGE_METRIC_PUBLISHER_SIGNAL_ATTRACTED,
+    BADGE_METRIC_PUBLISHER_SIGNAL_ATTRACTED_ID,
     tokensDeposited,
     eventData
   );
@@ -189,7 +193,7 @@ function _processCurationBurn(
 
   subtractFromProgress(
     subgraphOwner,
-    BADGE_METRIC_PUBLISHER_SIGNAL_ATTRACTED,
+    BADGE_METRIC_PUBLISHER_SIGNAL_ATTRACTED_ID,
     tokensReceived,
     eventData
   );

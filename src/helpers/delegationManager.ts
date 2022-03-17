@@ -17,8 +17,8 @@ import { beneficiaryIfLockWallet } from "../mappings/graphTokenLockWallet";
 import {
   BADGE_AWARD_METADATA_NAME_DELEGATOR,
   BADGE_AWARD_METADATA_NAME_TOKENS,
-  BADGE_METRIC_DELEGATOR_INDEXERS,
-  BADGE_METRIC_INDEXER_DELEGATOR_COUNT,
+  BADGE_METRIC_DELEGATOR_INDEXERS_ID,
+  BADGE_METRIC_INDEXER_DELEGATOR_COUNT_ID,
 } from "../Emblem/metrics";
 import { createOrLoadIndexer } from "./indexerManager";
 import { zeroBI } from "./constants";
@@ -79,12 +79,17 @@ function _processStakeDelegated(
   if (
     oldDelegatedTokens.lt(BigInt.fromI32(100)) &&
     delegatedStake.tokens.ge(BigInt.fromI32(100)) &&
-    !delegatedStake.crossed100
+    !delegatedStake.crossed100 &&
+    delegatedStake.crossed100 == false
   ) {
     delegatedStake.crossed100 = true;
     delegatedStake.save();
 
-    incrementProgress(delegatorId, BADGE_METRIC_DELEGATOR_INDEXERS, eventData);
+    incrementProgress(
+      delegatorId,
+      BADGE_METRIC_DELEGATOR_INDEXERS_ID,
+      eventData
+    );
   }
 }
 
@@ -146,7 +151,7 @@ export function createOrLoadDelegatedStake(
 
     incrementProgress(
       indexerId,
-      BADGE_METRIC_INDEXER_DELEGATOR_COUNT,
+      BADGE_METRIC_INDEXER_DELEGATOR_COUNT_ID,
       eventData
     );
   }

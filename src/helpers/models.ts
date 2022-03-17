@@ -4,10 +4,10 @@ import {
   Protocol,
 } from "../../generated/schema";
 import {
-  createOrLoadBadgeUser,
+  createOrLoadEmblemUser,
   createOrLoadEmblemEntityStats,
 } from "../Emblem/emblemModels";
-import { PROTOCOL_NAME_THE_GRAPH } from "./constants";
+import { PROTOCOL_NAME_THE_GRAPH } from "./../Emblem/metrics";
 
 export function createOrLoadTheGraphEntityStats(): TheGraphEntityStats {
   let entityStats = TheGraphEntityStats.load("1");
@@ -34,9 +34,9 @@ export function createOrLoadGraphAccount(address: string): GraphAccount {
   let graphAccount = GraphAccount.load(address);
 
   if (graphAccount == null) {
-    createOrLoadBadgeUser(address);
+    createOrLoadEmblemUser(address);
     graphAccount = new GraphAccount(address);
-    graphAccount.badgeUser = address;
+    graphAccount.emblemUser = address;
     graphAccount.awardCount = 0;
 
     graphAccount.save();

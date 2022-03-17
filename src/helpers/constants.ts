@@ -27,15 +27,3 @@ export function negOneBI(): BigInt {
 export function oneDay(): BigInt {
   return BigInt.fromI32(60 * 60 * 24);
 }
-
-export function minimumDelegationStreak(): BigInt {
-  return BigInt.fromI32(100000); // measured in blocks
-}
-
-export const PROTOCOL_NAME_THE_GRAPH = "The Graph";
-
-export const PROTOCOL_ROLE_INDEXER = "INDEXER";
-export const PROTOCOL_ROLE_DELEGATOR = "DELEGATOR";
-export const PROTOCOL_ROLE_CURATOR = "CURATOR";
-export const PROTOCOL_ROLE_SUBGRAPH_DEVELOPER = "SUBGRAPH_DEVELOPER";
-export const PROTOCOL_ROLE_CONSUMER = "CONSUMER";

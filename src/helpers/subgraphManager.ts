@@ -17,7 +17,7 @@ import { incrementProgress } from "../Emblem/metricProgress";
 import { beneficiaryIfLockWallet } from "../mappings/graphTokenLockWallet";
 import {
   BADGE_AWARD_METADATA_NAME_SUBGRAPH,
-  BADGE_METRIC_PUBLISHER_SUBGRAPHS_DEPLOYED,
+  BADGE_METRIC_PUBLISHER_SUBGRAPHS_DEPLOYED_ID,
 } from "../Emblem/metrics";
 import {
   createOrLoadTheGraphEntityStats,
@@ -68,7 +68,7 @@ export function processSubgraphPublished(event: SubgraphPublished): void {
 
   incrementProgress(
     publisherId,
-    BADGE_METRIC_PUBLISHER_SUBGRAPHS_DEPLOYED,
+    BADGE_METRIC_PUBLISHER_SUBGRAPHS_DEPLOYED_ID,
     eventData
   );
 }

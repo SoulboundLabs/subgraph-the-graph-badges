@@ -2,42 +2,42 @@ import { BigInt } from "@graphprotocol/graph-ts";
 import {
   BadgeDefinition,
   MetricConsumer,
-  Progress,
+  EmblemUserLiveData,
 } from "../../generated/schema";
 import { zeroBI } from "../helpers/constants";
 import { createEarnedBadge, EarnedBadgeEventData } from "./emblemModels";
 
 export function incrementProgress(
-  badgeUser: string,
-  metric: string,
+  emblemUser: string,
+  metricId: i32,
   eventData: EarnedBadgeEventData
 ): void {
-  let progress = _createOrLoadProgress(badgeUser, metric);
+  let progress = _createOrLoadProgress(emblemUser, metricId);
   updateProgress(progress, progress.value.plus(BigInt.fromI32(1)), eventData);
 }
 
 export function addToProgress(
-  badgeUser: string,
-  metric: string,
+  emblemUser: string,
+  metricId: i32,
   value: BigInt,
   eventData: EarnedBadgeEventData
 ): void {
-  let progress = _createOrLoadProgress(badgeUser, metric);
+  let progress = _createOrLoadProgress(emblemUser, metricId);
   updateProgress(progress, progress.value.plus(value), eventData);
 }
 
 export function subtractFromProgress(
-  badgeUser: string,
-  metric: string,
+  emblemUser: string,
+  metricId: i32,
   value: BigInt,
   eventData: EarnedBadgeEventData
 ): void {
-  let progress = _createOrLoadProgress(badgeUser, metric);
+  let progress = _createOrLoadProgress(emblemUser, metricId);
   updateProgress(progress, progress.value.minus(value), eventData);
 }
 
 function updateProgress(
-  progress: Progress,
+  progress: EmblemUserLiveData,
   updatedValue: BigInt,
   eventData: EarnedBadgeEventData
 ): void {
@@ -50,7 +50,7 @@ function updateProgress(
       );
 
       if (updatedValue.ge(badgeDefinition.threshold)) {
-        createEarnedBadge(badgeDefinition, progress.badgeUser, eventData);
+        createEarnedBadge(badgeDefinition, progress.emblemUser, eventData);
       }
     }
 
@@ -59,19 +59,25 @@ function updateProgress(
   }
 }
 
-function _createOrLoadProgress(badgeUser: string, metric: string): Progress {
-  let id = badgeUser.concat("-").concat(metric);
-  let progress = Progress.load(id);
+function _createOrLoadProgress(
+  emblemUser: string,
+  metric: i32
+): EmblemUserLiveData {
+  let id = emblemUser.concat("-").concat(BigInt.fromI32(metric).toString());
+  let progress = EmblemUserLiveData.load(id);
 
   if (progress == null) {
-    progress = new Progress(id);
-    progress.metric = metric;
-    progress.badgeUser = badgeUser;
+    progress = new EmblemUserLiveData(id);
+    progress.emblemUser = emblemUser;
+    progress.metric = BigInt.fromI32(metric).toString();
     progress.value = zeroBI();
+    progress.valueOnChain = zeroBI();
+    progress.maxValue = zeroBI();
+    progress.maxValueBlockNumber = zeroBI();
     progress.save();
   }
 
-  return progress as Progress;
+  return progress as EmblemUserLiveData;
 }
 
 // returns an array of BadgeDefinitionIds tracking a given metric

@@ -26,9 +26,9 @@ import { beneficiaryIfLockWallet } from "../mappings/graphTokenLockWallet";
 import {
   BADGE_AWARD_METADATA_NAME_SUBGRAPH_DEPLOYMENT,
   BADGE_AWARD_METADATA_NAME_TOKENS,
-  BADGE_METRIC_INDEXER_ALLOCATIONS_OPENED,
-  BADGE_METRIC_INDEXER_QUERY_FEES_COLLECTED,
-  BADGE_METRIC_INDEXER_SUBGRAPHS_INDEXED,
+  BADGE_METRIC_INDEXER_ALLOCATIONS_OPENED_ID,
+  BADGE_METRIC_INDEXER_QUERY_FEES_COLLECTED_ID,
+  BADGE_METRIC_INDEXER_SUBGRAPHS_INDEXED_ID,
 } from "../Emblem/metrics";
 import { zeroBI } from "./constants";
 
@@ -116,7 +116,7 @@ function _processAllocationCreated(
     _createSubgraphAllocation(indexerId, subgraphDeploymentId);
     incrementProgress(
       indexerId,
-      BADGE_METRIC_INDEXER_SUBGRAPHS_INDEXED,
+      BADGE_METRIC_INDEXER_SUBGRAPHS_INDEXED_ID,
       eventData
     );
   }
@@ -129,7 +129,7 @@ function _processAllocationCreated(
 
   incrementProgress(
     indexerId,
-    BADGE_METRIC_INDEXER_ALLOCATIONS_OPENED,
+    BADGE_METRIC_INDEXER_ALLOCATIONS_OPENED_ID,
     eventData
   );
 }
@@ -160,7 +160,7 @@ function _processAllocationCollected(
 
   addToProgress(
     indexerId,
-    BADGE_METRIC_INDEXER_QUERY_FEES_COLLECTED,
+    BADGE_METRIC_INDEXER_QUERY_FEES_COLLECTED_ID,
     rebateFees,
     eventData
   );
