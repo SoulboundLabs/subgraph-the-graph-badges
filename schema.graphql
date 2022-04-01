@@ -362,12 +362,26 @@ type BadgeMetric @entity {
 Tracks the number of EmblemUsers with a particular community score
 """
 type LeaderboardTier @entity {
-  "The accumulated community score that at least one or more users has achieved"
+  "#{protocolRole}-{communityScore}"
   id: ID!
+  "The accumulated community score that at least one or more users has achieved"
+  communityScore: BigInt!
   "Total count of users with that community score"
   userCount: Int!
   "Community scores are network-wide or role-specific"
   protocolRole: ProtocolRole!
+}
+
+"""
+Associated User with Leaderboard Tier
+"""
+type LeaderboardTierUser @entity {
+  "#{userId}-#{leaderboardTierId}"
+  id: ID!
+  "User associated with this leaderboard tier"
+  emblemUser: EmblemUser!
+  "Community scores are network-wide or role-specific"
+  leaderboardTier: LeaderboardTier!
 }
 
 """

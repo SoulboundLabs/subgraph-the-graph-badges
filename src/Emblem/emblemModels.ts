@@ -1,3 +1,4 @@
+import { store } from "@graphprotocol/graph-ts";
 import { BigInt, ethereum } from "@graphprotocol/graph-ts/index";
 import {
   BadgeDefinition,
@@ -9,6 +10,7 @@ import {
   EmblemUserCount,
   EmblemUserRole,
   LeaderboardTier,
+  LeaderboardTierUser,
   MetricConsumer,
 } from "../../generated/schema";
 import { zeroBI } from "../helpers/constants";
@@ -126,14 +128,35 @@ function createOrLoadLeaderboardTier(
   communityScore: BigInt,
   protocolRole: string
 ): LeaderboardTier {
-  let leaderboardTier = LeaderboardTier.load(communityScore.toString());
+  let id = communityScore.toString().concat("-").concat(protocolRole);
+  let leaderboardTier = LeaderboardTier.load(id);
   if (leaderboardTier == null) {
-    leaderboardTier = new LeaderboardTier(communityScore.toString());
+    leaderboardTier = new LeaderboardTier(id);
+    leaderboardTier.communityScore = communityScore;
     leaderboardTier.userCount = 0;
     leaderboardTier.protocolRole = protocolRole;
     leaderboardTier.save();
   }
   return leaderboardTier as LeaderboardTier;
+}
+
+function removeLeaderboardTierUser(leaderboardTierUserId: string): void {
+  store.remove("LeaderboardTierUser", leaderboardTierUserId);
+}
+
+function createOrLoadLeaderboardTierUser(
+  leaderboardTierId: string,
+  emblemUserId: string
+): LeaderboardTierUser {
+  let id = leaderboardTierId.concat("-").concat(emblemUserId);
+  let leaderboardTierUser = LeaderboardTierUser.load(leaderboardTierId);
+  if (leaderboardTierUser == null) {
+    leaderboardTierUser = new LeaderboardTierUser(id);
+    leaderboardTierUser.leaderboardTier = leaderboardTierId;
+    leaderboardTierUser.emblemUser = emblemUserId;
+    leaderboardTierUser.save();
+  }
+  return leaderboardTierUser as LeaderboardTierUser;
 }
 
 export function createEarnedBadge(
@@ -183,8 +206,12 @@ export function createEarnedBadge(
       badgeMetric.protocolRole
     );
 
-    formerLeaderboardTier.userCount = formerLeaderboardTier.userCount - 1;
-    formerLeaderboardTier.save();
+    let shouldDecrementUserCount = formerLeaderboardTier.userCount > 0;
+
+    if (shouldDecrementUserCount) {
+      formerLeaderboardTier.userCount = formerLeaderboardTier.userCount - 1;
+      formerLeaderboardTier.save();
+    }
 
     let newLeaderboardTier = createOrLoadLeaderboardTier(
       newCommunityScore,
@@ -193,6 +220,10 @@ export function createEarnedBadge(
 
     newLeaderboardTier.userCount = newLeaderboardTier.userCount + 1;
     newLeaderboardTier.save();
+
+    removeLeaderboardTierUser(formerLeaderboardTier.id);
+    createOrLoadLeaderboardTierUser(newLeaderboardTier.id, emblemUserId);
+    /* End LeaderboardTiers calculations */
 
     // create metadata entities
     for (let i = 0; i < eventData.metadata.length; i++) {
