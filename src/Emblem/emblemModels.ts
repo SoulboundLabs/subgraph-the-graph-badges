@@ -2,13 +2,14 @@ import { BigInt, ethereum } from "@graphprotocol/graph-ts/index";
 import {
   BadgeDefinition,
   BadgeMetric,
-  EmblemUser,
   EarnedBadge,
   EarnedBadgeMetadata,
   EmblemEntityStats,
-  MetricConsumer,
-  EmblemUserRole,
+  EmblemUser,
   EmblemUserCount,
+  EmblemUserRole,
+  LeaderboardTier,
+  MetricConsumer,
 } from "../../generated/schema";
 import { zeroBI } from "../helpers/constants";
 import { generateGenesisBadgeDefinitions } from "./genesisBadges";
@@ -121,6 +122,20 @@ function createOrLoadMetricConsumer(metricId: i32): MetricConsumer {
   return metricConsumer as MetricConsumer;
 }
 
+function createOrLoadLeaderboardTier(
+  communityScore: BigInt,
+  protocolRole: string
+): LeaderboardTier {
+  let leaderboardTier = LeaderboardTier.load(communityScore.toString());
+  if (leaderboardTier == null) {
+    leaderboardTier = new LeaderboardTier(communityScore.toString());
+    leaderboardTier.userCount = 0;
+    leaderboardTier.protocolRole = protocolRole;
+    leaderboardTier.save();
+  }
+  return leaderboardTier as LeaderboardTier;
+}
+
 export function createEarnedBadge(
   badgeDefinition: BadgeDefinition,
   emblemUserId: string,
@@ -145,10 +160,12 @@ export function createEarnedBadge(
     emblemUserRole.save();
 
     let emblemUser = createOrLoadEmblemUser(emblemUserId);
-    emblemUser.earnedBadgeCount = emblemUser.earnedBadgeCount + 1;
-    emblemUser.communityScore = emblemUser.communityScore.plus(
+
+    let newCommunityScore = emblemUser.communityScore.plus(
       badgeDefinition.communityScore
     );
+    emblemUser.earnedBadgeCount = emblemUser.earnedBadgeCount + 1;
+    emblemUser.communityScore = newCommunityScore;
     emblemUser.save();
 
     earnedBadge = new EarnedBadge(badgeId);
@@ -159,6 +176,23 @@ export function createEarnedBadge(
     earnedBadge.timestampAwarded = eventData.timestamp;
     earnedBadge.awardNumber = badgeDefinition.earnedBadgeCount + 1;
     earnedBadge.save();
+
+    /* Update the count of users at the LeaderboardTiers associated with both the awardee's old communityScore and new communityScore*/
+    let formerLeaderboardTier = createOrLoadLeaderboardTier(
+      emblemUser.communityScore,
+      badgeMetric.protocolRole
+    );
+
+    formerLeaderboardTier.userCount = formerLeaderboardTier.userCount - 1;
+    formerLeaderboardTier.save();
+
+    let newLeaderboardTier = createOrLoadLeaderboardTier(
+      newCommunityScore,
+      badgeMetric.protocolRole
+    );
+
+    newLeaderboardTier.userCount = newLeaderboardTier.userCount + 1;
+    newLeaderboardTier.save();
 
     // create metadata entities
     for (let i = 0; i < eventData.metadata.length; i++) {
