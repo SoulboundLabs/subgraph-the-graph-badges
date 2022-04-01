@@ -1,14 +1,17 @@
+import { store } from "@graphprotocol/graph-ts";
 import { BigInt, ethereum } from "@graphprotocol/graph-ts/index";
 import {
   BadgeDefinition,
   BadgeMetric,
-  EmblemUser,
   EarnedBadge,
   EarnedBadgeMetadata,
   EmblemEntityStats,
-  MetricConsumer,
-  EmblemUserRole,
+  EmblemUser,
   EmblemUserCount,
+  EmblemUserRole,
+  LeaderboardTier,
+  LeaderboardTierUser,
+  MetricConsumer,
 } from "../../generated/schema";
 import { zeroBI } from "../helpers/constants";
 import { generateGenesisBadgeDefinitions } from "./genesisBadges";
@@ -121,6 +124,41 @@ function createOrLoadMetricConsumer(metricId: i32): MetricConsumer {
   return metricConsumer as MetricConsumer;
 }
 
+function createOrLoadLeaderboardTier(
+  communityScore: BigInt,
+  protocolRole: string
+): LeaderboardTier {
+  let id = communityScore.toString().concat("-").concat(protocolRole);
+  let leaderboardTier = LeaderboardTier.load(id);
+  if (leaderboardTier == null) {
+    leaderboardTier = new LeaderboardTier(id);
+    leaderboardTier.communityScore = communityScore;
+    leaderboardTier.userCount = 0;
+    leaderboardTier.protocolRole = protocolRole;
+    leaderboardTier.save();
+  }
+  return leaderboardTier as LeaderboardTier;
+}
+
+function removeLeaderboardTierUser(leaderboardTierUserId: string): void {
+  store.remove("LeaderboardTierUser", leaderboardTierUserId);
+}
+
+function createOrLoadLeaderboardTierUser(
+  leaderboardTierId: string,
+  emblemUserId: string
+): LeaderboardTierUser {
+  let id = leaderboardTierId.concat("-").concat(emblemUserId);
+  let leaderboardTierUser = LeaderboardTierUser.load(leaderboardTierId);
+  if (leaderboardTierUser == null) {
+    leaderboardTierUser = new LeaderboardTierUser(id);
+    leaderboardTierUser.leaderboardTier = leaderboardTierId;
+    leaderboardTierUser.emblemUser = emblemUserId;
+    leaderboardTierUser.save();
+  }
+  return leaderboardTierUser as LeaderboardTierUser;
+}
+
 export function createEarnedBadge(
   badgeDefinition: BadgeDefinition,
   emblemUserId: string,
@@ -145,10 +183,12 @@ export function createEarnedBadge(
     emblemUserRole.save();
 
     let emblemUser = createOrLoadEmblemUser(emblemUserId);
-    emblemUser.earnedBadgeCount = emblemUser.earnedBadgeCount + 1;
-    emblemUser.communityScore = emblemUser.communityScore.plus(
+
+    let newCommunityScore = emblemUser.communityScore.plus(
       badgeDefinition.communityScore
     );
+    emblemUser.earnedBadgeCount = emblemUser.earnedBadgeCount + 1;
+    emblemUser.communityScore = newCommunityScore;
     emblemUser.save();
 
     earnedBadge = new EarnedBadge(badgeId);
@@ -159,6 +199,31 @@ export function createEarnedBadge(
     earnedBadge.timestampAwarded = eventData.timestamp;
     earnedBadge.awardNumber = badgeDefinition.earnedBadgeCount + 1;
     earnedBadge.save();
+
+    /* Update the count of users at the LeaderboardTiers associated with both the awardee's old communityScore and new communityScore*/
+    let formerLeaderboardTier = createOrLoadLeaderboardTier(
+      emblemUser.communityScore,
+      badgeMetric.protocolRole
+    );
+
+    let shouldDecrementUserCount = formerLeaderboardTier.userCount > 0;
+
+    if (shouldDecrementUserCount) {
+      formerLeaderboardTier.userCount = formerLeaderboardTier.userCount - 1;
+      formerLeaderboardTier.save();
+    }
+
+    let newLeaderboardTier = createOrLoadLeaderboardTier(
+      newCommunityScore,
+      badgeMetric.protocolRole
+    );
+
+    newLeaderboardTier.userCount = newLeaderboardTier.userCount + 1;
+    newLeaderboardTier.save();
+
+    removeLeaderboardTierUser(formerLeaderboardTier.id);
+    createOrLoadLeaderboardTierUser(newLeaderboardTier.id, emblemUserId);
+    /* End LeaderboardTiers calculations */
 
     // create metadata entities
     for (let i = 0; i < eventData.metadata.length; i++) {

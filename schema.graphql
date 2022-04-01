@@ -325,11 +325,11 @@ type EmblemOracle @entity {
 }
 
 """
-EarnedBadges are awarded to EmblemUsers for satisfying BadgeDefinition thresholds. EarnedBadge 
-ids are an incrementing number, which facilitates future merkle proof verification via the Subgraph 
-Bridge. This creates a streamlined interface for smart contracts to emit events with a merkle root 
-and sorted range of leaves (in our case EarnedBadgeCounts) used to generate the root. With this data 
-the subgraph verifies that the leaves hash to the root, effectively verifying an arbitrarily sized 
+EarnedBadges are awarded to EmblemUsers for satisfying BadgeDefinition thresholds. EarnedBadge
+ids are an incrementing number, which facilitates future merkle proof verification via the Subgraph
+Bridge. This creates a streamlined interface for smart contracts to emit events with a merkle root
+and sorted range of leaves (in our case EarnedBadgeCounts) used to generate the root. With this data
+the subgraph verifies that the leaves hash to the root, effectively verifying an arbitrarily sized
 batch of data posted by an oracle.
 """
 type EarnedBadge @entity {
@@ -351,12 +351,37 @@ type EarnedBadge @entity {
   metadata: [EarnedBadgeMetadata!]! @derivedFrom(field: "earnedBadge")
 }
 
-
 type BadgeMetric @entity {
   id: ID!
   metricNumber: Int!
   metricName: String!
   protocolRole: ProtocolRole!
+}
+
+"""
+Tracks the number of EmblemUsers with a particular community score
+"""
+type LeaderboardTier @entity {
+  "#{protocolRole}-{communityScore}"
+  id: ID!
+  "The accumulated community score that at least one or more users has achieved"
+  communityScore: BigInt!
+  "Total count of users with that community score"
+  userCount: Int!
+  "Community scores are network-wide or role-specific"
+  protocolRole: ProtocolRole!
+}
+
+"""
+Associated User with Leaderboard Tier
+"""
+type LeaderboardTierUser @entity {
+  "#{userId}-#{leaderboardTierId}"
+  id: ID!
+  "User associated with this leaderboard tier"
+  emblemUser: EmblemUser!
+  "Community scores are network-wide or role-specific"
+  leaderboardTier: LeaderboardTier!
 }
 
 """
