@@ -1,6 +1,6 @@
-# The Graph Badges
+# The Graph SoulboundBadges
 
-Emblem is a dApp for identifying and rewarding noteworthy behavior on the Ethereum blockchain by issuing NFT badges. This repo houses the subgraph responsible for monitoring and rewarding users within The Graph protocol. For more information, please visit our [website](https://emblemdao.com) or join our [Discord](https://discord.gg/464p6GzrWq).
+Emblem is a dApp for identifying and rewarding noteworthy behavior on the Ethereum blockchain by issuing NFT soulboundBadges. This repo houses the subgraph responsible for monitoring and rewarding users within The Graph protocol. For more information, please visit our [website](https://emblemdao.com) or join our [Discord](https://discord.gg/464p6GzrWq).
 
 ## Setup
 

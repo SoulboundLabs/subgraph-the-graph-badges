@@ -2,15 +2,14 @@ import { BigDecimal, BigInt } from "@graphprotocol/graph-ts/index";
 import { NSignalBurned, NSignalMinted } from "../../generated/GNS/GNS";
 import { Curator, NameSignal, Subgraph } from "../../generated/schema";
 import {
-  EarnedBadgeEventData,
-  EarnedBadgeEventMetadata,
+  SoulboundBadgeEventData,
+  SoulboundBadgeEventMetadata,
 } from "../Emblem/emblemModels";
 import {
   addToProgress,
   incrementProgress,
   subtractFromProgress,
 } from "../Emblem/metricProgress";
-import { beneficiaryIfLockWallet } from "../mappings/graphTokenLockWallet";
 import {
   BADGE_AWARD_METADATA_NAME_CURATOR,
   BADGE_AWARD_METADATA_NAME_SUBGRAPH,
@@ -20,8 +19,9 @@ import {
   BADGE_METRIC_CURATOR_SUBGRAPHS_SIGNALLED_ID,
   BADGE_METRIC_PUBLISHER_SIGNAL_ATTRACTED_ID,
 } from "../Emblem/metrics";
-import { createOrLoadTheGraphEntityStats } from "./models";
+import { beneficiaryIfLockWallet } from "../mappings/graphTokenLockWallet";
 import { zeroBD } from "./constants";
+import { createOrLoadTheGraphEntityStats } from "./models";
 
 ////////////////      Public
 
@@ -58,7 +58,7 @@ export function processCurationBurn(event: NSignalBurned): void {
   let nSignalBurnt = event.params.nSignalBurnt;
   let vSignalBurnt = event.params.vSignalBurnt.toBigDecimal();
   let tokensReceived = event.params.tokensReceived;
-  let eventData = new EarnedBadgeEventData(event, []);
+  let eventData = new SoulboundBadgeEventData(event, []);
   _processCurationBurn(
     subgraphOwner,
     subgraphNumber,
@@ -82,18 +82,21 @@ function _processCurationSignal(
   event: NSignalMinted
 ): void {
   let subgraphId = subgraphOwner.concat("-").concat(subgraphNumber);
-  let metadata: Array<EarnedBadgeEventMetadata> = [
-    new EarnedBadgeEventMetadata(
+  let metadata: Array<SoulboundBadgeEventMetadata> = [
+    new SoulboundBadgeEventMetadata(
       BADGE_AWARD_METADATA_NAME_TOKENS,
       tokensDeposited.toString()
     ),
-    new EarnedBadgeEventMetadata(BADGE_AWARD_METADATA_NAME_CURATOR, curatorId),
-    new EarnedBadgeEventMetadata(
+    new SoulboundBadgeEventMetadata(
+      BADGE_AWARD_METADATA_NAME_CURATOR,
+      curatorId
+    ),
+    new SoulboundBadgeEventMetadata(
       BADGE_AWARD_METADATA_NAME_SUBGRAPH,
       subgraphOwner.concat("-").concat(subgraphNumber)
     ),
   ];
-  let eventData = new EarnedBadgeEventData(event, metadata);
+  let eventData = new SoulboundBadgeEventData(event, metadata);
   let nameSignal = createOrLoadNameSignal(curatorId, subgraphId, eventData);
 
   let isNameSignalBecomingActive =
@@ -169,7 +172,7 @@ function _processCurationBurn(
   nSignalBurnt: BigInt,
   vSignalBurnt: BigDecimal,
   tokensReceived: BigInt,
-  eventData: EarnedBadgeEventData
+  eventData: SoulboundBadgeEventData
 ): void {
   let subgraphId = subgraphOwner.concat("-").concat(subgraphNumber);
   let nameSignal = createOrLoadNameSignal(curatorId, subgraphId, eventData);
@@ -203,7 +206,7 @@ function _processCurationBurn(
 
 function _createOrLoadCurator(
   id: string,
-  eventData: EarnedBadgeEventData
+  eventData: SoulboundBadgeEventData
 ): Curator {
   let curator = Curator.load(id);
 
@@ -225,7 +228,7 @@ function _createOrLoadCurator(
 export function createOrLoadNameSignal(
   curatorId: string,
   subgraphId: string,
-  eventData: EarnedBadgeEventData
+  eventData: SoulboundBadgeEventData
 ): NameSignal {
   let nameSignalID = curatorId.concat("-").concat(subgraphId);
   let nameSignal = NameSignal.load(nameSignalID);

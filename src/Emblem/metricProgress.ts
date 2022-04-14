@@ -1,56 +1,62 @@
 import { BigInt } from "@graphprotocol/graph-ts";
 import {
-  BadgeDefinition,
-  MetricConsumer,
-  EmblemUserLiveData,
+  SoulboundBadgeDefinition,
+  SoulboundMetricConsumer,
+  SoulboundUserStat,
 } from "../../generated/schema";
 import { zeroBI } from "../helpers/constants";
-import { createEarnedBadge, EarnedBadgeEventData } from "./emblemModels";
+import { createSoulboundBadge, SoulboundBadgeEventData } from "./emblemModels";
 
 export function incrementProgress(
-  emblemUser: string,
+  soulboundUser: string,
   metricId: i32,
-  eventData: EarnedBadgeEventData
+  eventData: SoulboundBadgeEventData
 ): void {
-  let progress = _createOrLoadProgress(emblemUser, metricId);
+  let progress = _createOrLoadProgress(soulboundUser, metricId);
   updateProgress(progress, progress.value.plus(BigInt.fromI32(1)), eventData);
 }
 
 export function addToProgress(
-  emblemUser: string,
+  soulboundUser: string,
   metricId: i32,
   value: BigInt,
-  eventData: EarnedBadgeEventData
+  eventData: SoulboundBadgeEventData
 ): void {
-  let progress = _createOrLoadProgress(emblemUser, metricId);
+  let progress = _createOrLoadProgress(soulboundUser, metricId);
   updateProgress(progress, progress.value.plus(value), eventData);
 }
 
 export function subtractFromProgress(
-  emblemUser: string,
+  soulboundUser: string,
   metricId: i32,
   value: BigInt,
-  eventData: EarnedBadgeEventData
+  eventData: SoulboundBadgeEventData
 ): void {
-  let progress = _createOrLoadProgress(emblemUser, metricId);
+  let progress = _createOrLoadProgress(soulboundUser, metricId);
   updateProgress(progress, progress.value.minus(value), eventData);
 }
 
 function updateProgress(
-  progress: EmblemUserLiveData,
+  progress: SoulboundUserStat,
   updatedValue: BigInt,
-  eventData: EarnedBadgeEventData
+  eventData: SoulboundBadgeEventData
 ): void {
   if (updatedValue.gt(progress.value)) {
-    // iterate through BadgeDefinitions tracking this metric
-    let badgeDefinitions = _badgeDefinitionsForMetric(progress.metric);
-    for (let i = 0; i < badgeDefinitions.length; i++) {
-      let badgeDefinition = changetype<BadgeDefinition>(
-        BadgeDefinition.load(badgeDefinitions[i])
+    // iterate through SoulboundBadgeDefinitions tracking this metric
+    let soulboundBadgeDefinitions = _soulboundBadgeDefinitionsForMetric(
+      progress.metric
+    );
+    for (let i = 0; i < soulboundBadgeDefinitions.length; i++) {
+      let soulboundBadgeDefinition = changetype<SoulboundBadgeDefinition>(
+        SoulboundBadgeDefinition.load(soulboundBadgeDefinitions[i])
       );
 
-      if (updatedValue.ge(badgeDefinition.threshold)) {
-        createEarnedBadge(badgeDefinition, progress.emblemUser, eventData);
+      if (updatedValue.ge(soulboundBadgeDefinition.threshold)) {
+        createSoulboundBadge(
+          soulboundBadgeDefinition,
+          progress.soulboundUser,
+          eventData
+        );
       }
     }
 
@@ -60,15 +66,15 @@ function updateProgress(
 }
 
 function _createOrLoadProgress(
-  emblemUser: string,
+  soulboundUser: string,
   metric: i32
-): EmblemUserLiveData {
-  let id = emblemUser.concat("-").concat(BigInt.fromI32(metric).toString());
-  let progress = EmblemUserLiveData.load(id);
+): SoulboundUserStat {
+  let id = soulboundUser.concat("-").concat(BigInt.fromI32(metric).toString());
+  let progress = SoulboundUserStat.load(id);
 
   if (progress == null) {
-    progress = new EmblemUserLiveData(id);
-    progress.emblemUser = emblemUser;
+    progress = new SoulboundUserStat(id);
+    progress.soulboundUser = soulboundUser;
     progress.metric = BigInt.fromI32(metric).toString();
     progress.value = zeroBI();
     progress.valueOnChain = zeroBI();
@@ -77,17 +83,17 @@ function _createOrLoadProgress(
     progress.save();
   }
 
-  return progress as EmblemUserLiveData;
+  return progress as SoulboundUserStat;
 }
 
-// returns an array of BadgeDefinitionIds tracking a given metric
-function _badgeDefinitionsForMetric(metric: string): string[] {
-  let metricConsumer = MetricConsumer.load(metric);
-  if (metricConsumer == null) {
-    metricConsumer = new MetricConsumer(metric);
-    metricConsumer.badgeDefinitions = [];
-    metricConsumer.save();
+// returns an array of SoulboundBadgeDefinitionIds tracking a given metric
+function _soulboundBadgeDefinitionsForMetric(metric: string): string[] {
+  let soulboundMetricConsumer = SoulboundMetricConsumer.load(metric);
+  if (soulboundMetricConsumer == null) {
+    soulboundMetricConsumer = new SoulboundMetricConsumer(metric);
+    soulboundMetricConsumer.soulboundBadgeDefinitions = [];
+    soulboundMetricConsumer.save();
   }
 
-  return metricConsumer.badgeDefinitions;
+  return soulboundMetricConsumer.soulboundBadgeDefinitions;
 }

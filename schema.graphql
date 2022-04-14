@@ -23,9 +23,9 @@ type TheGraphEntityStats @entity {
 type GraphAccount @entity {
   "ETH address of Graph Account"
   id: ID!
-  "BadgeUser associated with this Graph Account"
-  emblemUser: EmblemUser!
-  "Number of Graph badges awarded to this account"
+  "SoulboundBadgeUser associated with this Graph Account"
+  soulboundUser: SoulboundUser!
+  "Number of Graph soulboundBadges awarded to this account"
   awardCount: Int!
   "Indexer fields for this Graph Account. Null if never indexed"
   indexer: Indexer @derivedFrom(field: "account")
@@ -237,228 +237,18 @@ type SubgraphDeployment @entity {
   versions: [SubgraphVersion!]! @derivedFrom(field: "subgraphDeployment")
 }
 
-"""
-Protocols indexed by this subgraph
-"""
-type Protocol @entity {
-  "Name of the protocol"
-  id: ID!
-}
+#░██████╗░█████╗░██╗░░░██╗██╗░░░░░██████╗░░█████╗░██╗░░░██╗███╗░░██╗██████╗       ███╗░░░███╗░█████╗░██████╗░███████╗██╗░░░░░░██████╗
+#██╔════╝██╔══██╗██║░░░██║██║░░░░░██╔══██╗██╔══██╗██║░░░██║████╗░██║██╔══██╗      ████╗░████║██╔══██╗██╔══██╗██╔════╝██║░░░░░██╔════╝
+#╚█████╗░██║░░██║██║░░░██║██║░░░░░██████╦╝██║░░██║██║░░░██║██╔██╗██║██║░░██║      ██╔████╔██║██║░░██║██║░░██║█████╗░░██║░░░░░╚█████╗░
+#░╚═══██╗██║░░██║██║░░░██║██║░░░░░██╔══██╗██║░░██║██║░░░██║██║╚████║██║░░██║      ██║╚██╔╝██║██║░░██║██║░░██║██╔══╝░░██║░░░░░░╚═══██╗
+#██████╔╝╚█████╔╝╚██████╔╝███████╗██████╦╝╚█████╔╝╚██████╔╝██║░╚███║██████╔╝      ██║░╚═╝░██║╚█████╔╝██████╔╝███████╗███████╗██████╔╝
+#╚═════╝░░╚════╝░░╚═════╝░╚══════╝╚═════╝░░╚════╝░░╚═════╝░╚═╝░░╚══╝╚═════╚═╝░░░░░╚═╝░╚════╝░╚═════╝░╚══════╝╚══════╝╚═════╝░
 
-########################
-#### Badge Entities ####
-########################
+#################################
+######## Soulbound Enums ########
+#################################
 
-"""
-Ethereum accounts this subgraph is tracking in order to award badges
-"""
-type EmblemUser @entity {
-  "Ethereum address"
-  id: ID!
-  "Graph Account associated with this user"
-  graphAccount: GraphAccount! @derivedFrom(field: "emblemUser")
-  "Badges awarded to address"
-  earnedBadges: [EarnedBadge!]! @derivedFrom(field: "emblemUser")
-  "Progress being tracked along each BadgeMetric"
-  liveData: [EmblemUserLiveData!]! @derivedFrom(field: "emblemUser")
-
-  "Community score awarded when EmblemUsers complete badgeworthy on-chain activity"
-  communityScore: BigInt!
-
-  "Number of badge awards won"
-  earnedBadgeCount: Int!
-  "block number when live data was last posted on-chain"
-  lastSyncedBlockNumber: BigInt!
-}
-
-"""
-Orders EmblemUsers for merkle bridge compatibility (syncing live data)
-"""
-type EmblemUserCount @entity {
-  "incrementing number"
-  id: ID!
-  "Int representation of id"
-  userId: Int!
-  "assiciated EmblemUser"
-  emblemUser: EmblemUser!
-}
-
-type EmblemUserLiveData @entity {
-  "{EmblemUser}-{BadgeMetric}"
-  id: ID!
-  "EmblemUser making progress"
-  emblemUser: EmblemUser!
-  "BadgeMetric being tracked"
-  metric: BadgeMetric!
-  "Current value of metric"
-  value: BigInt!
-  "Value that was last posted on-chain in a valid merkle root"
-  valueOnChain: BigInt!
-  "Maximum value acheived by EmblemUser"
-  maxValue: BigInt!
-  "Block number when EmblemUser achieved maxValue"
-  maxValueBlockNumber: BigInt!
-}
-
-type MerkleRoot @entity {
-  "root"
-  id: ID!
-  "starting index of leaves"
-  startingIndex: Int!
-  "number of leaves in the merkle tree"
-  treeSize: Int!
-  "true if leaves are liveData rather than earnedBadges"
-  isLiveData: Boolean!
-  "true if leaves hashed to root"
-  isVerified: Boolean!
-  "oracle that posted the root"
-  emblemOracle: EmblemOracle
-}
-
-type EmblemOracle @entity {
-  "address"
-  id: ID!
-  "merkle roots posted"
-  rootsPosted: [MerkleRoot!]! @derivedFrom(field: "emblemOracle")
-  "percentage of posted merkle roots that pass subgraph verification"
-  performanceRating: Int!
-}
-
-"""
-EarnedBadges are awarded to EmblemUsers for satisfying BadgeDefinition thresholds. EarnedBadge
-ids are an incrementing number, which facilitates future merkle proof verification via the Subgraph
-Bridge. This creates a streamlined interface for smart contracts to emit events with a merkle root
-and sorted range of leaves (in our case EarnedBadgeCounts) used to generate the root. With this data
-the subgraph verifies that the leaves hash to the root, effectively verifying an arbitrarily sized
-batch of data posted by an oracle.
-"""
-type EarnedBadge @entity {
-  "incrementing number"
-  id: ID!
-  "Address of the EmblemUser"
-  emblemUser: EmblemUser!
-  "Block number in which badge was awarded"
-  blockAwarded: BigInt!
-  "Timestamp in which badge was awarded"
-  timestampAwarded: BigInt!
-  "Hash of the transaction that triggered this award"
-  transactionHash: String!
-  "Additional details about the badge"
-  definition: BadgeDefinition!
-  "Ordered number in which the badge was awarded for the associated definition"
-  awardNumber: Int!
-  "Data specific to earnedBadges of a given BadgeDefinition"
-  metadata: [EarnedBadgeMetadata!]! @derivedFrom(field: "earnedBadge")
-}
-
-type BadgeMetric @entity {
-  id: ID!
-  metricNumber: Int!
-  metricName: String!
-  protocolRole: ProtocolRole!
-}
-
-"""
-Tracks the number of EmblemUsers with a particular community score
-"""
-type LeaderboardTier @entity {
-  "#{protocolRole}-{communityScore}"
-  id: ID!
-  "The accumulated community score that at least one or more users has achieved"
-  communityScore: BigInt!
-  "Total count of users with that community score"
-  userCount: Int!
-  "Community scores are network-wide or role-specific"
-  protocolRole: ProtocolRole!
-}
-
-"""
-Associated User with Leaderboard Tier
-"""
-type LeaderboardTierUser @entity {
-  "#{userId}-#{leaderboardTierId}"
-  id: ID!
-  "User associated with this leaderboard tier"
-  emblemUser: EmblemUser!
-  "Community scores are network-wide or role-specific"
-  leaderboardTier: LeaderboardTier!
-}
-
-"""
-BadgeDefinitions are created by the BadgeDefinitionManager smart contract.
-Subgraphs may also have genesis BadgeDefinitions that are baked in for retroactive
-drops.
-"""
-type BadgeDefinition @entity {
-  "incrementing number"
-  id: ID!
-  "Name of badge"
-  name: String!
-  "Description of badge"
-  description: String!
-  "IPFS URI containing metadata about this BadgeDefinition"
-  ipfsURI: String!
-  "Metric being tracked"
-  metric: BadgeMetric!
-  "Value that metric must reach in order for a badge to be awarded"
-  threshold: BigInt!
-  "Community score given when badge is awarded"
-  communityScore: BigInt!
-  "Total count of earned badges"
-  earnedBadgeCount: Int!
-  "Badges awarded with this definition"
-  earnedBadges: [EarnedBadge!]! @derivedFrom(field: "definition")
-}
-
-"""
-Tracks EmblemUser's protocol roles and role-specific community score
-"""
-type EmblemUserRole @entity {
-  "{EmblemUser}-{ProtocolRole}"
-  id: ID!
-  "Associated EmblemUser"
-  emblemUser: EmblemUser!
-  "Associated Protocol Role"
-  protocolRole: ProtocolRole!
-  "Accumulated community score for badges with this protocol role"
-  communityScore: BigInt!
-}
-
-enum ProtocolRole {
-  INDEXER
-  DELEGATOR
-  CURATOR
-  SUBGRAPH_DEVELOPER
-  CONSUMER
-  FISHERMAN
-  EMBLEM_USER
-}
-
-################################
-#### Internal Badge Entities ###
-################################
-
-"""
-Singleton entity that tracks numbers and stats relating to Emblem
-"""
-type EmblemEntityStats @entity {
-  "ID is set to 1"
-  id: ID!
-  "Number of badges earned"
-  earnedBadgeCount: Int!
-  "Number of unique BadgeWinners"
-  emblemUserCount: Int!
-  "Number of unique BadgeDefinitions created (including Genesis badges)"
-  badgeDefinitionCount: Int!
-  "Number of BadgeMetric entities"
-  badgeMetricCount: Int!
-}
-
-################################
-# These are only required by Emblem frontend
-################################
-
-enum EarnedBadgeMetadataName {
+enum SoulboundBadgeMetadataName {
   INDEXER
   DELEGATOR
   CURATOR
@@ -468,26 +258,268 @@ enum EarnedBadgeMetadataName {
   TOKENS
 }
 
+enum SoulboundProtocolRole {
+  INDEXER
+  DELEGATOR
+  CURATOR
+  SUBGRAPH_DEVELOPER
+  CONSUMER
+  FISHERMAN
+  EMBLEM_USER
+}
+
+##################################
+##### Soulbound Badge Models #####
+##################################
 """
-EarnedBadge metadata specific to the given BadgeDefinition
+SoulboundBadges are awarded to SoulboundUsers for satisfying SoulboundBadgeDefinition thresholds. SoulboundBadge
+ids are an incrementing number, which facilitates future merkle proof verification via the Subgraph
+Bridge. This creates a streamlined interface for smart contracts to emit events with a merkle root
+and sorted range of leaves (in our case SoulboundBadgeCounts) used to generate the root. With this data
+the subgraph verifies that the leaves hash to the root, effectively verifying an arbitrarily sized
+batch of data posted by an oracle.
 """
-type EarnedBadgeMetadata @entity {
-  "{EarnedBadge}-{metricName}"
+type SoulboundBadge @entity {
+  "incrementing number"
   id: ID!
-  "Name of metric"
-  name: EarnedBadgeMetadataName!
-  "Value"
-  value: String!
-  "EarnedBadge the metadata refers to"
-  earnedBadge: EarnedBadge!
+  "Address of the SoulboundUser"
+  soulboundUser: SoulboundUser!
+  "Block number in which soulboundBadge was awarded"
+  blockAwarded: BigInt!
+  "Timestamp in which soulboundBadge was awarded"
+  timestampAwarded: BigInt!
+  "Hash of the transaction that triggered this award"
+  transactionHash: String!
+  "Additional details about the soulboundBadge"
+  definition: SoulboundBadgeDefinition!
+  "Ordered number in which the soulboundBadge was awarded for the associated definition"
+  awardNumber: Int!
+  "Data specific to soulboundBadges of a given SoulboundBadgeDefinition"
+  metadata: [SoulboundBadgeMetadata!]! @derivedFrom(field: "soulboundBadge")
 }
 
 """
-BadgeMetric -> BadgeDefinitions tracking that metric
+SoulboundBadgeDefinitions are created by the SoulboundBadgeDefinitionManager smart contract.
+Subgraphs may also have genesis SoulboundBadgeDefinitions that are baked in for retroactive
+drops.
 """
-type MetricConsumer @entity {
-  "BadgeMetric"
+type SoulboundBadgeDefinition @entity {
+  "incrementing number"
   id: ID!
-  "BadgeDefinitions using this metric"
-  badgeDefinitions: [BadgeDefinition!]!
+  "Name of soulboundBadge"
+  name: String!
+  "Description of soulboundBadge"
+  description: String!
+  "IPFS URI containing metadata about this SoulboundBadgeDefinition"
+  ipfsURI: String!
+  "Metric being tracked"
+  metric: SoulboundMetric!
+  "Value that metric must reach in order for a soulboundBadge to be awarded"
+  threshold: BigInt!
+  "Community score given when soulboundBadge is awarded"
+  communityScore: BigInt!
+  "Total count of earned soulboundBadges"
+  soulboundBadgeCount: Int!
+  "SoulboundBadges awarded with this definition"
+  soulboundBadges: [SoulboundBadge!]! @derivedFrom(field: "definition")
+}
+
+"""
+SoulboundBadge metadata specific to the given SoulboundBadgeDefinition
+"""
+type SoulboundBadgeMetadata @entity {
+  "{SoulboundBadge}-{metricName}"
+  id: ID!
+  "Name of metric"
+  name: SoulboundBadgeMetadataName!
+  "Value"
+  value: String!
+  "SoulboundBadge the metadata refers to"
+  soulboundBadge: SoulboundBadge!
+}
+
+#################################
+####### Soulbound Metrics #######
+#################################
+type SoulboundMetric @entity {
+  id: ID!
+  metricNumber: Int!
+  metricName: String!
+  protocolRole: SoulboundProtocolRole!
+}
+
+"""
+SoulboundMetric -> SoulboundBadgeDefinitions tracking that metric
+"""
+type SoulboundMetricConsumer @entity {
+  "SoulboundMetric"
+  id: ID!
+  "SoulboundBadgeDefinitions using this metric"
+  soulboundBadgeDefinitions: [SoulboundBadgeDefinition!]!
+}
+
+##################################
+###### Soulbound User Models #####
+##################################
+"""
+Ethereum accounts this subgraph is tracking in order to award soulboundBadges
+"""
+type SoulboundUser @entity {
+  "Ethereum address"
+  id: ID!
+  "Graph Account associated with this user"
+  graphAccount: GraphAccount! @derivedFrom(field: "soulboundUser")
+  "SoulboundBadges awarded to address"
+  soulboundBadges: [SoulboundBadge!]! @derivedFrom(field: "soulboundUser")
+  "Progress being tracked along each SoulboundMetric"
+  liveData: [SoulboundUserStat!]! @derivedFrom(field: "soulboundUser")
+
+  "Community score awarded when SoulboundUsers complete soulboundBadgeworthy on-chain activity"
+  communityScore: BigInt!
+
+  "Number of soulboundBadge awards won"
+  soulboundBadgeCount: Int!
+  "block number when live data was last posted on-chain"
+  lastSyncedBlockNumber: BigInt!
+}
+
+"""
+Orders SoulboundUsers for merkle bridge compatibility (syncing live data)
+"""
+type SoulboundUserCount @entity {
+  "incrementing number"
+  id: ID!
+  "Int representation of id"
+  userId: Int!
+  "assiciated SoulboundUser"
+  soulboundUser: SoulboundUser!
+}
+
+"""
+Tracks SoulboundUser's protocol roles and role-specific community score
+"""
+type SoulboundUserRole @entity {
+  "{SoulboundUser}-{SoulboundProtocolRole}"
+  id: ID!
+  "Associated SoulboundUser"
+  soulboundUser: SoulboundUser!
+  "Associated SoulboundProtocol Role"
+  protocolRole: SoulboundProtocolRole!
+  "Accumulated community score for soulboundBadges with this protocol role"
+  communityScore: BigInt!
+}
+
+##################################
+###### Soulbound Leaderboard #####
+##################################
+"""
+Tracks the number of SoulboundUsers with a particular community score
+"""
+type SoulboundTier @entity {
+  "#{protocolRole}-{communityScore}"
+  id: ID!
+  "The accumulated community score that at least one or more users has achieved"
+  communityScore: BigInt!
+  "Total count of users with that community score"
+  userCount: Int!
+  "Community scores are network-wide or role-specific"
+  protocolRole: SoulboundProtocolRole!
+}
+
+"""
+Associated User with Leaderboard Tier
+"""
+type SoulboundTierUser @entity {
+  "#{userId}-#{soulboundTierId}"
+  id: ID!
+  "User associated with this leaderboard tier"
+  soulboundUser: SoulboundUser!
+  "Community scores are network-wide or role-specific"
+  soulboundTier: SoulboundTier!
+}
+
+######################################
+##### Soulbound Subgraph Bridge ######
+######################################
+type SoulboundOracle @entity {
+  "address"
+  id: ID!
+  "merkle roots posted"
+  rootsPosted: [SoulboundBadgeMerkleRoot!]!
+    @derivedFrom(field: "soulboundOracle")
+  "percentage of posted merkle roots that pass subgraph verification"
+  performanceRating: Int!
+}
+
+type SoulboundBadgeMerkleRoot @entity {
+  "root"
+  id: ID!
+  "starting index of leaves"
+  startingIndex: Int!
+  "number of leaves in the merkle tree"
+  treeSize: Int!
+  "true if leaves are liveData rather than soulboundBadges"
+  isLiveData: Boolean!
+  "true if leaves hashed to root"
+  isVerified: Boolean!
+  "oracle that posted the root"
+  soulboundOracle: SoulboundOracle
+}
+
+################################
+######## Soulbound Stats #######
+################################
+"""
+Singleton entity that tracks numbers and stats relating to Emblem
+"""
+type SoulboundStats @entity {
+  "ID is set to 1"
+  id: ID!
+  "Number of soulboundBadges earned"
+  soulboundBadgeCount: Int!
+  "Number of unique SoulboundBadgeWinners"
+  soulboundUserCount: Int!
+  "Number of unique SoulboundBadgeDefinitions created (including Genesis soulboundBadges)"
+  soulboundBadgeDefinitionCount: Int!
+  "Number of SoulboundMetric entities"
+  soulboundMetricCount: Int!
+}
+
+type SoulboundUserStat @entity {
+  "{SoulboundUser}-{SoulboundMetric}"
+  id: ID!
+  "SoulboundUser making progress"
+  soulboundUser: SoulboundUser!
+  "SoulboundMetric being tracked"
+  metric: SoulboundMetric!
+  "Current value of metric"
+  value: BigInt!
+  "Value that was last posted on-chain in a valid merkle root"
+  valueOnChain: BigInt!
+  "Maximum value acheived by SoulboundUser"
+  maxValue: BigInt!
+  "Block number when SoulboundUser achieved maxValue"
+  maxValueBlockNumber: BigInt!
+}
+
+#####################################
+##### Soulbound Protocol Models #####
+#####################################
+type SoulboundProtocolStat @entity {
+  "{protocolID}-{statID}"
+  id: ID!
+  "Name of stat"
+  name: String!
+  "Count of stat"
+  count: Int!
+  "SoulboundProtocol ID"
+  protocolID: SoulboundProtocol!
+}
+
+"""
+SoulboundProtocols indexed by this subgraph
+"""
+type SoulboundProtocol @entity {
+  "Name of the protocol"
+  id: ID!
 }

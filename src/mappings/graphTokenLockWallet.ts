@@ -1,8 +1,7 @@
-import { TokenLockCreated } from "../../generated/GraphTokenLockWalletManager/GraphTokenLockWalletManager";
 import { log } from "@graphprotocol/graph-ts";
+import { TokenLockCreated } from "../../generated/GraphTokenLockWalletManager/GraphTokenLockWalletManager";
 import { TokenLockWallet } from "../../generated/schema";
 import { createOrLoadTheGraphEntityStats } from "../helpers/models";
-import { generateGenesisBadgeDefinitions } from "../Emblem/genesisBadges";
 
 export function handleTokenLockCreated(event: TokenLockCreated): void {
   log.debug("TokenLockWalletCreated event found", []);

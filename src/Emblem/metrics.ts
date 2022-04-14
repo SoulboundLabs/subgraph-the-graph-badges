@@ -1,6 +1,6 @@
 import { BigInt } from "@graphprotocol/graph-ts/index";
-import { BadgeMetric } from "../../generated/schema";
-import { createOrLoadEmblemEntityStats } from "./emblemModels";
+import { SoulboundMetric } from "../../generated/schema";
+import { createOrLoadSoulboundStats } from "./emblemModels";
 
 export const BADGE_AWARD_METADATA_NAME_INDEXER = "INDEXER";
 export const BADGE_AWARD_METADATA_NAME_DELEGATOR = "DELEGATOR";
@@ -50,80 +50,80 @@ export const PROTOCOL_ROLE_CONSUMER = "CONSUMER";
 
 export const PROTOCOL_ROLE_EMBLEM_USER = "EMBLEM_USER";
 
-export function generateBadgeMetrics(): void {
-  createBadgeMetric(
+export function generateSoulboundMetrics(): void {
+  createSoulboundMetric(
     BADGE_METRIC_INDEXER_SUBGRAPHS_INDEXED_ID,
     BADGE_METRIC_INDEXER_SUBGRAPHS_INDEXED,
     PROTOCOL_ROLE_INDEXER
   );
-  createBadgeMetric(
+  createSoulboundMetric(
     BADGE_METRIC_INDEXER_QUERY_FEES_COLLECTED_ID,
     BADGE_METRIC_INDEXER_QUERY_FEES_COLLECTED,
     PROTOCOL_ROLE_INDEXER
   );
-  createBadgeMetric(
+  createSoulboundMetric(
     BADGE_METRIC_INDEXER_ALLOCATIONS_OPENED_ID,
     BADGE_METRIC_INDEXER_ALLOCATIONS_OPENED,
     PROTOCOL_ROLE_INDEXER
   );
-  createBadgeMetric(
+  createSoulboundMetric(
     BADGE_METRIC_INDEXER_DELEGATOR_COUNT_ID,
     BADGE_METRIC_INDEXER_DELEGATOR_COUNT,
     PROTOCOL_ROLE_INDEXER
   );
-  createBadgeMetric(
+  createSoulboundMetric(
     BADGE_METRIC_DELEGATOR_INDEXERS_ID,
     BADGE_METRIC_DELEGATOR_INDEXERS,
     PROTOCOL_ROLE_DELEGATOR
   );
-  createBadgeMetric(
+  createSoulboundMetric(
     BADGE_METRIC_CURATOR_SUBGRAPHS_SIGNALLED_ID,
     BADGE_METRIC_CURATOR_SUBGRAPHS_SIGNALLED,
     PROTOCOL_ROLE_CURATOR
   );
-  createBadgeMetric(
+  createSoulboundMetric(
     BADGE_METRIC_CURATOR_HOUSE_ODDS_ID,
     BADGE_METRIC_CURATOR_HOUSE_ODDS,
     PROTOCOL_ROLE_CURATOR
   );
-  createBadgeMetric(
+  createSoulboundMetric(
     BADGE_METRIC_CURATOR_APE_ID,
     BADGE_METRIC_CURATOR_APE,
     PROTOCOL_ROLE_CURATOR
   );
-  createBadgeMetric(
+  createSoulboundMetric(
     BADGE_METRIC_PUBLISHER_SIGNAL_ATTRACTED_ID,
     BADGE_METRIC_PUBLISHER_SIGNAL_ATTRACTED,
     PROTOCOL_ROLE_SUBGRAPH_DEVELOPER
   );
-  createBadgeMetric(
+  createSoulboundMetric(
     BADGE_METRIC_PUBLISHER_SUBGRAPHS_DEPLOYED_ID,
     BADGE_METRIC_PUBLISHER_SUBGRAPHS_DEPLOYED,
     PROTOCOL_ROLE_SUBGRAPH_DEVELOPER
   );
-  createBadgeMetric(
+  createSoulboundMetric(
     BADGE_METRIC_USER_BADGES_WON_ID,
     BADGE_METRIC_USER_BADGES_WON,
     PROTOCOL_ROLE_EMBLEM_USER
   );
 }
 
-function createBadgeMetric(
+function createSoulboundMetric(
   metricNumber: i32,
   metricName: string,
   protocolRole: string
 ): void {
-  const badgeMetricId = BigInt.fromI32(metricNumber).toString();
-  let badgeMetric = BadgeMetric.load(badgeMetricId);
-  if (badgeMetric == null) {
-    badgeMetric = new BadgeMetric(badgeMetricId);
-    badgeMetric.metricNumber = metricNumber;
-    badgeMetric.metricName = metricName;
-    badgeMetric.protocolRole = protocolRole;
-    badgeMetric.save();
+  const soulboundMetricId = BigInt.fromI32(metricNumber).toString();
+  let soulboundMetric = SoulboundMetric.load(soulboundMetricId);
+  if (soulboundMetric == null) {
+    soulboundMetric = new SoulboundMetric(soulboundMetricId);
+    soulboundMetric.metricNumber = metricNumber;
+    soulboundMetric.metricName = metricName;
+    soulboundMetric.protocolRole = protocolRole;
+    soulboundMetric.save();
 
-    let entityStats = createOrLoadEmblemEntityStats();
-    entityStats.badgeMetricCount = entityStats.badgeMetricCount + 1;
+    let entityStats = createOrLoadSoulboundStats();
+    entityStats.soulboundMetricCount = entityStats.soulboundMetricCount + 1;
     entityStats.save();
   }
 }

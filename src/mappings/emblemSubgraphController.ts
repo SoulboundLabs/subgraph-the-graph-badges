@@ -1,19 +1,21 @@
 import { log } from "@graphprotocol/graph-ts";
 import {
-  BadgeDefinitionCreated,
-  MerkleRootPosted,
+  SoulboundBadgeDefinitionCreated,
+  SoulboundBadgeMerkleRootPosted,
 } from "../../generated/EmblemSubgraphController/EmblemSubgraphController";
-import { processBadgeDefinitionCreated } from "../Emblem/emblemModels";
-import { processMerkleRootPosted } from "../Emblem/merkle";
+import { processSoulboundBadgeDefinitionCreated } from "../Emblem/emblemModels";
+import { processSoulboundBadgeMerkleRootPosted } from "../Emblem/merkle";
 
-export function handleBadgeDefinitionCreated(
-  event: BadgeDefinitionCreated
+export function handleSoulboundBadgeDefinitionCreated(
+  event: SoulboundBadgeDefinitionCreated
 ): void {
-  log.debug("BadgeDefinitionCreated event found", []);
-  processBadgeDefinitionCreated(event);
+  log.debug("SoulboundBadgeDefinitionCreated event found", []);
+  processSoulboundBadgeDefinitionCreated(event);
 }
 
-export function handleMerkleRootPosted(event: MerkleRootPosted): void {
-  log.debug("MerkleRootPosted event found", []);
-  processMerkleRootPosted(event);
+export function handleSoulboundBadgeMerkleRootPosted(
+  event: SoulboundBadgeMerkleRootPosted
+): void {
+  log.debug("SoulboundBadgeMerkleRootPosted event found", []);
+  processSoulboundBadgeMerkleRootPosted(event);
 }

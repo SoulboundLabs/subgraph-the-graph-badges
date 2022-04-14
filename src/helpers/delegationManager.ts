@@ -5,23 +5,23 @@ import {
   StakeDelegatedLocked,
 } from "../../generated/Staking/Staking";
 import {
-  EarnedBadgeEventData,
-  EarnedBadgeEventMetadata,
+  SoulboundBadgeEventData,
+  SoulboundBadgeEventMetadata,
 } from "../Emblem/emblemModels";
 import { incrementProgress } from "../Emblem/metricProgress";
-import {
-  createOrLoadTheGraphEntityStats,
-  createOrLoadGraphAccount,
-} from "../helpers/models";
-import { beneficiaryIfLockWallet } from "../mappings/graphTokenLockWallet";
 import {
   BADGE_AWARD_METADATA_NAME_DELEGATOR,
   BADGE_AWARD_METADATA_NAME_TOKENS,
   BADGE_METRIC_DELEGATOR_INDEXERS_ID,
   BADGE_METRIC_INDEXER_DELEGATOR_COUNT_ID,
 } from "../Emblem/metrics";
-import { createOrLoadIndexer } from "./indexerManager";
+import {
+  createOrLoadGraphAccount,
+  createOrLoadTheGraphEntityStats,
+} from "../helpers/models";
+import { beneficiaryIfLockWallet } from "../mappings/graphTokenLockWallet";
 import { zeroBI } from "./constants";
+import { createOrLoadIndexer } from "./indexerManager";
 
 ////////////////      Public
 
@@ -31,17 +31,17 @@ export function processStakeDelegated(event: StakeDelegated): void {
   );
   let indexerId = beneficiaryIfLockWallet(event.params.indexer.toHexString());
   let tokens = event.params.tokens;
-  let metadata: Array<EarnedBadgeEventMetadata> = [
-    new EarnedBadgeEventMetadata(
+  let metadata: Array<SoulboundBadgeEventMetadata> = [
+    new SoulboundBadgeEventMetadata(
       BADGE_AWARD_METADATA_NAME_DELEGATOR,
       delegatorId
     ),
-    new EarnedBadgeEventMetadata(
+    new SoulboundBadgeEventMetadata(
       BADGE_AWARD_METADATA_NAME_TOKENS,
       tokens.toString()
     ),
   ];
-  let eventData = new EarnedBadgeEventData(event, metadata);
+  let eventData = new SoulboundBadgeEventData(event, metadata);
   _processStakeDelegated(delegatorId, indexerId, tokens, eventData);
 }
 
@@ -51,7 +51,7 @@ export function processStakeDelegatedLocked(event: StakeDelegatedLocked): void {
   );
   let indexerId = beneficiaryIfLockWallet(event.params.indexer.toHexString());
   let tokens = event.params.tokens;
-  let eventData = new EarnedBadgeEventData(event, []);
+  let eventData = new SoulboundBadgeEventData(event, []);
   _processStakeDelegatedLocked(delegatorId, indexerId, tokens, eventData);
 }
 
@@ -61,7 +61,7 @@ function _processStakeDelegated(
   delegatorId: string,
   indexerId: string,
   tokens: BigInt,
-  eventData: EarnedBadgeEventData
+  eventData: SoulboundBadgeEventData
 ): void {
   createOrLoadDelegator(delegatorId);
   let indexer = createOrLoadIndexer(indexerId, eventData);
@@ -97,7 +97,7 @@ function _processStakeDelegatedLocked(
   delegatorId: string,
   indexerId: string,
   tokens: BigInt,
-  eventData: EarnedBadgeEventData
+  eventData: SoulboundBadgeEventData
 ): void {
   let indexer = createOrLoadIndexer(indexerId, eventData);
   indexer.delegatedTokens = indexer.delegatedTokens.minus(tokens);
@@ -136,7 +136,7 @@ export function createOrLoadDelegator(id: string): Delegator {
 export function createOrLoadDelegatedStake(
   delegatorId: string,
   indexerId: string,
-  eventData: EarnedBadgeEventData
+  eventData: SoulboundBadgeEventData
 ): DelegatedStake {
   let id = delegatorId.concat("-").concat(indexerId);
   let delegatedStake = DelegatedStake.load(id);

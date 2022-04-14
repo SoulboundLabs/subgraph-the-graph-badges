@@ -1,253 +1,274 @@
 import { store } from "@graphprotocol/graph-ts";
 import { BigInt, ethereum } from "@graphprotocol/graph-ts/index";
 import {
-  BadgeDefinition,
-  BadgeMetric,
-  EarnedBadge,
-  EarnedBadgeMetadata,
-  EmblemEntityStats,
-  EmblemUser,
-  EmblemUserCount,
-  EmblemUserRole,
-  LeaderboardTier,
-  LeaderboardTierUser,
-  MetricConsumer,
+  SoulboundBadge,
+  SoulboundBadgeDefinition,
+  SoulboundBadgeMetadata,
+  SoulboundMetric,
+  SoulboundMetricConsumer,
+  SoulboundStats,
+  SoulboundTier,
+  SoulboundTierUser,
+  SoulboundUser,
+  SoulboundUserCount,
+  SoulboundUserRole,
 } from "../../generated/schema";
 import { zeroBI } from "../helpers/constants";
-import { generateGenesisBadgeDefinitions } from "./genesisBadges";
-import { generateBadgeMetrics } from "./metrics";
+import { generateGenesisSoulboundBadgeDefinitions } from "./genesisSoulboundBadges";
+import { generateSoulboundMetrics } from "./metrics";
 
-export function createOrLoadEmblemEntityStats(): EmblemEntityStats {
-  let entityStats = EmblemEntityStats.load("1");
+export function createOrLoadSoulboundStats(): SoulboundStats {
+  let entityStats = SoulboundStats.load("1");
 
   if (entityStats == null) {
-    entityStats = new EmblemEntityStats("1");
-    entityStats.earnedBadgeCount = 0;
-    entityStats.badgeDefinitionCount = 0;
-    entityStats.badgeMetricCount = 0;
+    entityStats = new SoulboundStats("1");
+    entityStats.soulboundBadgeCount = 0;
+    entityStats.soulboundBadgeDefinitionCount = 0;
+    entityStats.soulboundMetricCount = 0;
 
     entityStats.save();
 
-    generateBadgeMetrics();
-    generateGenesisBadgeDefinitions();
+    generateSoulboundMetrics();
+    generateGenesisSoulboundBadgeDefinitions();
   }
 
-  return entityStats as EmblemEntityStats;
+  return entityStats as SoulboundStats;
 }
 
-export function createOrLoadEmblemUser(address: string): EmblemUser {
-  let emblemUser = EmblemUser.load(address);
+export function createOrLoadSoulboundUser(address: string): SoulboundUser {
+  let soulboundUser = SoulboundUser.load(address);
 
-  if (emblemUser == null) {
-    emblemUser = new EmblemUser(address);
-    emblemUser.communityScore = zeroBI();
-    emblemUser.earnedBadgeCount = 0;
-    emblemUser.lastSyncedBlockNumber = zeroBI();
-    emblemUser.save();
+  if (soulboundUser == null) {
+    soulboundUser = new SoulboundUser(address);
+    soulboundUser.communityScore = zeroBI();
+    soulboundUser.soulboundBadgeCount = 0;
+    soulboundUser.lastSyncedBlockNumber = zeroBI();
+    soulboundUser.save();
 
-    const entityStats = createOrLoadEmblemEntityStats();
-    const emblemUserCount = new EmblemUserCount(
-      BigInt.fromI32(entityStats.emblemUserCount).toString()
+    const entityStats = createOrLoadSoulboundStats();
+    const soulboundUserCount = new SoulboundUserCount(
+      BigInt.fromI32(entityStats.soulboundUserCount).toString()
     );
-    emblemUserCount.save();
-    entityStats.emblemUserCount = entityStats.emblemUserCount + 1;
+    soulboundUserCount.save();
+    entityStats.soulboundUserCount = entityStats.soulboundUserCount + 1;
     entityStats.save();
   }
 
-  return emblemUser as EmblemUser;
+  return soulboundUser as SoulboundUser;
 }
 
-export function createOrLoadEmblemUserRole(
+export function createOrLoadSoulboundUserRole(
   address: string,
   protocolRole: string
-): EmblemUserRole {
+): SoulboundUserRole {
   const id = address.concat("-").concat(protocolRole);
-  let emblemUserRole = EmblemUserRole.load(id);
+  let soulboundUserRole = SoulboundUserRole.load(id);
 
-  if (emblemUserRole == null) {
-    emblemUserRole = new EmblemUserRole(id);
-    emblemUserRole.emblemUser = address;
-    emblemUserRole.communityScore = zeroBI();
-    emblemUserRole.protocolRole = protocolRole;
-    emblemUserRole.save();
+  if (soulboundUserRole == null) {
+    soulboundUserRole = new SoulboundUserRole(id);
+    soulboundUserRole.soulboundUser = address;
+    soulboundUserRole.communityScore = zeroBI();
+    soulboundUserRole.protocolRole = protocolRole;
+    soulboundUserRole.save();
   }
 
-  return emblemUserRole as EmblemUserRole;
+  return soulboundUserRole as SoulboundUserRole;
 }
 
-export function createBadgeDefinition(
+export function createSoulboundBadgeDefinition(
   name: string,
   description: string,
   metricId: i32,
   threshold: BigInt,
   communityScore: BigInt,
   ipfsURI: string
-): BadgeDefinition {
-  let entityStats = createOrLoadEmblemEntityStats();
-  const badgeDefinitionId = BigInt.fromI32(
-    entityStats.badgeDefinitionCount
+): SoulboundBadgeDefinition {
+  let entityStats = createOrLoadSoulboundStats();
+  const soulboundBadgeDefinitionId = BigInt.fromI32(
+    entityStats.soulboundBadgeDefinitionCount
   ).toString();
-  entityStats.badgeDefinitionCount = entityStats.badgeDefinitionCount + 1;
+  entityStats.soulboundBadgeDefinitionCount =
+    entityStats.soulboundBadgeDefinitionCount + 1;
   entityStats.save();
 
-  let badgeDefinition = BadgeDefinition.load(badgeDefinitionId);
+  let soulboundBadgeDefinition = SoulboundBadgeDefinition.load(
+    soulboundBadgeDefinitionId
+  );
 
-  if (badgeDefinition == null) {
-    badgeDefinition = new BadgeDefinition(badgeDefinitionId);
-    badgeDefinition.name = name;
-    badgeDefinition.description = description;
-    badgeDefinition.metric = BigInt.fromI32(metricId).toString();
-    badgeDefinition.threshold = threshold;
-    badgeDefinition.communityScore = communityScore;
-    badgeDefinition.ipfsURI = ipfsURI;
-    badgeDefinition.earnedBadgeCount = 0;
+  if (soulboundBadgeDefinition == null) {
+    soulboundBadgeDefinition = new SoulboundBadgeDefinition(
+      soulboundBadgeDefinitionId
+    );
+    soulboundBadgeDefinition.name = name;
+    soulboundBadgeDefinition.description = description;
+    soulboundBadgeDefinition.metric = BigInt.fromI32(metricId).toString();
+    soulboundBadgeDefinition.threshold = threshold;
+    soulboundBadgeDefinition.communityScore = communityScore;
+    soulboundBadgeDefinition.ipfsURI = ipfsURI;
+    soulboundBadgeDefinition.soulboundBadgeCount = 0;
 
-    badgeDefinition.save();
+    soulboundBadgeDefinition.save();
 
-    let metricConsumer = createOrLoadMetricConsumer(metricId);
-    let consumers = metricConsumer.badgeDefinitions;
-    consumers.push(badgeDefinitionId);
-    metricConsumer.badgeDefinitions = consumers;
-    metricConsumer.save();
+    let soulboundMetricConsumer = createOrLoadSoulboundMetricConsumer(metricId);
+    let consumers = soulboundMetricConsumer.soulboundBadgeDefinitions;
+    consumers.push(soulboundBadgeDefinitionId);
+    soulboundMetricConsumer.soulboundBadgeDefinitions = consumers;
+    soulboundMetricConsumer.save();
   }
 
-  return badgeDefinition as BadgeDefinition;
+  return soulboundBadgeDefinition as SoulboundBadgeDefinition;
 }
 
-function createOrLoadMetricConsumer(metricId: i32): MetricConsumer {
-  let metricConsumer = MetricConsumer.load(BigInt.fromI32(metricId).toString());
-  if (metricConsumer == null) {
-    metricConsumer = new MetricConsumer(BigInt.fromI32(metricId).toString());
-    metricConsumer.badgeDefinitions = new Array<string>();
-    metricConsumer.save();
+function createOrLoadSoulboundMetricConsumer(
+  metricId: i32
+): SoulboundMetricConsumer {
+  let soulboundMetricConsumer = SoulboundMetricConsumer.load(
+    BigInt.fromI32(metricId).toString()
+  );
+  if (soulboundMetricConsumer == null) {
+    soulboundMetricConsumer = new SoulboundMetricConsumer(
+      BigInt.fromI32(metricId).toString()
+    );
+    soulboundMetricConsumer.soulboundBadgeDefinitions = new Array<string>();
+    soulboundMetricConsumer.save();
   }
-  return metricConsumer as MetricConsumer;
+  return soulboundMetricConsumer as SoulboundMetricConsumer;
 }
 
-function createOrLoadLeaderboardTier(
+function createOrLoadSoulboundTier(
   communityScore: BigInt,
   protocolRole: string
-): LeaderboardTier {
+): SoulboundTier {
   let id = communityScore.toString().concat("-").concat(protocolRole);
-  let leaderboardTier = LeaderboardTier.load(id);
-  if (leaderboardTier == null) {
-    leaderboardTier = new LeaderboardTier(id);
-    leaderboardTier.communityScore = communityScore;
-    leaderboardTier.userCount = 0;
-    leaderboardTier.protocolRole = protocolRole;
-    leaderboardTier.save();
+  let soulboundTier = SoulboundTier.load(id);
+  if (soulboundTier == null) {
+    soulboundTier = new SoulboundTier(id);
+    soulboundTier.communityScore = communityScore;
+    soulboundTier.userCount = 0;
+    soulboundTier.protocolRole = protocolRole;
+    soulboundTier.save();
   }
-  return leaderboardTier as LeaderboardTier;
+  return soulboundTier as SoulboundTier;
 }
 
-function removeLeaderboardTierUser(leaderboardTierUserId: string): void {
-  store.remove("LeaderboardTierUser", leaderboardTierUserId);
+function removeSoulboundTierUser(soulboundTierUserId: string): void {
+  store.remove("SoulboundTierUser", soulboundTierUserId);
 }
 
-function createOrLoadLeaderboardTierUser(
-  leaderboardTierId: string,
-  emblemUserId: string
-): LeaderboardTierUser {
-  let id = leaderboardTierId.concat("-").concat(emblemUserId);
-  let leaderboardTierUser = LeaderboardTierUser.load(leaderboardTierId);
-  if (leaderboardTierUser == null) {
-    leaderboardTierUser = new LeaderboardTierUser(id);
-    leaderboardTierUser.leaderboardTier = leaderboardTierId;
-    leaderboardTierUser.emblemUser = emblemUserId;
-    leaderboardTierUser.save();
+function createOrLoadSoulboundTierUser(
+  soulboundTierId: string,
+  soulboundUserId: string
+): SoulboundTierUser {
+  let id = soulboundTierId.concat("-").concat(soulboundUserId);
+  let soulboundTierUser = SoulboundTierUser.load(soulboundTierId);
+  if (soulboundTierUser == null) {
+    soulboundTierUser = new SoulboundTierUser(id);
+    soulboundTierUser.soulboundTier = soulboundTierId;
+    soulboundTierUser.soulboundUser = soulboundUserId;
+    soulboundTierUser.save();
   }
-  return leaderboardTierUser as LeaderboardTierUser;
+  return soulboundTierUser as SoulboundTierUser;
 }
 
-export function createEarnedBadge(
-  badgeDefinition: BadgeDefinition,
-  emblemUserId: string,
-  eventData: EarnedBadgeEventData
+export function createSoulboundBadge(
+  soulboundBadgeDefinition: SoulboundBadgeDefinition,
+  soulboundUserId: string,
+  eventData: SoulboundBadgeEventData
 ): void {
-  let entityStats = createOrLoadEmblemEntityStats();
-  let badgeId = BigInt.fromI32(entityStats.earnedBadgeCount + 1).toString();
-  entityStats.earnedBadgeCount = entityStats.earnedBadgeCount + 1;
+  let entityStats = createOrLoadSoulboundStats();
+  let soulboundBadgeId = BigInt.fromI32(
+    entityStats.soulboundBadgeCount + 1
+  ).toString();
+  entityStats.soulboundBadgeCount = entityStats.soulboundBadgeCount + 1;
   entityStats.save();
 
-  let earnedBadge = EarnedBadge.load(badgeId);
+  let soulboundBadge = SoulboundBadge.load(soulboundBadgeId);
 
-  if (earnedBadge == null) {
-    let badgeMetric = BadgeMetric.load(badgeDefinition.metric) as BadgeMetric;
-    let emblemUserRole = createOrLoadEmblemUserRole(
-      emblemUserId,
-      badgeMetric.protocolRole
+  if (soulboundBadge == null) {
+    let soulboundMetric = SoulboundMetric.load(
+      soulboundBadgeDefinition.metric
+    ) as SoulboundMetric;
+    let soulboundUserRole = createOrLoadSoulboundUserRole(
+      soulboundUserId,
+      soulboundMetric.protocolRole
     );
-    emblemUserRole.communityScore = emblemUserRole.communityScore.plus(
-      badgeDefinition.communityScore
+    soulboundUserRole.communityScore = soulboundUserRole.communityScore.plus(
+      soulboundBadgeDefinition.communityScore
     );
-    emblemUserRole.save();
+    soulboundUserRole.save();
 
-    let emblemUser = createOrLoadEmblemUser(emblemUserId);
+    let soulboundUser = createOrLoadSoulboundUser(soulboundUserId);
 
-    let newCommunityScore = emblemUser.communityScore.plus(
-      badgeDefinition.communityScore
+    let newCommunityScore = soulboundUser.communityScore.plus(
+      soulboundBadgeDefinition.communityScore
     );
-    emblemUser.earnedBadgeCount = emblemUser.earnedBadgeCount + 1;
-    emblemUser.communityScore = newCommunityScore;
-    emblemUser.save();
+    soulboundUser.soulboundBadgeCount = soulboundUser.soulboundBadgeCount + 1;
+    soulboundUser.communityScore = newCommunityScore;
+    soulboundUser.save();
 
-    earnedBadge = new EarnedBadge(badgeId);
-    earnedBadge.emblemUser = emblemUser.id;
-    earnedBadge.definition = badgeDefinition.id;
-    earnedBadge.blockAwarded = eventData.blockNumber;
-    earnedBadge.transactionHash = eventData.transactionHash;
-    earnedBadge.timestampAwarded = eventData.timestamp;
-    earnedBadge.awardNumber = badgeDefinition.earnedBadgeCount + 1;
-    earnedBadge.save();
+    soulboundBadge = new SoulboundBadge(soulboundBadgeId);
+    soulboundBadge.soulboundUser = soulboundUser.id;
+    soulboundBadge.definition = soulboundBadgeDefinition.id;
+    soulboundBadge.blockAwarded = eventData.blockNumber;
+    soulboundBadge.transactionHash = eventData.transactionHash;
+    soulboundBadge.timestampAwarded = eventData.timestamp;
+    soulboundBadge.awardNumber =
+      soulboundBadgeDefinition.soulboundBadgeCount + 1;
+    soulboundBadge.save();
 
-    /* Update the count of users at the LeaderboardTiers associated with both the awardee's old communityScore and new communityScore*/
-    let formerLeaderboardTier = createOrLoadLeaderboardTier(
-      emblemUser.communityScore,
-      badgeMetric.protocolRole
+    /* Update the count of users at the SoulboundTiers associated with both the awardee's old communityScore and new communityScore*/
+    let formerSoulboundTier = createOrLoadSoulboundTier(
+      soulboundUser.communityScore,
+      soulboundMetric.protocolRole
     );
 
-    let shouldDecrementUserCount = formerLeaderboardTier.userCount > 0;
+    let shouldDecrementUserCount = formerSoulboundTier.userCount > 0;
 
     if (shouldDecrementUserCount) {
-      formerLeaderboardTier.userCount = formerLeaderboardTier.userCount - 1;
-      formerLeaderboardTier.save();
+      formerSoulboundTier.userCount = formerSoulboundTier.userCount - 1;
+      formerSoulboundTier.save();
     }
 
-    let newLeaderboardTier = createOrLoadLeaderboardTier(
+    let newSoulboundTier = createOrLoadSoulboundTier(
       newCommunityScore,
-      badgeMetric.protocolRole
+      soulboundMetric.protocolRole
     );
 
-    newLeaderboardTier.userCount = newLeaderboardTier.userCount + 1;
-    newLeaderboardTier.save();
+    newSoulboundTier.userCount = newSoulboundTier.userCount + 1;
+    newSoulboundTier.save();
 
-    removeLeaderboardTierUser(formerLeaderboardTier.id);
-    createOrLoadLeaderboardTierUser(newLeaderboardTier.id, emblemUserId);
-    /* End LeaderboardTiers calculations */
+    removeSoulboundTierUser(formerSoulboundTier.id);
+    createOrLoadSoulboundTierUser(newSoulboundTier.id, soulboundUserId);
+    /* End SoulboundTiers calculations */
 
     // create metadata entities
     for (let i = 0; i < eventData.metadata.length; i++) {
-      let metadata = eventData.metadata[i] as EarnedBadgeEventMetadata;
-      _createOrLoadEarnedBadgeMetaData(badgeId, metadata.name, metadata.value);
+      let metadata = eventData.metadata[i] as SoulboundBadgeEventMetadata;
+      _createOrLoadSoulboundBadgeMetaData(
+        soulboundBadgeId,
+        metadata.name,
+        metadata.value
+      );
     }
 
-    entityStats.earnedBadgeCount = entityStats.earnedBadgeCount + 1;
+    entityStats.soulboundBadgeCount = entityStats.soulboundBadgeCount + 1;
     entityStats.save();
-    badgeDefinition.earnedBadgeCount = badgeDefinition.earnedBadgeCount + 1;
-    badgeDefinition.save();
+    soulboundBadgeDefinition.soulboundBadgeCount =
+      soulboundBadgeDefinition.soulboundBadgeCount + 1;
+    soulboundBadgeDefinition.save();
   }
 }
 
-function _createOrLoadEarnedBadgeMetaData(
-  earnedBadgeId: string,
+function _createOrLoadSoulboundBadgeMetaData(
+  soulboundBadgeId: string,
   name: string,
   value: string
 ): void {
-  let metadataId = earnedBadgeId.concat("-").concat(name);
-  let metadata = EarnedBadgeMetadata.load(metadataId);
+  let metadataId = soulboundBadgeId.concat("-").concat(name);
+  let metadata = SoulboundBadgeMetadata.load(metadataId);
   if (metadata == null) {
-    metadata = new EarnedBadgeMetadata(metadataId);
-    metadata.earnedBadge = earnedBadgeId;
+    metadata = new SoulboundBadgeMetadata(metadataId);
+    metadata.soulboundBadge = soulboundBadgeId;
     metadata.name = name;
     metadata.value = value;
     metadata.save();
@@ -255,7 +276,7 @@ function _createOrLoadEarnedBadgeMetaData(
 }
 
 // custom metadata from the event
-export class EarnedBadgeEventMetadata {
+export class SoulboundBadgeEventMetadata {
   readonly name: string;
   readonly value: string;
 
@@ -266,14 +287,14 @@ export class EarnedBadgeEventMetadata {
 }
 
 // standard metadata from event/transaction
-export class EarnedBadgeEventData {
+export class SoulboundBadgeEventData {
   readonly blockNumber: BigInt;
   readonly transactionHash: string;
   readonly timestamp: BigInt;
-  readonly metadata: Array<EarnedBadgeEventMetadata>;
+  readonly metadata: Array<SoulboundBadgeEventMetadata>;
   constructor(
     event: ethereum.Event,
-    metadata: Array<EarnedBadgeEventMetadata>
+    metadata: Array<SoulboundBadgeEventMetadata>
   ) {
     this.blockNumber = event.block.number;
     this.transactionHash = event.transaction.hash.toHexString();

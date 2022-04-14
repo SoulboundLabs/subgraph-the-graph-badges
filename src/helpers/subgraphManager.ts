@@ -10,20 +10,20 @@ import {
   SubgraphVersion,
 } from "../../generated/schema";
 import {
-  EarnedBadgeEventData,
-  EarnedBadgeEventMetadata,
+  SoulboundBadgeEventData,
+  SoulboundBadgeEventMetadata,
 } from "../Emblem/emblemModels";
 import { incrementProgress } from "../Emblem/metricProgress";
-import { beneficiaryIfLockWallet } from "../mappings/graphTokenLockWallet";
 import {
   BADGE_AWARD_METADATA_NAME_SUBGRAPH,
   BADGE_METRIC_PUBLISHER_SUBGRAPHS_DEPLOYED_ID,
 } from "../Emblem/metrics";
-import {
-  createOrLoadTheGraphEntityStats,
-  createOrLoadGraphAccount,
-} from "./models";
+import { beneficiaryIfLockWallet } from "../mappings/graphTokenLockWallet";
 import { zeroBI } from "./constants";
+import {
+  createOrLoadGraphAccount,
+  createOrLoadTheGraphEntityStats,
+} from "./models";
 
 ////////////////      Public
 
@@ -34,11 +34,11 @@ export function processSubgraphPublished(event: SubgraphPublished): void {
   let subgraphId = publisherId
     .concat("-")
     .concat(event.params.subgraphNumber.toString());
-  let metadata = new EarnedBadgeEventMetadata(
+  let metadata = new SoulboundBadgeEventMetadata(
     BADGE_AWARD_METADATA_NAME_SUBGRAPH,
     subgraphId
   );
-  let eventData = new EarnedBadgeEventData(event, [metadata]);
+  let eventData = new SoulboundBadgeEventData(event, [metadata]);
 
   let subgraph = _createOrLoadSubgraph(
     subgraphId,

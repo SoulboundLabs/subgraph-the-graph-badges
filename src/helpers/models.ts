@@ -1,11 +1,11 @@
 import {
-  TheGraphEntityStats,
   GraphAccount,
-  Protocol,
+  SoulboundProtocol,
+  TheGraphEntityStats,
 } from "../../generated/schema";
 import {
-  createOrLoadEmblemUser,
-  createOrLoadEmblemEntityStats,
+  createOrLoadSoulboundStats,
+  createOrLoadSoulboundUser,
 } from "../Emblem/emblemModels";
 import { PROTOCOL_NAME_THE_GRAPH } from "./../Emblem/metrics";
 
@@ -22,7 +22,7 @@ export function createOrLoadTheGraphEntityStats(): TheGraphEntityStats {
 
     entityStats.save();
 
-    createOrLoadEmblemEntityStats();
+    createOrLoadSoulboundStats();
   }
 
   return entityStats as TheGraphEntityStats;
@@ -34,9 +34,9 @@ export function createOrLoadGraphAccount(address: string): GraphAccount {
   let graphAccount = GraphAccount.load(address);
 
   if (graphAccount == null) {
-    createOrLoadEmblemUser(address);
+    createOrLoadSoulboundUser(address);
     graphAccount = new GraphAccount(address);
-    graphAccount.emblemUser = address;
+    graphAccount.soulboundUser = address;
     graphAccount.awardCount = 0;
 
     graphAccount.save();
@@ -45,13 +45,13 @@ export function createOrLoadGraphAccount(address: string): GraphAccount {
   return graphAccount as GraphAccount;
 }
 
-export function createOrLoadTheGraphProtocol(): Protocol {
-  let protocol = Protocol.load(PROTOCOL_NAME_THE_GRAPH);
+export function createOrLoadTheGraphSoulboundProtocol(): SoulboundProtocol {
+  let protocol = SoulboundProtocol.load(PROTOCOL_NAME_THE_GRAPH);
 
   if (protocol == null) {
-    protocol = new Protocol(PROTOCOL_NAME_THE_GRAPH);
+    protocol = new SoulboundProtocol(PROTOCOL_NAME_THE_GRAPH);
     protocol.save();
   }
 
-  return protocol as Protocol;
+  return protocol as SoulboundProtocol;
 }

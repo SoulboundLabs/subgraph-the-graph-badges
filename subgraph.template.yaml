@@ -1,6 +1,6 @@
 specVersion: 0.0.3
-description: First badges for Emblem
-repository: https://github.com/EmblemDAO/subgraph-the-graph-badges
+description: First soulboundBadges for Emblem
+repository: https://github.com/EmblemDAO/subgraph-the-graph-soulboundBadges
 schema:
   file: ./schema.graphql
 dataSources:
@@ -10,14 +10,14 @@ dataSources:
     source:
       address: "{{staking}}"
       abi: Staking
-      startBlock: {{blockNumber}}
+      startBlock: { { blockNumber } }
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.5
       language: wasm/assemblyscript
       file: ./src/mappings/staking.ts
       entities:
-        - EarnedBadge
+        - SoulboundBadge
         - Indexer
         - Delegator
       abis:
@@ -40,11 +40,11 @@ dataSources:
           handler: handleRebateClaimed
   - kind: ethereum/contract
     name: RewardsManager
-    network: {{network}}
+    network: { { network } }
     source:
-      address: '{{rewardsManager}}'
+      address: "{{rewardsManager}}"
       abi: RewardsManager
-      startBlock: {{blockNumber}}
+      startBlock: { { blockNumber } }
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.5
@@ -65,7 +65,7 @@ dataSources:
     source:
       address: "{{gns}}"
       abi: GNS
-      startBlock: {{blockNumber}}
+      startBlock: { { blockNumber } }
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.5
@@ -78,8 +78,8 @@ dataSources:
         - GraphAccount
         - Winner
         - NameSignal
-        - BadgeDefinition
-        - EarnedBadge
+        - SoulboundBadgeDefinition
+        - SoulboundBadge
       abis:
         - name: GNS
           file: ./node_modules/@graphprotocol/contracts/dist/abis/GNS.json
@@ -102,7 +102,7 @@ dataSources:
     source:
       address: "{{graphTokenLockWalletManager1}}"
       abi: GraphTokenLockWalletManager
-      startBlock: {{blockNumber}}
+      startBlock: { { blockNumber } }
     mapping:
       kind: ethereum/events
       file: ./src/mappings/graphTokenLockWallet.ts
@@ -136,5 +136,3 @@ dataSources:
       eventHandlers:
         - event: TokenLockCreated(indexed address,indexed bytes32,indexed address,address,uint256,uint256,uint256,uint256,uint256,uint256,uint8)
           handler: handleTokenLockCreated
-        
-
